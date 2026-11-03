@@ -4543,7 +4543,396 @@ State.CatalogReapply = function()
     end)
 end
 
-Section("Adicionar")
+
+-- ══════════════════════════════════════════════════════════════════════════════
+-- CATALOG BROWSE ENGINE — injected into Catálogo tab
+-- Browse completo do catálogo Roblox: por categoria, busca, thumb grid, APLICAR.
+-- Body-safety: volleyball = block-only. HBG = aceita qualquer corpo.
+-- R6 / R15 compat via catAdd existente (detecta tipo, roteia Ward se body part).
+-- ══════════════════════════════════════════════════════════════════════════════
+
+-- ── game profile ──────────────────────────────────────────────────────────────
+local _VOLLEYBALL_IDS = {
+    [9358981663]=true,[4645842232]=true,[301549746]=true,
+    [3669573733]=true,[5295493007]=true,[7126492541]=true,
+}
+local _HBG_IDS = {
+    [2788229376]=true,[5765273346]=true,[5765275050]=true,
+}
+local _CUR_PLACE = game.PlaceId
+local function _isVolleyball() return _VOLLEYBALL_IDS[_CUR_PLACE] == true end
+local function _isHBG()        return _HBG_IDS[_CUR_PLACE] == true end
+local function _blockBodyGame()
+    if _isHBG() then return false end
+    if _isVolleyball() then return true end
+    local char = LocalPlayer.Character
+    local hum  = char and char:FindFirstChildOfClass("Humanoid")
+    if not hum then return false end
+    local bts = hum:FindFirstChild("BodyTypeScale")
+    local bws = hum:FindFirstChild("BodyWidthScale")
+    return (bts and bts.Value < 0.05) and (bws and bws.Value > 0.95)
+end
+
+-- ── asset type info ───────────────────────────────────────────────────────────
+local _AT = {
+    [8]  = {label="Chapéu",    body=false},
+    [41] = {label="Cabelo",    body=false},
+    [18] = {label="Rosto",     body=false},
+    [11] = {label="Camisa",    body=false},
+    [12] = {label="Calça",     body=false},
+    [2]  = {label="T-Shirt",   body=false},
+    [17] = {label="Cabeça",    body=true, field="Head"},
+    [27] = {label="Tronco",    body=true, field="Torso"},
+    [28] = {label="Braço Dir", body=true, field="RightArm"},
+    [29] = {label="Braço Esq", body=true, field="LeftArm"},
+    [30] = {label="Perna Esq", body=true, field="LeftLeg"},
+    [31] = {label="Perna Dir", body=true, field="RightLeg"},
+    [40] = {label="Pacote",    body=true, field=nil},
+    [61] = {label="Acessório", body=false},
+    [64] = {label="Acessório", body=false},
+    [65] = {label="Acessório", body=false},
+}
+
+-- ── body-safety ───────────────────────────────────────────────────────────────
+local function _safeForGame(assetId, assetTypeId)
+    if _isHBG() then return true end
+    if not _blockBodyGame() then return true end
+    local info = _AT[assetTypeId]
+    if not info or not info.body then return true end
+    local ok, safe = pcall(function()
+        local d = Instance.new("HumanoidDescription")
+        if info.field then d[info.field] = assetId end
+        local rig = Players:CreateHumanoidModelFromDescription(d, Enum.HumanoidRigType.R15)
+        if not rig then return true end
+        local h2 = rig:FindFirstChildOfClass("Humanoid")
+        local pass = true
+        if h2 then
+            local bts2 = h2:FindFirstChild("BodyTypeScale")
+            local bws2 = h2:FindFirstChild("BodyWidthScale")
+            if bts2 and bts2.Value > 0.1 then pass = false end
+            if bws2 and bws2.Value < 0.9  then pass = false end
+        end
+        rig:Destroy()
+        return pass
+    end)
+    return ok and safe or true
+end
+
+-- ── http / json ───────────────────────────────────────────────────────────────
+local _httpFn = (syn and syn.request) or request or http_request
+local function _httpGet(url)
+    if not _httpFn then return nil end
+    local ok, res = pcall(_httpFn, {Url=url, Method="GET"})
+    if not ok or not res or res.StatusCode ~= 200 then return nil end
+    return res.Body
+end
+local function _jsonDecode(s)
+    if not s then return nil end
+    local ok, v = pcall(HttpService.JSONDecode, HttpService, s)
+    return ok and v or nil
+end
+
+-- ── catalog categories ────────────────────────────────────────────────────────
+local _CATS = {
+    {id="featured", label="Em Alta",   assetType=nil, keyword=nil},
+    {id="hats",     label="Chapéu",    assetType=8,   keyword=nil},
+    {id="hair",     label="Cabelo",    assetType=41,  keyword=nil},
+    {id="face",     label="Rosto",     assetType=18,  keyword=nil},
+    {id="shirt",    label="Camisa",    assetType=11,  keyword=nil},
+    {id="pants",    label="Calça",     assetType=12,  keyword=nil},
+    {id="bundle",   label="Pacotes",   assetType=40,  keyword=nil},
+    {id="acc",      label="Acessório", assetType=61,  keyword=nil},
+    {id="search",   label="Busca",     assetType=nil, keyword=""},
+}
+
+local function _fetchPage(cat, keyword, cursor)
+    local url = "https://catalog.roblox.com/v1/search/items/details?limit=30&sortOrder=Desc&salesTypeFilter=1&category=All"
+    if cat.assetType then
+        url = url .. "&assetType=" .. tostring(cat.assetType)
+    end
+    local kw = (keyword and #keyword > 0) and keyword or cat.keyword
+    if kw and #kw > 0 then url = url .. "&keyword=" .. kw:gsub(" ", "+") end
+    if cursor and #cursor > 0 then url = url .. "&cursor=" .. cursor end
+    local body = _httpGet(url)
+    local data = _jsonDecode(body)
+    if not data then return {}, "" end
+    return data.data or {}, tostring(data.nextPageCursor or "")
+end
+
+local _thumbCache = {}
+local function _fetchThumbs(ids)
+    local needed = {}
+    for _, id in ipairs(ids) do
+        if not _thumbCache[id] then needed[#needed+1] = tostring(id) end
+    end
+    if #needed == 0 then return end
+    local body = _httpGet(
+        "https://thumbnails.roblox.com/v1/assets?assetIds=" ..
+        table.concat(needed, ",") ..
+        "&size=150x150&format=Png&isCircular=false"
+    )
+    local data = _jsonDecode(body)
+    if not data then return end
+    for _, entry in ipairs(data.data or {}) do
+        if entry.state == "Completed" then
+            _thumbCache[tostring(entry.targetId)] = entry.imageUrl
+        end
+    end
+end
+
+-- ── browse state ──────────────────────────────────────────────────────────────
+local _bItems   = {}
+local _bCursor  = ""
+local _bCatIdx  = 1
+local _bKeyword = ""
+local _bLoading = false
+local _browseGrid    = nil
+local _browseCards   = {}
+local _bPrevBtn, _bNextBtn, _bInfoLbl
+
+-- ── card factory ──────────────────────────────────────────────────────────────
+local function _makeBrowseCard(parent, item)
+    local id     = tonumber(item.id) or 0
+    local name   = tostring(item.name or "?")
+    local atId   = tonumber(item.assetType) or 0
+    local atInfo = _AT[atId]
+    local typeLabel = atInfo and atInfo.label or "Item"
+    local isSafe    = _safeForGame(id, atId)
+
+    local outer = New("Frame", {
+        Size=UDim2.fromOffset(148,186), BackgroundTransparency=1, BorderSizePixel=0,
+    }, parent)
+    local card = New("Frame", {
+        Size=UDim2.fromScale(1,1), BackgroundColor3=T.Card, BorderSizePixel=0,
+    }, outer)
+    Round(card, 8)
+    Stroke(card, T.Stroke, 1)
+
+    local cachedThumb = _thumbCache[tostring(id)]
+    local thumb = New("ImageLabel", {
+        Size=UDim2.fromOffset(126,100), Position=UDim2.fromOffset(11,10),
+        BackgroundColor3=T.Bg, BorderSizePixel=0, ScaleType=Enum.ScaleType.Fit,
+        Image = cachedThumb or ("rbxthumb://type=Asset&id="..tostring(id).."&w=150&h=150"),
+    }, card)
+    Round(thumb, 6)
+
+    New("TextLabel", {
+        Text=name, Font=F.Bold, TextSize=11, TextColor3=T.Text,
+        TextXAlignment=Enum.TextXAlignment.Left, TextTruncate=Enum.TextTruncate.AtEnd,
+        BackgroundTransparency=1, Position=UDim2.fromOffset(11,116), Size=UDim2.fromOffset(126,16),
+    }, card)
+    New("TextLabel", {
+        Text=typeLabel, Font=F.Mono, TextSize=9,
+        TextColor3 = isSafe and T.Faint or T.Bad,
+        TextXAlignment=Enum.TextXAlignment.Left,
+        BackgroundTransparency=1, Position=UDim2.fromOffset(11,132), Size=UDim2.fromOffset(126,12),
+    }, card)
+
+    local applyColor = isSafe and T.Good or T.Bad
+    local applyTxt   = isSafe and "APLICAR" or "BLOQUEADO"
+    Button(card, applyTxt, UDim2.fromOffset(11,148), UDim2.fromOffset(126,30),
+        applyColor, function()
+            if not isSafe then
+                Toast("corpo slim incompatível — disponível só no HBG", false)
+                return
+            end
+            catAdd(id, function(a, b) Toast(b, a) end)
+        end
+    )
+
+    card.MouseEnter:Connect(function() Tween(card, 0.15, {BackgroundColor3=T.Card2}) end)
+    card.MouseLeave:Connect(function() Tween(card, 0.2,  {BackgroundColor3=T.Card})  end)
+
+    return {outer=outer, card=card, thumb=thumb, _id=id}
+end
+
+local function _clearBrowseGrid()
+    for _, c in ipairs(_browseCards) do
+        if c.outer and c.outer.Parent then c.outer:Destroy() end
+    end
+    _browseCards = {}
+    -- limpa TextLabels de status (carregando / sem resultados)
+    if _browseGrid then
+        for _, ch in ipairs(_browseGrid:GetChildren()) do
+            if ch:IsA("TextLabel") then ch:Destroy() end
+        end
+    end
+end
+
+local function _renderPage()
+    _clearBrowseGrid()
+    if not _browseGrid then return end
+    if #_bItems == 0 then
+        New("TextLabel", {
+            Text="Nenhum item encontrado.", Font=F.Mono, TextSize=11, TextColor3=T.Faint,
+            BackgroundTransparency=1, Size=UDim2.new(1,0,0,32),
+            TextXAlignment=Enum.TextXAlignment.Left,
+        }, _browseGrid)
+        if _bInfoLbl then _bInfoLbl.Text = "0 itens" end
+        if _bNextBtn  then _bNextBtn.Visible = false  end
+        return
+    end
+    local ids = {}
+    for _, it in ipairs(_bItems) do ids[#ids+1] = tonumber(it.id) or 0 end
+    task.spawn(function()
+        _fetchThumbs(ids)
+        for _, c in ipairs(_browseCards) do
+            if c.outer and c.outer.Parent then
+                local url = _thumbCache[tostring(c._id)]
+                if url then c.thumb.Image = url end
+            end
+        end
+    end)
+    for _, it in ipairs(_bItems) do
+        local c = _makeBrowseCard(_browseGrid, it)
+        _browseCards[#_browseCards+1] = c
+    end
+    if _bInfoLbl  then _bInfoLbl.Text = #_bItems .. " itens" end
+    if _bNextBtn  then _bNextBtn.Visible  = #_bItems >= 30         end
+    if _bPrevBtn  then _bPrevBtn.Visible  = (_bCursor and #_bCursor > 0) end
+end
+
+local function _loadPage(cursor)
+    if _bLoading then return end
+    _bLoading = true
+    _clearBrowseGrid()
+    if _browseGrid then
+        New("TextLabel", {
+            Text="Carregando...", Font=F.Mono, TextSize=11, TextColor3=T.Faint,
+            BackgroundTransparency=1, Size=UDim2.new(1,0,0,32),
+            TextXAlignment=Enum.TextXAlignment.Left,
+        }, _browseGrid)
+    end
+    task.spawn(function()
+        local cat = _CATS[_bCatIdx]
+        local items, nextCur = _fetchPage(cat, _bKeyword, cursor or "")
+        _bItems  = items
+        _bCursor = nextCur
+        _bLoading = false
+        _renderPage()
+    end)
+end
+
+-- ── UI: seção browse ──────────────────────────────────────────────────────────
+Section("Browse Catálogo")
+
+-- barra de categorias
+do
+    local row = Row(84)
+    local catBar = New("ScrollingFrame", {
+        Size=UDim2.new(1,-16,0,32), Position=UDim2.fromOffset(8,8),
+        BackgroundTransparency=1, BorderSizePixel=0,
+        ScrollBarThickness=0, ScrollingDirection=Enum.ScrollingDirection.X,
+        CanvasSize=UDim2.new(), AutomaticCanvasSize=Enum.AutomaticSize.X,
+        ClipsDescendants=true,
+    }, row)
+    New("UIListLayout", {
+        FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,6),
+        SortOrder=Enum.SortOrder.LayoutOrder, VerticalAlignment=Enum.VerticalAlignment.Center,
+    }, catBar)
+
+    local catBtns = {}
+    local function paintCats()
+        for i, b in ipairs(catBtns) do
+            local on = (i == _bCatIdx)
+            if on then bindAcc(b,"BackgroundColor3","Accent",true) else unbindAcc(b,"BackgroundColor3") end
+            Tween(b,0.18,{BackgroundColor3=on and T.Accent or T.Card3, TextColor3=on and textOn(T.Accent) or T.Sub})
+        end
+    end
+    for i, cat in ipairs(_CATS) do
+        local b = New("TextButton", {
+            Text=cat.label, Font=F.Bold, TextSize=10, AutoButtonColor=false,
+            BackgroundColor3=T.Card3, TextColor3=T.Sub, BorderSizePixel=0,
+            Size=UDim2.fromOffset(0,24), AutomaticSize=Enum.AutomaticSize.X, LayoutOrder=i,
+        }, catBar)
+        New("UIPadding", {PaddingLeft=UDim.new(0,8), PaddingRight=UDim.new(0,8)}, b)
+        Round(b, 5)
+        catBtns[i] = b
+        b.MouseButton1Click:Connect(Safe(function()
+            _bCatIdx  = i
+            _bKeyword = ""
+            paintCats()
+            _loadPage("")
+        end, "bcat"..i))
+    end
+    paintCats()
+    onTheme(paintCats)
+
+    -- campo de busca
+    local searchBox = Field(row, UDim2.fromOffset(8,46), UDim2.new(1,-112,0,30), "buscar no catálogo...", "")
+    Button(row, "BUSCAR", UDim2.new(1,-96,0,46), UDim2.fromOffset(84,30), T.Accent, function()
+        _bKeyword = searchBox.Text
+        for i, c in ipairs(_CATS) do if c.id=="search" then _bCatIdx=i end end
+        paintCats()
+        _loadPage("")
+    end)
+    searchBox.FocusLost:Connect(function(enter)
+        if enter then
+            _bKeyword = searchBox.Text
+            for i, c in ipairs(_CATS) do if c.id=="search" then _bCatIdx=i end end
+            paintCats()
+            _loadPage("")
+        end
+    end)
+end
+
+-- aviso de compatibilidade de corpo
+do
+    local msg, col
+    if _VOLLEYBALL_IDS[_CUR_PLACE] then
+        msg = "Volleyball detectado — corpos slim bloqueados. Apenas roupas e acessórios permitidos."
+        col = T.Bad
+    elseif _HBG_IDS[_CUR_PLACE] then
+        msg = "HBG detectado — todos os tipos de corpo liberados."
+        col = T.Good
+    end
+    if msg then
+        local wRow = Row(44)
+        local wl = Label(wRow, msg, 10, col, F.Mono, nil, UDim2.fromOffset(16,0), UDim2.new(1,-32,1,0))
+        wl.TextWrapped = true
+    end
+end
+
+-- grid de resultados
+do
+    local outer = New("Frame", {
+        Size=UDim2.new(1,0,0,0), AutomaticSize=Enum.AutomaticSize.Y,
+        BackgroundTransparency=1, LayoutOrder=nextOrder(),
+    }, CurTab)
+    _browseGrid = New("Frame", {
+        Size=UDim2.new(1,0,0,0), AutomaticSize=Enum.AutomaticSize.Y, BackgroundTransparency=1,
+    }, outer)
+    New("UIGridLayout", {
+        CellSize=UDim2.fromOffset(148,186), CellPadding=UDim2.fromOffset(8,8),
+        SortOrder=Enum.SortOrder.LayoutOrder,
+    }, _browseGrid)
+end
+
+-- paginação
+do
+    local row = Row(36)
+    _bPrevBtn = Button(row, "< ANTERIOR", UDim2.fromOffset(8,3), UDim2.fromOffset(96,30), T.Card, function()
+        _loadPage("")  -- API Roblox não expõe cursor anterior; recomeça do início
+    end)
+    _bInfoLbl = Label(row, "0 itens", 10, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+        UDim2.new(0.3,0,0,3), UDim2.fromOffset(140,30))
+    _bNextBtn = Button(row, "PROXIMO >", UDim2.new(1,-108,0,3), UDim2.fromOffset(96,30), T.Card, function()
+        _loadPage(_bCursor)
+    end)
+    if _bPrevBtn then _bPrevBtn.Visible = false end
+    if _bNextBtn then _bNextBtn.Visible = false end
+end
+
+-- carrega automaticamente ao abrir a aba
+do
+    local _origHook = tabHooks["Cat\195\161logo"]
+    tabHooks["Cat\195\161logo"] = function()
+        if _origHook then pcall(_origHook) end
+        if #_bItems == 0 and not _bLoading then _loadPage("") end
+    end
+end
+
+Section("Adicionar por ID")
 do
     local row = Row(104)
     local hint = Label(row, "Cole um ID ou vários (vírgula, espaço ou links). O tipo é detectado sozinho: acessório, roupa, rosto, tool, efeito ou parte do corpo.",
