@@ -7935,7 +7935,7 @@ function HG.DumpAll()
     dumpAttrs(LocalPlayer.Character, "Character")
     dumpAttrs(workspace, "Workspace")
 
-    -- fonte dos scripts, em fatias
+    -- fonte dos scripts: anti-cheat primeiro, resto depois, com teto de tamanho
     add("")
     add("== FONTE DOS SCRIPTS ==")
     local inst
@@ -7944,32 +7944,39 @@ function HG.DumpAll()
         if ok then inst = res end
     end
     local dumped, budget = 0, 0
+    local LIM_BYTES, LIM_SCRIPTS = 2000000, 90
+
+    local function try_dump(v)
+        if dumped >= LIM_SCRIPTS or budget > LIM_BYTES then return end
+        local okS, isS = pcall(function() return v:IsA("LuaSourceContainer") end)
+        if not okS or not isS then return end
+        local src
+        if type(decompile) == "function" then
+            local okd, d = pcall(decompile, v)
+            if okd and type(d) == "string" then src = d end
+        end
+        if not src then return end
+        dumped = dumped + 1
+        budget = budget + #src
+        add("")
+        add("---- %s [%s] %d chars ----", v:GetFullName(), v.ClassName, #src)
+        add("%s", src:sub(1, 30000))
+    end
+
     if inst then
         for i, v in ipairs(inst) do
-            local okS, isS = pcall(function() return v:IsA("LuaSourceContainer") end)
-            if okS and isS and dumped < 160 then
-                local src
-                if type(decompile) == "function" then
-                    local okd, d = pcall(decompile, v)
-                    if okd and type(d) == "string" then src = d end
-                end
-                if src then
-                    dumped = dumped + 1
-                    budget = budget + #src
-                    add("")
-                    add("---- %s [%s] %d chars ----", v:GetFullName(), v.ClassName, #src)
-                    add("%s", src:sub(1, 40000))
-                    if budget > 4000000 then
-                        add("-- corte: limite de 4 MB atingido")
-                        break
-                    end
-                end
-            end
-            if i % 8 == 0 then task.wait() end
+            if hgWordHit(v.Name, HG_AC_WORDS) then try_dump(v) end
+            if i % 20 == 0 then task.wait() end
+        end
+        add("")
+        add("-- passe 2: restante dos scripts --")
+        for i, v in ipairs(inst) do
+            if not hgWordHit(v.Name, HG_AC_WORDS) then try_dump(v) end
+            if i % 20 == 0 then task.wait() end
         end
     end
     add("")
-    add("  scripts com fonte: %d", dumped)
+    add("  scripts com fonte: %d · %d bytes", dumped, budget)
 
     -- gc: só o índice das funções
     add("")
@@ -8008,6 +8015,7 @@ function HG.DumpAll()
     if writefile then pcall(writefile, "SilkcoreFullDump.txt", txt) end
     local copied = false
     if setclipboard then copied = pcall(setclipboard, txt) end
+    HG.LastDump = txt
     return txt, copied, os.clock() - t0
 end
 
@@ -8429,6 +8437,12 @@ BtnRow("DUMP TOTAL (tudo)", T.Good, function()
         Toast(string.format("dump total · %d chars · %.1fs · %s", #txt, secs, copied and "copiado!" or "salvo em arquivo"), true)
     end)
 end)
+
+BtnRow("COPIAR ÚLTIMO DUMP", T.Card, function()
+    if not HG.LastDump then Toast("nenhum dump ainda — roda o DUMP TOTAL primeiro", false); return end
+    if setclipboard then pcall(setclipboard, HG.LastDump) end
+    Toast(string.format("%d chars copiados pro clipboard", #HG.LastDump), true)
+end, 34)
 
 Toggle("Trace de remotes", false, function(v)
     local ok, msg = HG.TraceRemotes(v)
