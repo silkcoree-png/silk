@@ -5507,33 +5507,64 @@ Persist.Scope = "volley"
 local Drawing = Drawing or (getgenv and getgenv().Drawing)
 local VB = {
     On = false, Len = 14, Ball = true,
-    pairs = {}, ballLine = nil, ballDot = nil, cache = nil, t = 0,
-    Enemy = Color3.fromRGB(255, 88, 88),
+    Thick = 4, Outline = 2, Alpha = 1, Dot = 5, ShowDot = true,
+    pairs = {}, ballLine = nil, ballOl = nil, ballDot = nil, cache = nil, t = 0,
+    Enemy = Color3.fromRGB(255, 60, 60),
     BallC = Color3.fromRGB(255, 214, 84),
+    Dark  = Color3.fromRGB(0, 0, 0),
 }
 
 -- desenho antigo dessa aba, de uma execucao anterior
 if env and env.SilkcoreVolley then
     for _, p in pairs(env.SilkcoreVolley) do
-        if p.l then pcall(function() p.l:Remove() end) end
-        if p.d then pcall(function() p.d:Remove() end) end
+        for _, k in ipairs({"ol", "l", "d"}) do
+            if p[k] then pcall(function() p[k]:Remove() end) end
+        end
     end
     env.SilkcoreVolley = nil
 end
 if env then env.SilkcoreVolley = VB.pairs end
 
+-- Contorno escuro atrás da linha colorida: é isso que faz a linha aparecer
+-- contra qualquer fundo. Sem ele, vermelho em parede vermelha some.
+local function applyStyle(p)
+    p.ol.Thickness    = VB.Thick + VB.Outline * 2
+    p.ol.Transparency = 0.25
+    p.l.Thickness     = VB.Thick
+    p.l.Transparency  = 1 - VB.Alpha
+    p.d.Radius        = VB.Dot
+    p.d.Thickness     = 2
+    p.d.Transparency  = 1 - VB.Alpha
+end
+
+local function paint(p)
+    p.l.Color  = VB.Enemy
+    p.d.Color  = VB.Enemy
+end
+
 local function mkpair()
-    local l = Drawing.new("Line")
-    l.Color, l.Thickness, l.Transparency, l.Visible = VB.Enemy, 1.6, 0.2, false
-    local d = Drawing.new("Circle")
-    d.Color, d.Thickness, d.Filled, d.NumSides, d.Radius, d.Transparency, d.Visible =
-        VB.Enemy, 1, true, 12, 3, 0.2, false
-    return { l = l, d = d }
+    local ol = Drawing.new("Line")
+    local l  = Drawing.new("Line")
+    local d  = Drawing.new("Circle")
+    ol.Color, ol.Visible = VB.Dark, false
+    l.Visible, d.Visible = false, false
+    d.Filled, d.NumSides = true, 24
+    local p = { ol = ol, l = l, d = d }
+    applyStyle(p)
+    paint(p)
+    return p
 end
 
 local function killpair(p)
-    if p.l then pcall(function() p.l:Remove() end) end
-    if p.d then pcall(function() p.d:Remove() end) end
+    for _, k in ipairs({"ol", "l", "d"}) do
+        if p[k] then pcall(function() p[k]:Remove() end) end
+    end
+end
+
+local function restyleAll()
+    for _, p in pairs(VB.pairs) do
+        applyStyle(p); paint(p)
+    end
 end
 
 local function proj(pos)
@@ -5590,23 +5621,33 @@ local function step(dt)
             local a = proj(o)
             local b = proj(o + lookVec(char, head) * VB.Len)
             if a and b then
-                p.l.From, p.l.To, p.l.Visible = a, b, true
-                p.d.Position, p.d.Visible = b, true
+                p.ol.From, p.ol.To, p.ol.Visible = a, b, true
+                p.l.From,  p.l.To,  p.l.Visible  = a, b, true
+                p.d.Position = b
+                p.d.Visible  = VB.ShowDot
             else
-                p.l.Visible, p.d.Visible = false, false
+                p.ol.Visible, p.l.Visible, p.d.Visible = false, false, false
             end
         else
-            p.l.Visible, p.d.Visible = false, false
+            p.ol.Visible, p.l.Visible, p.d.Visible = false, false, false
         end
     end
 
     if not VB.ballLine then
+        VB.ballOl   = Drawing.new("Line")
         VB.ballLine = Drawing.new("Line")
-        VB.ballLine.Color, VB.ballLine.Thickness, VB.ballLine.Transparency, VB.ballLine.Visible = VB.BallC, 1.6, 0.2, false
-        VB.ballDot = Drawing.new("Circle")
-        VB.ballDot.Color, VB.ballDot.Thickness, VB.ballDot.Filled, VB.ballDot.NumSides, VB.ballDot.Radius, VB.ballDot.Transparency, VB.ballDot.Visible =
-            VB.BallC, 1, true, 12, 3, 0.2, false
+        VB.ballDot  = Drawing.new("Circle")
+        VB.ballOl.Color, VB.ballOl.Visible = VB.Dark, false
+        VB.ballLine.Visible, VB.ballDot.Visible = false, false
+        VB.ballDot.Filled, VB.ballDot.NumSides = true, 24
     end
+    VB.ballOl.Thickness    = VB.Thick + VB.Outline * 2
+    VB.ballOl.Transparency = 0.25
+    VB.ballLine.Thickness    = VB.Thick
+    VB.ballLine.Transparency = 1 - VB.Alpha
+    VB.ballLine.Color, VB.ballDot.Color = VB.BallC, VB.BallC
+    VB.ballDot.Radius, VB.ballDot.Thickness = VB.Dot, 2
+    VB.ballDot.Transparency = 1 - VB.Alpha
 
     local ball = VB.cache
     if VB.On and VB.Ball and ball and ball.Parent then
@@ -5614,15 +5655,26 @@ local function step(dt)
         local a = proj(p0)
         local b = proj(p0 + ball.AssemblyLinearVelocity * 0.55)
         if a and b then
+            VB.ballOl.From, VB.ballOl.To, VB.ballOl.Visible = a, b, true
             VB.ballLine.From, VB.ballLine.To, VB.ballLine.Visible = a, b, true
-            VB.ballDot.Position, VB.ballDot.Visible = b, true
+            VB.ballDot.Position = b
+            VB.ballDot.Visible  = VB.ShowDot
         else
-            VB.ballLine.Visible, VB.ballDot.Visible = false, false
+            VB.ballOl.Visible, VB.ballLine.Visible, VB.ballDot.Visible = false, false, false
         end
     else
-        VB.ballLine.Visible, VB.ballDot.Visible = false, false
+        VB.ballOl.Visible, VB.ballLine.Visible, VB.ballDot.Visible = false, false, false
     end
 end
+
+local COLORS = {
+    {n = "vermelho", c = Color3.fromRGB(255, 60, 60)},
+    {n = "ciano",    c = Color3.fromRGB(0, 240, 255)},
+    {n = "verde",    c = Color3.fromRGB(70, 255, 120)},
+    {n = "magenta",  c = Color3.fromRGB(255, 60, 220)},
+    {n = "branco",   c = Color3.fromRGB(255, 255, 255)},
+}
+local colorIdx = 1
 
 Section("Linha de mira")
 Toggle("Ativar linha de mira", false, function(v)
@@ -5633,6 +5685,36 @@ end, "Volley aim line")
 Slider("Tamanho da linha", 4, 40, 14, "%d studs", function(v)
     VB.Len = math.floor(v + 0.5)
 end, "Volley line length")
+
+Section("Aparência da linha")
+Slider("Espessura", 1, 14, 4, "%d px", function(v)
+    VB.Thick = math.floor(v + 0.5)
+    restyleAll()
+end, "Volley thickness")
+
+Slider("Contorno (halo escuro)", 0, 6, 2, "%d px", function(v)
+    VB.Outline = math.floor(v + 0.5)
+    restyleAll()
+end, "Volley outline")
+
+Slider("Opacidade", 20, 100, 100, "%d%%", function(v)
+    VB.Alpha = v / 100
+    restyleAll()
+end, "Volley opacity")
+
+Toggle("Ponto na ponta", true, function(v) VB.ShowDot = v end, "Volley dot on")
+
+Slider("Tamanho do ponto", 2, 16, 5, "%d px", function(v)
+    VB.Dot = math.floor(v + 0.5)
+    restyleAll()
+end, "Volley dot size")
+
+BtnRow("TROCAR COR DA LINHA", T.Card, function()
+    colorIdx = colorIdx % #COLORS + 1
+    VB.Enemy = COLORS[colorIdx].c
+    restyleAll()
+    Toast("cor: " .. COLORS[colorIdx].n, true)
+end, 34)
 
 Toggle("Trajetória da bola", true, function(v) VB.Ball = v end, "Volley ball trajec")
 
