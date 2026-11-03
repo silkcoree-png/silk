@@ -1,14 +1,15 @@
 --[[
     SILK CORE - loader com diagnostico
-    Busca o script em varios espelhos, recusa resposta curta/vazia e mostra
-    o erro na tela em vez de falhar em silencio.
+    Busca o script em varios espelhos, recusa resposta curta, vazia ou de
+    build antigo, e mostra o erro na tela em vez de falhar em silencio.
 ]]
 
 local MIN_BYTES = 300000
+local MARKER    = "buildBrookhaven()"   -- presente so na build atual
 
 local URLS = {
-    "https://cdn.jsdelivr.net/gh/silkcoree-png/silk@main/silk.lua",
     "https://raw.githubusercontent.com/silkcoree-png/silk/main/silk.lua",
+    "https://cdn.jsdelivr.net/gh/silkcoree-png/silk@main/silk.lua?v=4",
     "https://raw.githack.com/silkcoree-png/silk/main/silk.lua",
     "https://rawcdn.githack.com/silkcoree-png/silk/main/silk.lua",
 }
@@ -35,10 +36,6 @@ local function get_body(url)
         local ok, res = pcall(http_request, { Url = url, Method = "GET" })
         if ok and type(res) == "table" and type(res.Body) == "string" then return res.Body end
     end
-    if game.HttpGet then
-        local ok, body = pcall(game.HttpGet, game, url)
-        if ok and type(body) == "string" then return body end
-    end
     local ok, body = pcall(function() return game:HttpGet(url) end)
     if ok and type(body) == "string" then return body end
     return nil
@@ -47,18 +44,21 @@ end
 local src, source_url
 for i, u in ipairs(URLS) do
     local body = get_body(u)
-    if body and #body >= MIN_BYTES then
+    if body and #body >= MIN_BYTES and body:find(MARKER, 1, true) then
         src, source_url = body, u
         warn(string.format("[silk] fonte %d ok: %d bytes", i, #body))
         break
     end
-    warn(string.format("[silk] fonte %d falhou: %s", i,
-        body and ("bytes=" .. #body .. "  inicio=" .. body:sub(1, 60):gsub("\n", " "))
-        or "sem resposta"))
+    if body and #body >= MIN_BYTES then
+        warn(string.format("[silk] fonte %d: build antiga em cache (%d bytes)", i, #body))
+    else
+        warn(string.format("[silk] fonte %d falhou: %s", i,
+            body and ("bytes=" .. #body) or "sem resposta"))
+    end
 end
 
 if not src then
-    return notify("Silk Core", "nenhum espelho serviu o script inteiro — veja o console (warn)")
+    return notify("Silk Core", "nenhum espelho serviu a build atual — cache do CDN, tente de novo em 1 min")
 end
 
 local fn, parse_err = loadstring(src, "silk")
