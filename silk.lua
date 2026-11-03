@@ -8019,6 +8019,93 @@ function HG.DumpAll()
     return txt, copied, os.clock() - t0
 end
 
+-- ============================================================
+-- DUMP DO JOGO (sem o lixo da engine)
+-- ============================================================
+-- O filtro por palavra-chave pega 40 mil linhas de CorePackages e quase nada
+-- do jogo. O filtro certo é por caminho: joga fora a engine, fica com o que
+-- o dev do jogo escreveu.
+local HG_SKIP_PATH = {"CorePackages", "CoreGui", "RobloxGui", "RobloxReplicatedStorage", "CoreScripts"}
+
+local function hgIsGamePath(obj)
+    local ok, path = pcall(function() return obj:GetFullName() end)
+    if not ok or not path then return false end
+    for i = 1, #HG_SKIP_PATH do
+        if path:find(HG_SKIP_PATH[i], 1, true) then return false end
+    end
+    return true
+end
+
+function HG.DumpGame()
+    local t0 = os.clock()
+    local out, n = {}, 0
+    local function add(fmt, ...) n = n + 1; out[n] = string.format(fmt, ...) end
+
+    add("== SILK CORE · DUMP DO JOGO ==")
+    add("place=%s  job=%s  executor=%s",
+        tostring(game.PlaceId), tostring(game.JobId), tostring(execName))
+    add("")
+
+    -- todos os remotes, agrupados pelo pai
+    add("== REMOTES COMPLETAS ==")
+    local groups, order = {}, {}
+    for i, r in ipairs(hgScanRemotes(true)) do
+        local parent = r.path:match("^(.*)%.[^.]+$") or "?"
+        if not groups[parent] then groups[parent] = {}; order[#order + 1] = parent end
+        table.insert(groups[parent], r)
+        if i % 40 == 0 then task.wait() end
+    end
+    for _, parent in ipairs(order) do
+        add("")
+        add("[%s]", parent)
+        for _, r in ipairs(groups[parent]) do
+            add("  %-18s %s", r.class, tostring(r.ref and r.ref.Name or r.name))
+        end
+    end
+
+    -- fonte de tudo que é do jogo
+    add("")
+    add("== FONTE DOS SCRIPTS DO JOGO ==")
+    local inst
+    if type(getinstances) == "function" then
+        local ok, r = pcall(getinstances); if ok then inst = r end
+    end
+    local dumped, bytes = 0, 0
+    if inst then
+        for i, v in ipairs(inst) do
+            local okS, isS = pcall(function() return v:IsA("LuaSourceContainer") end)
+            if okS and isS and hgIsGamePath(v) then
+                local src
+                if type(decompile) == "function" then
+                    local okd, d = pcall(decompile, v)
+                    if okd and type(d) == "string" then src = d end
+                end
+                if src then
+                    dumped = dumped + 1
+                    bytes = bytes + #src
+                    add("")
+                    add("---- %s [%s] %d chars ----", v:GetFullName(), v.ClassName, #src)
+                    add("%s", src:sub(1, 80000))
+                    if bytes > 3000000 then
+                        add("-- corte: 3 MB atingido")
+                        break
+                    end
+                end
+            end
+            if i % 10 == 0 then task.wait() end
+        end
+    end
+    add("")
+    add("  scripts do jogo com fonte: %d · %d bytes", dumped, bytes)
+
+    local txt = table.concat(out, "\n")
+    if writefile then pcall(writefile, "SilkcoreGameDump.txt", txt) end
+    local copied = false
+    if setclipboard then copied = pcall(setclipboard, txt) end
+    HG.LastDump = txt
+    return txt, copied, os.clock() - t0
+end
+
 -- Trace de __namecall: mostra toda remote que o JOGO dispara e toda que NÓS
 -- disparamos, com o payload. É esse log que revela qual remote o anti-cheat
 -- usa pra avisar o servidor.
@@ -8427,6 +8514,14 @@ BtnRow("DUMP DE SCRIPTS / AC", T.Accent, function()
     task.spawn(function()
         local txt, copied = HG.DumpScripts()
         Toast(string.format("dump AC · %d chars · %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
+    end)
+end)
+
+BtnRow("DUMP DO JOGO (sem CorePackages)", T.Accent, function()
+    task.spawn(function()
+        Toast("dump do jogo rodando — só o que é do dev", true)
+        local txt, copied, secs = HG.DumpGame()
+        Toast(string.format("dump do jogo · %d chars · %.1fs · %s", #txt, secs, copied and "copiado!" or "salvo em arquivo"), true)
     end)
 end)
 
