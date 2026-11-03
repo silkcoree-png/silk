@@ -4621,45 +4621,134 @@ local function _safeForGame(assetId, assetTypeId)
 end
 
 -- ── http / json ───────────────────────────────────────────────────────────────
-local _httpFn = (syn and syn.request) or request or http_request
+local _httpFn = (syn and syn.request)
+    or (typeof(request)      == "function" and request)
+    or (typeof(http_request) == "function" and http_request)
+    or (typeof(http)         == "table"    and http.request)
+    or nil
+
+-- ── http / json ───────────────────────────────────────────────────────────────
+-- HttpService:RequestAsync não existe no cliente — o Roblox só permite essa API
+-- no servidor. O código antigo tentava ela primeiro, gastando um erro por
+-- requisição antes de cair no request() do executor. Aqui o request() vem
+-- primeiro: é o único que funciona de dentro do cliente.
+local _lastHttp = "nada ainda"
+
 local function _httpGet(url)
-    if not _httpFn then return nil end
-    local ok, res = pcall(_httpFn, {Url=url, Method="GET"})
-    if not ok or not res or res.StatusCode ~= 200 then return nil end
-    return res.Body
+    if _httpFn then
+        local ok, res = pcall(_httpFn, {
+            Url = url, Method = "GET",
+            Headers = {
+                ["Accept"] = "application/json",
+                ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Roblox/WinInet",
+            },
+        })
+        if ok and type(res) == "table" and type(res.Body) == "string" then
+            _lastHttp = "request HTTP " .. tostring(res.StatusCode)
+            if #res.Body > 10 then return res.Body end
+        else
+            _lastHttp = "request falhou: " .. tostring(res):sub(1, 70)
+        end
+    else
+        _lastHttp = "executor sem request()"
+    end
+
+    local ok1, res1 = pcall(function()
+        return HttpService:RequestAsync({
+            Url = url, Method = "GET",
+            Headers = { ["Accept"] = "application/json" },
+        })
+    end)
+    if ok1 and res1 and res1.Success and res1.Body and #res1.Body > 10 then
+        _lastHttp = "RequestAsync HTTP " .. tostring(res1.StatusCode)
+        return res1.Body
+    end
+
+    local ok3, body3 = pcall(function() return game:HttpGet(url) end)
+    if ok3 and body3 and #body3 > 10 then
+        _lastHttp = "game:HttpGet"
+        return body3
+    end
+
+    return nil
 end
+
 local function _jsonDecode(s)
     if not s then return nil end
     local ok, v = pcall(HttpService.JSONDecode, HttpService, s)
     return ok and v or nil
 end
 
+local function _urlEnc(s)
+    s = tostring(s):gsub("[^%w%-_%.~ ]", function(c)
+        return string.format("%%%02X", string.byte(c))
+    end)
+    s = s:gsub(" ", "+")
+    return s
+end
+
 -- ── catalog categories ────────────────────────────────────────────────────────
+-- A API v1/search/items/details tem três regras que o código antigo violava:
+--   · limit só aceita 10, 28 ou 30
+--   · category=0 devolve 400 "Category subcategory selection not supported"
+--   · assetType= é aceito e IGNORADO — nunca filtrou nada
+-- Era isso que zerava a grade e fazia o aviso culpar o executor. Agora a URL só
+-- leva category válido (1=Em Alta, 3=Roupas, 11=Acessórios, 12=Emotes) ou
+-- keyword, e o filtro por tipo de item é feito aqui no cliente.
 local _CATS = {
-    {id="featured", label="Em Alta",   assetType=nil, keyword=nil},
-    {id="hats",     label="Chapéu",    assetType=8,   keyword=nil},
-    {id="hair",     label="Cabelo",    assetType=41,  keyword=nil},
-    {id="face",     label="Rosto",     assetType=18,  keyword=nil},
-    {id="shirt",    label="Camisa",    assetType=11,  keyword=nil},
-    {id="pants",    label="Calça",     assetType=12,  keyword=nil},
-    {id="bundle",   label="Pacotes",   assetType=40,  keyword=nil},
-    {id="acc",      label="Acessório", assetType=61,  keyword=nil},
-    {id="emotes",   label="Emotes",    assetType=24,  keyword=nil},
-    {id="search",   label="Busca",     assetType=nil, keyword=""},
+    {id="featured", label="Em Alta",    category=1},
+    {id="emotes",   label="Emotes",     category=12},
+    {id="clothes",  label="Roupas",     category=3},
+    {id="acc",      label="Acessórios", category=11},
+    {id="hats",     label="Chapéu",     kw="hat",   types={[8]=true}},
+    {id="hair",     label="Cabelo",     kw="hair",  types={[41]=true}},
+    {id="face",     label="Rosto",      kw="face",  types={[18]=true,[42]=true}},
+    {id="shirt",    label="Camisa",     kw="shirt", types={[11]=true}},
+    {id="pants",    label="Calça",      kw="pants", types={[12]=true}},
+    {id="search",   label="Busca"},
 }
 
-local function _fetchPage(cat, keyword, cursor)
-    local url = "https://catalog.roblox.com/v1/search/items/details?limit=30&sortOrder=Desc&salesTypeFilter=1&category=All"
-    if cat.assetType then
-        url = url .. "&assetType=" .. tostring(cat.assetType)
+local function _pageUrl(cat, kw, cursor)
+    local u = "https://catalog.roblox.com/v1/search/items/details?limit=30&sortOrder=Desc"
+    -- Aba por categoria usa category; aba por palavra usa keyword. Nunca as duas
+    -- juntas: a API responde 400 "Category subcategory selection not supported".
+    if not cat.category and kw and #kw > 0 then
+        u = u .. "&keyword=" .. _urlEnc(kw)
+    elseif cat.category then
+        u = u .. "&category=" .. tostring(cat.category)
     end
-    local kw = (keyword and #keyword > 0) and keyword or cat.keyword
-    if kw and #kw > 0 then url = url .. "&keyword=" .. kw:gsub(" ", "+") end
-    if cursor and #cursor > 0 then url = url .. "&cursor=" .. cursor end
-    local body = _httpGet(url)
-    local data = _jsonDecode(body)
-    if not data then return {}, "" end
-    return data.data or {}, tostring(data.nextPageCursor or "")
+    if cursor and #cursor > 0 then u = u .. "&cursor=" .. _urlEnc(cursor) end
+    return u
+end
+
+local function _fetchPage(cat, keyword, cursor)
+    local kw = cat.kw or ""
+    if cat.id == "search" then kw = keyword or "" end
+
+    -- Abas que filtram por tipo varrem mais de uma página: uma página de 30
+    -- acessórios traz só ~5 chapéus, e a grade sairia vazia.
+    local rounds = (cat.types and 4) or 1
+    local items, nextCur = {}, cursor or ""
+
+    for _ = 1, rounds do
+        local data = _jsonDecode(_httpGet(_pageUrl(cat, kw, nextCur)))
+        if not data or not data.data then
+            local reason = _lastHttp
+            if data and data.errors and data.errors[1] then
+                reason = tostring(data.errors[1].message)
+            end
+            if #items == 0 then return {}, "", reason end
+            break
+        end
+        for _, it in ipairs(data.data) do
+            local t = tonumber(it.assetType)
+            if not cat.types or (t and cat.types[t]) then items[#items+1] = it end
+        end
+        nextCur = tostring(data.nextPageCursor or "")
+        if #items >= 20 or #nextCur == 0 then break end
+    end
+
+    return items, nextCur, nil
 end
 
 local _thumbCache = {}
@@ -4695,6 +4784,25 @@ local _bPrevBtn, _bNextBtn, _bInfoLbl
 
 -- ── emote player ──────────────────────────────────────────────────────────────
 local _activeEmote = nil
+
+-- Derruba só as faixas de prioridade Action pra cima — ou seja, os emotes que
+-- o jogo tocou. Idle/Walk/Run (priority Movement) ficam de pé, senão o
+-- personagem emenda um T-pose no meio do gesto.
+local function _stopEmotes(animator)
+    pcall(function()
+        for _, t in ipairs(animator:GetPlayingAnimationTracks()) do
+            local p = t.Priority
+            if p == Enum.AnimationPriority.Action
+                or p == Enum.AnimationPriority.Action2
+                or p == Enum.AnimationPriority.Action3
+                or p == Enum.AnimationPriority.Action4 then
+                t:Stop()
+            end
+        end
+    end)
+    _activeEmote = nil
+end
+
 local function _playEmote(id)
     local char = Morph.Char()
     local hum  = char and char:FindFirstChildOfClass("Humanoid")
@@ -4704,17 +4812,29 @@ local function _playEmote(id)
         animator = Instance.new("Animator")
         animator.Parent = hum
     end
-    if _activeEmote then
-        pcall(function() _activeEmote:Stop() end)
-        _activeEmote = nil
-    end
+
+    _stopEmotes(animator)
+
     local anim = Instance.new("Animation")
     anim.AnimationId = "rbxassetid://" .. tostring(id)
+
     local ok, track = pcall(function() return animator:LoadAnimation(anim) end)
     if not ok or not track then return false, "falha ao carregar emote" end
-    track.Priority = Enum.AnimationPriority.Action
-    track:Play()
+
+    -- Action4 ganha de qualquer animação que o jogo esteja rodando. Looped=false
+    -- porque emote é gesto, não estado — e começar/terminar deixa o servidor
+    -- replicar a faixa inteira pros outros players.
+    pcall(function() track.Priority = Enum.AnimationPriority.Action4 end)
+    pcall(function() track.Looped = false end)
+    pcall(function() track:Play(0.1) end)
     _activeEmote = track
+
+    pcall(function()
+        track.Stopped:Connect(function()
+            if _activeEmote == track then _activeEmote = nil end
+        end)
+    end)
+
     return true, "emote tocando"
 end
 
@@ -4756,8 +4876,13 @@ local function _makeBrowseCard(parent, item)
         BackgroundTransparency=1, Position=UDim2.fromOffset(11,132), Size=UDim2.fromOffset(126,12),
     }, card)
 
-    if atId == 24 then
-        -- emote: toca direto no personagem (visível a outros players)
+    -- 61 = Emote, 24 = Animation, 68 = Mood. O código antigo só reconhecia o 24,
+    -- então TODO emote do catálogo (tipo 61) caía no ramo de peça vestível e
+    -- nem ganhava botão de tocar. Era por isso que emote não aparecia.
+    local isAnim = (atId == 61) or (atId == 24) or (atId == 68)
+    if isAnim then
+        -- animação tocada pelo cliente no próprio personagem é replicada pelo
+        -- servidor: os outros players veem o gesto.
         Button(card, "TOCAR", UDim2.fromOffset(11,148), UDim2.fromOffset(126,30),
             T.Accent, function()
                 local ok, msg = _playEmote(id)
@@ -4797,14 +4922,21 @@ local function _clearBrowseGrid()
     end
 end
 
+local _bFetchFailed = false   -- true quando o último fetch não retornou dados
+local _bFetchReason = nil     -- por que falhou: status http ou mensagem da API
+
 local function _renderPage()
     _clearBrowseGrid()
     if not _browseGrid then return end
     if #_bItems == 0 then
-        New("TextLabel", {
-            Text="Nenhum item encontrado.", Font=F.Mono, TextSize=11, TextColor3=T.Faint,
-            BackgroundTransparency=1, Size=UDim2.new(1,0,0,32),
-            TextXAlignment=Enum.TextXAlignment.Left,
+        local msg = _bFetchFailed
+            and ("Nada voltou da API.\n" .. tostring(_bFetchReason or "?") .. "\nTente RECARREGAR.")
+            or  "Nenhum item encontrado para essa busca."
+        local lbl = New("TextLabel", {
+            Text=msg, Font=F.Mono, TextSize=11,
+            TextColor3 = _bFetchFailed and T.Bad or T.Faint,
+            BackgroundTransparency=1, Size=UDim2.new(1,0,0,48),
+            TextXAlignment=Enum.TextXAlignment.Left, TextWrapped=true,
         }, _browseGrid)
         if _bInfoLbl then _bInfoLbl.Text = "0 itens" end
         if _bNextBtn  then _bNextBtn.Visible = false  end
@@ -4842,8 +4974,10 @@ local function _loadPage(cursor)
         }, _browseGrid)
     end
     task.spawn(function()
-        local cat = _CATS[_bCatIdx]
-        local items, nextCur = _fetchPage(cat, _bKeyword, cursor or "")
+        local cat = _CATS[_bCatIdx] or _CATS[1]
+        local items, nextCur, reason = _fetchPage(cat, _bKeyword, cursor or "")
+        _bFetchFailed = (#items == 0)
+        _bFetchReason = reason
         _bItems  = items
         _bCursor = nextCur
         _bLoading = false
@@ -4856,7 +4990,24 @@ CurTab = Tab("Browse", 0, true)
 Persist.Scope = "browse"
 
 -- ── UI: seção browse ──────────────────────────────────────────────────────────
-Section("Browse Catálogo")
+do
+    local row = Row(36)
+    Button(row, "RECARREGAR", UDim2.fromOffset(8,3), UDim2.fromOffset(100,30), T.Accent, function()
+        _bLoading = false  -- força reset caso tenha travado
+        _bFetchFailed = false
+        _loadPage("")
+    end)
+    -- teste de verdade: faz uma busca real e diz quantos itens voltaram
+    Button(row, "TESTAR HTTP", UDim2.fromOffset(116,3), UDim2.fromOffset(90,30), T.Card, function()
+        task.spawn(function()
+            local data = _jsonDecode(_httpGet("https://catalog.roblox.com/v1/search/items/details?limit=10"))
+            local n = (data and data.data and #data.data) or 0
+            local msg = ("http=%s  itens=%d"):format(_lastHttp, n)
+            Toast(msg, n > 0)
+            pcall(function() print("[SilkCore Browse]", msg) end)
+        end)
+    end)
+end
 
 -- barra de categorias
 do
