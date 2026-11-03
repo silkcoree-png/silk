@@ -5635,8 +5635,13 @@ end
 local function proj(pos)
     local cam = Workspace.CurrentCamera
     if not cam then return nil end
-    local v, on = cam:WorldToViewportPoint(pos)
-    if not on or v.Z <= 0 then return nil end
+    local v = cam:WorldToViewportPoint(pos)
+    -- O segundo retorno do Roblox (onScreen) é falso sempre que o ponto sai do
+    -- viewport. Para a linha de mira isso apagava a ponta perto da borda; para
+    -- a marca de queda apagava o chão INTEIRO quando a câmera subia atrás da
+    -- bola — o destino saía por baixo da tela e o Drawing sumia junto.
+    -- Drawing recorta sozinho: basta o ponto estar na frente da câmera.
+    if v.Z <= 0 then return nil end
     return Vector2.new(v.X, v.Y)
 end
 
@@ -5652,14 +5657,17 @@ end
 -- Achar por tag é uma consulta ao índice, não uma varredura: o Workspace tem
 -- milhares de partes e o find antigo percorria todas a cada 2 s.
 local function findBall()
-    local ok, tagged = pcall(game.GetService, game, "CollectionService")
-    if not ok then return nil end
-    local ok2, list = pcall(tagged.GetTagged, tagged, "Ball")
+    local ok, cs = pcall(game.GetService, game, "CollectionService")
+    if not ok or not cs then return nil end
+    local ok2, list = pcall(cs.GetTagged, cs, "Ball")
     if not ok2 or not list then return nil end
     for _, t in ipairs(list) do
         if t.Parent then
-            local part = t:IsA("BasePart") and t or t.PrimaryPart
-            if part then return part end
+            if t:IsA("BasePart") then return t end
+            local pp = t.PrimaryPart
+            if pp then return pp end
+            local d = t:FindFirstChildWhichIsA("BasePart", true)
+            if d then return d end
         end
     end
 end
@@ -5673,11 +5681,19 @@ end
 local VBX = {
     cs = game:GetService("CollectionService"),
     Prev = nil, PrevT = 0, Accel = Vector3.new(0, -workspace.Gravity, 0), Settle = 0,
-    FloorY = nil, FloorT = 0,
-    Arc = {}, Segs = 28, Span = 5, Ready = false,
+    FloorY = nil, FloorT = 0, LastT = nil, Err = nil, Diag = nil,
+    Arc = {}, Segs = 28, Span = 8, Ready = false,
     RingA = nil, RingB = nil, Core = nil, Orb = nil, OrbOl = nil,
     Txt = nil, Flare = nil, RingN = 3,
 }
+
+-- Alguns executores não expõem todos os campos de Drawing (Thickness em Circle,
+-- NumSides, Filled...). Escrever campo inexistente lança erro e mataria o passo
+-- de render inteiro — nenhuma linha, nenhuma marca, nada. set isola cada escrita.
+function VBX.set(o, k, v)
+    if not o then return end
+    pcall(function() o[k] = v end)
+end
 
 function VBX.params()
     local rp = RaycastParams.new()
@@ -5695,24 +5711,31 @@ end
 
 function VBX.build()
     if VBX.Ready then return end
-    VBX.Ready = true
     for i = 1, VBX.Segs do
         local L = Drawing.new("Line")
-        L.Thickness, L.Transparency = 1, 0.5
+        VBX.set(L, "Thickness", 1)
+        VBX.set(L, "Transparency", 0.5)
         VBX.Arc[i] = L
     end
     VBX.RingA, VBX.RingB = Drawing.new("Circle"), Drawing.new("Circle")
     VBX.Core, VBX.Flare = Drawing.new("Circle"), Drawing.new("Circle")
     for _, c in ipairs({VBX.RingA, VBX.RingB, VBX.Core, VBX.Flare}) do
-        c.Filled, c.NumSides, c.Visible = false, 40, false
+        VBX.set(c, "Filled", false)
+        VBX.set(c, "NumSides", 40)
+        VBX.set(c, "Visible", false)
     end
-    VBX.Core.Filled = true
-    VBX.Flare.Filled = true
+    VBX.set(VBX.Core, "Filled", true)
+    VBX.set(VBX.Flare, "Filled", true)
     VBX.Orb, VBX.OrbOl = Drawing.new("Circle"), Drawing.new("Circle")
-    VBX.Orb.Filled, VBX.Orb.NumSides = true, 20
-    VBX.OrbOl.Filled, VBX.OrbOl.NumSides = true, 20
+    VBX.set(VBX.Orb, "Filled", true)
+    VBX.set(VBX.Orb, "NumSides", 20)
+    VBX.set(VBX.OrbOl, "Filled", true)
+    VBX.set(VBX.OrbOl, "NumSides", 20)
     VBX.Txt = Drawing.new("Text")
-    VBX.Txt.Size, VBX.Txt.Center, VBX.Txt.Outline = 15, true, true
+    VBX.set(VBX.Txt, "Size", 15)
+    VBX.set(VBX.Txt, "Center", true)
+    VBX.set(VBX.Txt, "Outline", true)
+    VBX.Ready = true
 end
 
 function VBX.hide()
@@ -5747,6 +5770,19 @@ function VBX.solve(d, v, a)
     if t2 > 0 then return t2 end
 end
 
+function VBX.diag()
+    local ball = findBall()
+    local ntags, nl = 0, 0
+    local ok, list = pcall(VBX.cs.GetTagged, VBX.cs, "Ball")
+    if ok and list then for _ in ipairs(list) do ntags = ntags + 1 end end
+    local okL, launchers = pcall(VBX.cs.GetTagged, VBX.cs, "BallLauncher")
+    if okL and launchers then for _ in ipairs(launchers) do nl = nl + 1 end end
+    return string.format("bola=%s tag=%d launcher=%d chao=%s T=%s err=%s",
+        ball and ball.ClassName or "NAO", ntags, nl,
+        tostring(VBX.FloorY), tostring(VBX.LastT),
+        VBX.Err and ("SIM:" .. tostring(VBX.Err):sub(1, 48)) or "nao")
+end
+
 function VBX.hideMark()
     if not VBX.Ready then return end
     VBX.RingA.Visible, VBX.RingB.Visible = false, false
@@ -5763,37 +5799,40 @@ function VBX.drawMark(sp, col, urgent, scale, label)
     local base = (VB.Dot + 3) * scale
     local grow = 1 + 0.45 * pulse * (1 - urgent)
 
-    VBX.RingA.Position, VBX.RingA.Visible = sp, true
-    VBX.RingA.Radius = base + (10 + 6 * pulse) * grow
-    VBX.RingA.Thickness = 2
-    VBX.RingA.Color = col
-    VBX.RingA.Filled = false
-    VBX.RingA.Transparency = (0.42 + 0.32 * pulse) * VB.Alpha
+    VBX.set(VBX.RingA, "Position", sp)
+    VBX.set(VBX.RingA, "Radius", base + (10 + 6 * pulse) * grow)
+    VBX.set(VBX.RingA, "Thickness", 2)
+    VBX.set(VBX.RingA, "Color", col)
+    VBX.set(VBX.RingA, "Filled", false)
+    VBX.set(VBX.RingA, "Transparency", (0.42 + 0.32 * pulse) * VB.Alpha)
+    VBX.set(VBX.RingA, "Visible", true)
 
-    VBX.RingB.Position, VBX.RingB.Visible = sp, true
-    VBX.RingB.Radius = base + 3
-    VBX.RingB.Thickness = 2
-    VBX.RingB.Color = col
-    VBX.RingB.Filled = false
-    VBX.RingB.Transparency = 0.22 * VB.Alpha
+    VBX.set(VBX.RingB, "Position", sp)
+    VBX.set(VBX.RingB, "Radius", base + 3)
+    VBX.set(VBX.RingB, "Thickness", 2)
+    VBX.set(VBX.RingB, "Color", col)
+    VBX.set(VBX.RingB, "Filled", false)
+    VBX.set(VBX.RingB, "Transparency", 0.22 * VB.Alpha)
+    VBX.set(VBX.RingB, "Visible", true)
 
-    VBX.Core.Position, VBX.Core.Visible = sp, true
-    VBX.Core.Radius = math.max(3, base * 0.55)
-    VBX.Core.Color = col
-    VBX.Core.Filled = true
-    VBX.Core.Transparency = (0.14 + 0.3 * urgent) * VB.Alpha
+    VBX.set(VBX.Core, "Position", sp)
+    VBX.set(VBX.Core, "Radius", math.max(3, base * 0.55))
+    VBX.set(VBX.Core, "Color", col)
+    VBX.set(VBX.Core, "Filled", true)
+    VBX.set(VBX.Core, "Transparency", (0.14 + 0.3 * urgent) * VB.Alpha)
+    VBX.set(VBX.Core, "Visible", true)
 
-    VBX.Flare.Position = sp
-    VBX.Flare.Visible = urgent > 0.02
-    VBX.Flare.Radius = base + 26 * (1 - urgent) + 6 * pulse
-    VBX.Flare.Color = col
-    VBX.Flare.Filled = true
-    VBX.Flare.Transparency = 0.88 * VB.Alpha
+    VBX.set(VBX.Flare, "Position", sp)
+    VBX.set(VBX.Flare, "Radius", base + 26 * (1 - urgent) + 6 * pulse)
+    VBX.set(VBX.Flare, "Color", col)
+    VBX.set(VBX.Flare, "Filled", true)
+    VBX.set(VBX.Flare, "Transparency", 0.88 * VB.Alpha)
+    VBX.set(VBX.Flare, "Visible", urgent > 0.02)
 
-    VBX.Txt.Text = label
-    VBX.Txt.Position = sp + Vector2.new(0, base + 20)
-    VBX.Txt.Color = col
-    VBX.Txt.Visible = true
+    VBX.set(VBX.Txt, "Text", label)
+    VBX.set(VBX.Txt, "Position", sp + Vector2.new(0, base + 20))
+    VBX.set(VBX.Txt, "Color", col)
+    VBX.set(VBX.Txt, "Visible", true)
 end
 
 function VBX.step(ball)
@@ -5869,7 +5908,8 @@ function VBX.step(ball)
     if not floorY then VBX.hide(); return end
 
     local T = VBX.solve(p.Y - floorY, v.Y, VBX.Accel.Y)
-    if not T or T <= 0 or T > VBX.Span then VBX.hide(); return end
+    VBX.LastT = T
+    if not T or T <= 0 or T > 15 then VBX.hide(); return end
 
     -- amostra de tempo igual. Aceleração constante ⇒ parábola exata, então a
     -- curva desenhada é a curva real, não uma aproximação por passos.
@@ -6018,7 +6058,12 @@ local function step(dt)
         VB.ballOl.Visible, VB.ballLine.Visible, VB.ballDot.Visible = false, false, false
     end
 
-    if VB.Predict then VBX.step(VB.cache) else VBX.hide() end
+    if VB.Predict then
+        local okP, errP = pcall(VBX.step, VB.cache)
+        if not okP then VBX.Err = tostring(errP) end
+    else
+        VBX.hide()
+    end
 end
 
 local COLORS = {
@@ -6080,13 +6125,30 @@ Toggle("Trajetória da bola", true, function(v) VB.Ball = v end, "Volley ball tr
 Section("Prever queda")
 Toggle("Marcar onde a bola cai", false, function(v)
     VB.Predict = v
+    VBX.Err = nil
     if not v then VBX.hide() end
     Toast(v and "previsao de queda ligada" or "previsao desligada", v)
+    if v then
+        task.delay(1.5, function()
+            if VB.Predict then Toast(VBX.diag(), true) end
+        end)
+    end
 end, "Volley predict")
 
-Slider("Alcance da previsao", 1, 10, 5, "%d s", function(v)
+Slider("Alcance da previsao", 1, 10, 8, "%d s", function(v)
     VBX.Span = v
 end, "Volley predict span")
+
+BtnRow("TESTAR PREVISAO", T.Card, function()
+    Toast(VBX.diag(), true)
+end, 34)
+
+-- cria os Drawings agora, na thread principal. Criar dentro do passo de render
+-- funciona em alguns executores e falha em outros — aqui não tem risco.
+if Drawing then
+    local okB, errB = pcall(VBX.build)
+    if not okB then VBX.Err = tostring(errB) end
+end
 
 Note("Duas fases. Mirando o saque, a marca usa o destino que o proprio jogo ja calculou (attachment TrajectoryFinish no Terrain) e escreve MIRA. Com a bola no ar, a aceleracao e medida dela quadro a quadro e a queda sai da equacao exata de parabola que o jogo usa. Rede no caminho corta o arco e pinta de ambar. A contagem e o tempo real ate o impacto. Tudo leitura: nada sai daqui.", 76)
 
