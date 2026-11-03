@@ -5800,14 +5800,37 @@ function VBX.step(ball)
     local now = os.clock()
     VBX.build()
 
-    -- FASE 1 — alguém está mirando o saque. O jogo JÁ calculou o destino e
-    -- deixou o ponto no Terrain como attachment "TrajectoryFinish" (dump 37518).
-    -- Aqui a previsão não é estimativa: é o número que o Beam do jogo usa.
-    local aim = Workspace.Terrain:FindFirstChild("TrajectoryFinish")
+    -- FASE 1 — alguém está mirando o saque. O jogo calculou a queda e deixou o
+    -- Beam "Trajectory" dentro do launcher; Attachment1 dele É o ponto exato
+    -- (dump 37520-37539). Ler o Beam, e não o Terrain, evita pegar a mira de
+    -- outro jogador quando duas pessoas miram ao mesmo tempo.
     local live = ball ~= nil and ball.Parent ~= nil
+    local aimPos = nil
 
-    if aim and not live then
-        local sp = proj(aim.WorldPosition)
+    if not live then
+        local okL, launchers = pcall(VBX.cs.GetTagged, VBX.cs, "BallLauncher")
+        if okL and launchers then
+            local best = nil
+            for _, L in ipairs(launchers) do
+                if L.Parent and L:GetAttribute("IsActive") == true then
+                    if L:GetAttribute("OwnerId") == LocalPlayer.UserId then
+                        best = L
+                        break
+                    end
+                    if not best then best = L end
+                end
+            end
+            if best then
+                local beam = best:FindFirstChild("Trajectory")
+                if beam and beam:IsA("Beam") and beam.Attachment1 then
+                    aimPos = beam.Attachment1.WorldPosition
+                end
+            end
+        end
+    end
+
+    if aimPos then
+        local sp = proj(aimPos)
         if not sp then VBX.hide(); return end
         for i = 1, VBX.Segs do VBX.Arc[i].Visible = false end
         VBX.Orb.Visible, VBX.OrbOl.Visible = false, false
