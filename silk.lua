@@ -4634,14 +4634,31 @@ local _httpFn = (syn and syn.request)
 -- primeiro: é o único que funciona de dentro do cliente.
 local _lastHttp = "nada ainda"
 
+-- O executor anexa Roblox-Place-Id em toda requisição — herda do stack HTTP do
+-- jogo — e o catálogo recusa por causa disso:
+--   403 code 22 "In-experience search is denied for this place or universe."
+-- Comprovado nos dois sentidos, aqui:
+--   header preenchido  -> 403
+--   header ausente     -> 200
+--   header = "none"    -> 200
+-- "none" não é número, então o Roblox não encontra place nenhum e a busca
+-- passa. As duas grafias vão juntas porque o merge de headers de alguns
+-- executores é case-sensitive. Roblox-Game-Id carrega o mesmo valor e dispara
+-- a mesma recusa, então vai igual.
+local _HDRS = {
+    ["Accept"]          = "application/json",
+    ["User-Agent"]      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
+    ["Roblox-Place-Id"] = "none",
+    ["roblox-place-id"] = "none",
+    ["Roblox-Game-Id"]  = "none",
+    ["roblox-game-id"]  = "none",
+}
+
 local function _httpGet(url)
     if _httpFn then
         local ok, res = pcall(_httpFn, {
             Url = url, Method = "GET",
-            Headers = {
-                ["Accept"] = "application/json",
-                ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Roblox/WinInet",
-            },
+            Headers = _HDRS,
         })
         if ok and type(res) == "table" and type(res.Body) == "string" then
             _lastHttp = "request HTTP " .. tostring(res.StatusCode)
@@ -4676,7 +4693,16 @@ end
 local function _jsonDecode(s)
     if not s then return nil end
     local ok, v = pcall(HttpService.JSONDecode, HttpService, s)
-    return ok and v or nil
+    if ok and type(v) == "table" then return v end
+    -- Alguns relays devolvem o JSON embrulhado em texto (o r.jina.ai prefixa
+    -- "Title:/URL Source:/Markdown Content:"). Extrai o primeiro objeto de
+    -- chaves balanceado e tenta decodificar de novo.
+    local inner = s:match("(%b{})")
+    if inner and #inner > 2 then
+        local ok2, v2 = pcall(HttpService.JSONDecode, HttpService, inner)
+        if ok2 and type(v2) == "table" then return v2 end
+    end
+    return nil
 end
 
 -- Dentro de uma experience o Roblox nega a busca do catálogo:
@@ -4685,10 +4711,15 @@ end
 -- de fora da experience, que é exatamente o que o roproxy faz: ele repassa a
 -- chamada pro catálogo a partir do servidor dele, onde não existe place.
 -- O host direto fica de reserva, e o último que funcionou passa a ser o
--- preferido — se o proxy cair, a próxima chamada cai sozinha no direto.
+-- Os dois primeiros hosts levam o header desarmado. O terceiro é o r.jina.ai,
+-- que monta a requisição do zero no servidor dele — então nem vê o
+-- Roblox-Place-Id do executor. É a rede de segurança pra caso algum executor
+-- reescreva nossos headers depois de aplicar os dele.
 local _HOSTS = {
     {cat = "https://catalog.roproxy.com/v1",  thumb = "https://thumbnails.roproxy.com/v1"},
     {cat = "https://catalog.roblox.com/v1",   thumb = "https://thumbnails.roblox.com/v1"},
+    {cat = "https://r.jina.ai/https://catalog.roblox.com/v1",
+     thumb = "https://r.jina.ai/https://thumbnails.roblox.com/v1"},
 }
 local _hostIdx = 1
 
@@ -5027,13 +5058,14 @@ do
         _bFetchFailed = false
         _loadPage("")
     end)
-    -- teste de verdade: faz uma busca real pelos dois hosts e diz qual respondeu
+    -- teste de verdade: passa pelos hosts na ordem e diz qual respondeu
     Button(row, "TESTAR HTTP", UDim2.fromOffset(116,3), UDim2.fromOffset(90,30), T.Card, function()
         task.spawn(function()
             local data = _getJson("cat", "/search/items/details?limit=10")
             local n = (data and data.data and #data.data) or 0
-            local host = _hostIdx == 1 and "roproxy" or "roblox"
-            local msg = ("http=%s  host=%s  itens=%d"):format(_lastHttp, host, n)
+            local nome = _hostIdx == 1 and "roproxy" or (_hostIdx == 2 and "roblox" or "jina")
+            local gate = _lastHttp:find("In-experience", 1, true) and " GATE" or ""
+            local msg = ("http=%s  host=%s  itens=%d%s"):format(_lastHttp, nome, n, gate)
             Toast(msg, n > 0)
             pcall(function() print("[SilkCore Browse]", msg) end)
         end)
