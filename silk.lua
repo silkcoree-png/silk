@@ -4679,6 +4679,41 @@ local function _jsonDecode(s)
     return ok and v or nil
 end
 
+-- Dentro de uma experience o Roblox nega a busca do catálogo:
+--   403 "In-experience search is denied for this place or universe"
+-- Isso não é limitação do executor — é o place. A saída é perguntar ao Roblox
+-- de fora da experience, que é exatamente o que o roproxy faz: ele repassa a
+-- chamada pro catálogo a partir do servidor dele, onde não existe place.
+-- O host direto fica de reserva, e o último que funcionou passa a ser o
+-- preferido — se o proxy cair, a próxima chamada cai sozinha no direto.
+local _HOSTS = {
+    {cat = "https://catalog.roproxy.com/v1",  thumb = "https://thumbnails.roproxy.com/v1"},
+    {cat = "https://catalog.roblox.com/v1",   thumb = "https://thumbnails.roblox.com/v1"},
+}
+local _hostIdx = 1
+
+local function _getJson(kind, path)
+    local order = { _hostIdx }
+    for i = 1, #_HOSTS do
+        if i ~= _hostIdx then order[#order + 1] = i end
+    end
+    for _, i in ipairs(order) do
+        local data = _jsonDecode(_httpGet(_HOSTS[i][kind] .. path))
+        -- 403 e 400 voltam como {"errors":[...]}, sem campo data. É assim que a
+        -- gente sabe que aquele host não serve e passa pro próximo.
+        if data and data.data ~= nil then
+            _hostIdx = i
+            return data
+        end
+        -- guarda o motivo real (a API explica no campo message) pra tela poder
+        -- mostrar o que aconteceu em vez de culpar o executor
+        if data and data.errors and data.errors[1] then
+            _lastHttp = _lastHttp .. " / " .. tostring(data.errors[1].message)
+        end
+    end
+    return nil
+end
+
 local function _urlEnc(s)
     s = tostring(s):gsub("[^%w%-_%.~ ]", function(c)
         return string.format("%%%02X", string.byte(c))
@@ -4708,8 +4743,8 @@ local _CATS = {
     {id="search",   label="Busca"},
 }
 
-local function _pageUrl(cat, kw, cursor)
-    local u = "https://catalog.roblox.com/v1/search/items/details?limit=30&sortOrder=Desc"
+local function _pagePath(cat, kw, cursor)
+    local u = "/search/items/details?limit=30&sortOrder=Desc"
     -- Aba por categoria usa category; aba por palavra usa keyword. Nunca as duas
     -- juntas: a API responde 400 "Category subcategory selection not supported".
     if not cat.category and kw and #kw > 0 then
@@ -4731,13 +4766,11 @@ local function _fetchPage(cat, keyword, cursor)
     local items, nextCur = {}, cursor or ""
 
     for _ = 1, rounds do
-        local data = _jsonDecode(_httpGet(_pageUrl(cat, kw, nextCur)))
+        local data = _getJson("cat", _pagePath(cat, kw, nextCur))
         if not data or not data.data then
-            local reason = _lastHttp
-            if data and data.errors and data.errors[1] then
-                reason = tostring(data.errors[1].message)
+            if #items == 0 then
+                return {}, "", _lastHttp .. " (host " .. tostring(_hostIdx) .. ")"
             end
-            if #items == 0 then return {}, "", reason end
             break
         end
         for _, it in ipairs(data.data) do
@@ -4758,12 +4791,9 @@ local function _fetchThumbs(ids)
         if not _thumbCache[id] then needed[#needed+1] = tostring(id) end
     end
     if #needed == 0 then return end
-    local body = _httpGet(
-        "https://thumbnails.roblox.com/v1/assets?assetIds=" ..
-        table.concat(needed, ",") ..
-        "&size=150x150&format=Png&isCircular=false"
-    )
-    local data = _jsonDecode(body)
+    local data = _getJson("thumb",
+        "/assets?assetIds=" .. table.concat(needed, ",") ..
+        "&size=150x150&format=Png&isCircular=false")
     if not data then return end
     for _, entry in ipairs(data.data or {}) do
         if entry.state == "Completed" then
@@ -4997,12 +5027,13 @@ do
         _bFetchFailed = false
         _loadPage("")
     end)
-    -- teste de verdade: faz uma busca real e diz quantos itens voltaram
+    -- teste de verdade: faz uma busca real pelos dois hosts e diz qual respondeu
     Button(row, "TESTAR HTTP", UDim2.fromOffset(116,3), UDim2.fromOffset(90,30), T.Card, function()
         task.spawn(function()
-            local data = _jsonDecode(_httpGet("https://catalog.roblox.com/v1/search/items/details?limit=10"))
+            local data = _getJson("cat", "/search/items/details?limit=10")
             local n = (data and data.data and #data.data) or 0
-            local msg = ("http=%s  itens=%d"):format(_lastHttp, n)
+            local host = _hostIdx == 1 and "roproxy" or "roblox"
+            local msg = ("http=%s  host=%s  itens=%d"):format(_lastHttp, host, n)
             Toast(msg, n > 0)
             pcall(function() print("[SilkCore Browse]", msg) end)
         end)
