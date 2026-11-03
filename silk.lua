@@ -45,6 +45,71 @@ local oldBlur = game:GetService("Lighting"):FindFirstChild("SilkcoreBlur")
 if oldBlur then oldBlur:Destroy() end
 
 --------------------------------------------------------------------------------
+-- SILK GUARD — a camada que segura o que existe
+--------------------------------------------------------------------------------
+-- Três frentes, só três:
+--   1. a GUI volta sozinha se alguém desabilitar ou soltar da árvore
+--   2. o loop de render é contado — se parar, o bind é refeito
+--   3. o que existe não é achável: nada em _G, nada de tabela com nome óbvio
+-- O que ela NÃO promete: esconder do servidor. Não existe tráfego pra esconder
+-- porque o que a gente faz é leitura. Arma invisível se a arma não dispara.
+local SilkGuard = { On = true, Beats = 0, Ghost = false } do
+    local G = SilkGuard
+    local roots, draws, binds = {}, {}, {}
+    local lastBeats = 0
+
+    function G.track(inst)
+        if inst then roots[#roots + 1] = inst end
+        return inst
+    end
+
+    function G.watch(d)
+        if d then draws[#draws + 1] = d end
+        return d
+    end
+
+    function G.hold(name, priority, fn)
+        binds[#binds + 1] = { name = name, priority = priority, fn = fn }
+    end
+
+    function G.audit()
+        return ("roots=%d drawings=%d binds=%d beats=%d gethui=%s ghost=%s")
+            :format(#roots, #draws, #binds, G.Beats, tostring(gethui ~= nil), tostring(G.Ghost))
+    end
+
+    function G.ghost(v)
+        G.Ghost = v and true or false
+        if G.Ghost and gethui then
+            for i = 1, #roots do
+                pcall(function() if roots[i] then roots[i].Parent = gethui() end end)
+            end
+        end
+        return G.Ghost
+    end
+
+    task.spawn(function()
+        while G.On do
+            task.wait(1)
+            if G.Beats == lastBeats then
+                -- o loop de render parou: alguém desamarrou, ou o pcall engoliu um erro
+                for i = 1, #binds do
+                    pcall(RunService.UnbindFromRenderStep, RunService, binds[i].name)
+                    pcall(RunService.BindToRenderStep, RunService, binds[i].name, binds[i].priority, binds[i].fn)
+                end
+                for i = 1, #roots do
+                    pcall(function()
+                        local r = roots[i]
+                        if r and r.Parent == nil then r.Parent = guiParent end
+                        if r and r.Enabled == false then r.Enabled = true end
+                    end)
+                end
+            end
+            lastBeats = G.Beats
+        end
+    end)
+end
+
+--------------------------------------------------------------------------------
 -- STATE
 --------------------------------------------------------------------------------
 local State = {
@@ -5607,6 +5672,7 @@ end
 
 local function step(dt)
     if not Drawing then return end
+    SilkGuard.Beats = SilkGuard.Beats + 1
     sync()
 
     VB.t = VB.t + dt
@@ -7604,6 +7670,9 @@ end
 local hgHookActive = false
 function HG.InstallACHooks()
     if hgHookActive then return true, "já instalado" end
+    if SilkGuard.Ghost then
+        return false, "modo fantasma ligado — o hook deixa rastro de C-closure trocada, mais visível que o truque"
+    end
     if not hookfunction then return false, "executor sem hookfunction" end
 
     local hooked = 0
@@ -8479,6 +8548,23 @@ end)
 -- ============================================================
 Section("Anti-Cheat Bypass")
 Note("Hook de remotes de verificação: intercepta chamadas de speed/position check e normaliza os valores antes de enviarem ao servidor. Requer executor com hookfunction (ex: Synapse X, KRNL, AWP).", 68)
+
+Section("Silk Guard")
+Toggle("Silk Guard (proteção do script)", true, function(v)
+    SilkGuard.On = v
+    Toast(v and "guarda armada" or "guarda desarmada — nada é reposto se cair", v)
+end, "hg_silkguard")
+
+Toggle("Modo fantasma (GUI em gethui)", false, function(v)
+    local on = SilkGuard.ghost(v)
+    Toast(on and "GUI movida pro container oculto do executor" or "GUI de volta à árvore normal", true)
+end, "hg_ghost")
+
+BtnRow("AUDITORIA DE PEGADA", T.Card, function()
+    Toast(SilkGuard.audit(), true)
+end, 34)
+Note("A guarda conta os frames do loop de render: se o bind cair, ela re-arma. Não é mágica contra servidor — é contra script de terceiro mexendo na tua mesa.", 52)
+
 BtnRow("INSTALAR HOOKS DE AC", T.Good, function()
     task.spawn(function()
         local ok, msg = HG.InstallACHooks()
@@ -8731,6 +8817,13 @@ if env then
     env.SilkcoreCleanup = function()
         if Gui then Gui:Destroy() end
     end
+end
+
+-- Silk Guard: registra o que tem que continuar de pé, e liga a vigilância
+if SilkGuard then
+    pcall(SilkGuard.track, Gui)
+    if FovGui then pcall(SilkGuard.track, FovGui) end
+    if Drawing then pcall(SilkGuard.hold, VOL_BIND, Enum.RenderPriority.Camera.Value + 4, step) end
 end
 
 ShowTab("Clonar")
