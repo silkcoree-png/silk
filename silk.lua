@@ -5506,7 +5506,7 @@ Persist.Scope = "volley"
 
 local Drawing = Drawing or (getgenv and getgenv().Drawing)
 local VB = {
-    On = false, Len = 14, Ball = true,
+    On = false, Len = 14, Ball = true, OnlyEnemy = true,
     Thick = 4, Outline = 2, Alpha = 1, Dot = 5, ShowDot = true,
     pairs = {}, ballLine = nil, ballOl = nil, ballDot = nil, cache = nil, t = 0,
     Enemy = Color3.fromRGB(255, 60, 60),
@@ -5612,11 +5612,15 @@ local function step(dt)
     VB.t = VB.t + dt
     if VB.t > 2 then VB.t = 0; VB.cache = findBall() end
 
+    local myTeam = LocalPlayer.Team
     for plr, p in pairs(VB.pairs) do
         local char = plr.Character
         if char and not char.Parent then char = nil end
         local head = char and (char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart"))
-        if VB.On and head then
+        -- O jogo usa Team real do Roblox (Red/Purple/White/Black/Orange Team),
+        -- então comparar o objeto Team é exato. Sem time (lobby), mostra todos.
+        local ally = VB.OnlyEnemy and myTeam ~= nil and plr.Team == myTeam
+        if VB.On and head and not ally then
             local o = head.Position
             local a = proj(o)
             local b = proj(o + lookVec(char, head) * VB.Len)
@@ -5681,6 +5685,11 @@ Toggle("Ativar linha de mira", false, function(v)
     VB.On = v
     Toast(v and "linha de mira ligada" or "linha de mira desligada", v)
 end, "Volley aim line")
+
+Toggle("Só inimigos (ignorar meu time)", true, function(v)
+    VB.OnlyEnemy = v
+    Toast(v and "só adversários" or "todos os jogadores", true)
+end, "Volley enemy only")
 
 Slider("Tamanho da linha", 4, 40, 14, "%d studs", function(v)
     VB.Len = math.floor(v + 0.5)
