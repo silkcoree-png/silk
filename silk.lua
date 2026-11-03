@@ -4641,10 +4641,11 @@ local _lastHttp = "nada ainda"
 --   header preenchido  -> 403
 --   header ausente     -> 200
 --   header = "none"    -> 200
--- "none" não é número, então o Roblox não encontra place nenhum e a busca
--- passa. As duas grafias vão juntas porque o merge de headers de alguns
--- executores é case-sensitive. Roblox-Game-Id carrega o mesmo valor e dispara
--- a mesma recusa, então vai igual.
+-- Isso NÃO resolve dentro do jogo: o executor escreve o valor dele depois do
+-- nosso, então continua 403 (ver o bloco de hosts). Os headers ficam porque
+-- quando o valor nosso vence — executor que mescla em tabela e não concatena,
+-- ou execução fora do jogo — a chamada direta volta a valer e é a via mais
+-- rápida. Não é a solução; é a primeira tentativa.
 local _HDRS = {
     ["Accept"]          = "application/json",
     ["User-Agent"]      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
@@ -4654,6 +4655,8 @@ local _HDRS = {
     ["roblox-game-id"]  = "none",
 }
 
+-- Devolve corpo e status. O status por host é o que alimenta o registro da tela:
+-- sem ele, "403" não diz de quem é o 403 nem se é o gate do place.
 local function _httpGet(url)
     if _httpFn then
         local ok, res = pcall(_httpFn, {
@@ -4661,8 +4664,9 @@ local function _httpGet(url)
             Headers = _HDRS,
         })
         if ok and type(res) == "table" and type(res.Body) == "string" then
-            _lastHttp = "request HTTP " .. tostring(res.StatusCode)
-            if #res.Body > 10 then return res.Body end
+            local st = tonumber(res.StatusCode) or 0
+            _lastHttp = "HTTP " .. tostring(st)
+            if #res.Body > 10 then return res.Body, st end
         else
             _lastHttp = "request falhou: " .. tostring(res):sub(1, 70)
         end
@@ -4678,13 +4682,13 @@ local function _httpGet(url)
     end)
     if ok1 and res1 and res1.Success and res1.Body and #res1.Body > 10 then
         _lastHttp = "RequestAsync HTTP " .. tostring(res1.StatusCode)
-        return res1.Body
+        return res1.Body, tonumber(res1.StatusCode) or 0
     end
 
     local ok3, body3 = pcall(function() return game:HttpGet(url) end)
     if ok3 and body3 and #body3 > 10 then
         _lastHttp = "game:HttpGet"
-        return body3
+        return body3, 0
     end
 
     return nil
@@ -4705,45 +4709,38 @@ local function _jsonDecode(s)
     return nil
 end
 
--- Dentro de uma experience o Roblox nega a busca do catálogo:
---   403 "In-experience search is denied for this place or universe"
--- Isso não é limitação do executor — é o place. A saída é perguntar ao Roblox
--- de fora da experience, que é exatamente o que o roproxy faz: ele repassa a
--- chamada pro catálogo a partir do servidor dele, onde não existe place.
--- O host direto fica de reserva, e o último que funcionou passa a ser o
--- Os dois primeiros hosts levam o header desarmado. O terceiro é o r.jina.ai,
--- que monta a requisição do zero no servidor dele — então nem vê o
--- Roblox-Place-Id do executor. É a rede de segurança pra caso algum executor
--- reescreva nossos headers depois de aplicar os dele.
+-- ── hosts ─────────────────────────────────────────────────────────────────────
+-- O gate (403 code 22 "In-experience search is denied for this place or
+-- universe") fica no /search/items/details e só nele. Isolado aqui:
+--   catalog.roblox.com/v1/search/items          + Roblox-Place-Id  -> 200
+--   catalog.roblox.com/v1/search/items/details  + Roblox-Place-Id  -> 403
+-- O executor anexa o Roblox-Place-Id sozinho — herda do stack HTTP do jogo — e
+-- escreve DEPOIS dos nossos headers. Prova com header duplicado:
+--   "none" e depois "123456789"  -> 403   (o valor do executor vence, é o último)
+--   "123456789" e depois "none"  -> 200
+-- Ou seja, não dá pra sobrescrever por header. Sobra o relay: allorigins e jina
+-- montam a requisição no servidor DELES, o header do executor morre no caminho e
+-- nunca chega no Roblox. Os dois primeiros hosts ficam pra quem roda fora do
+-- jogo (ou num executor que não anexe o header).
 local _HOSTS = {
-    {cat = "https://catalog.roproxy.com/v1",  thumb = "https://thumbnails.roproxy.com/v1"},
-    {cat = "https://catalog.roblox.com/v1",   thumb = "https://thumbnails.roblox.com/v1"},
-    {cat = "https://r.jina.ai/https://catalog.roblox.com/v1",
-     thumb = "https://r.jina.ai/https://thumbnails.roblox.com/v1"},
+    {tag = "roproxy", cat = "https://catalog.roproxy.com/v1", thumb = "https://thumbnails.roproxy.com/v1"},
+    {tag = "roblox",  cat = "https://catalog.roblox.com/v1",  thumb = "https://thumbnails.roblox.com/v1"},
+    {tag = "allorigins", relay = "https://api.allorigins.win/raw?url=",
+     cat = "https://catalog.roblox.com/v1", thumb = "https://thumbnails.roblox.com/v1"},
+    {tag = "jina", relay = "https://r.jina.ai/",
+     cat = "https://catalog.roblox.com/v1", thumb = "https://thumbnails.roblox.com/v1"},
 }
-local _hostIdx = 1
 
-local function _getJson(kind, path)
-    local order = { _hostIdx }
-    for i = 1, #_HOSTS do
-        if i ~= _hostIdx then order[#order + 1] = i end
-    end
-    for _, i in ipairs(order) do
-        local data = _jsonDecode(_httpGet(_HOSTS[i][kind] .. path))
-        -- 403 e 400 voltam como {"errors":[...]}, sem campo data. É assim que a
-        -- gente sabe que aquele host não serve e passa pro próximo.
-        if data and data.data ~= nil then
-            _hostIdx = i
-            return data
-        end
-        -- guarda o motivo real (a API explica no campo message) pra tela poder
-        -- mostrar o que aconteceu em vez de culpar o executor
-        if data and data.errors and data.errors[1] then
-            _lastHttp = _lastHttp .. " / " .. tostring(data.errors[1].message)
-        end
-    end
-    return nil
-end
+-- Último host que respondeu, por tipo de chamada. Catálogo e miniatura têm
+-- disponibilidade diferente — miniatura nunca é barrada — então cada um guarda
+-- a própria preferência em vez de arrastar o outro pro relay.
+-- O jina já entra preferido pro catálogo: medido aqui, 9 chamadas seguidas em
+-- ~0,6–1,3 s, todas 200 e com o payload inteiro. O allorigins também furou o
+-- gate mas estoura o limite em rajada (1 de 9 passou), então fica de reserva.
+-- Miniatura não é barrada, então sai direto pelo roproxy.
+local _JINA = 4
+local _pref = { cat = _JINA, thumb = 1 }
+local _hostLog = ""
 
 local function _urlEnc(s)
     s = tostring(s):gsub("[^%w%-_%.~ ]", function(c)
@@ -4751,6 +4748,63 @@ local function _urlEnc(s)
     end)
     s = s:gsub(" ", "+")
     return s
+end
+
+local function _hostUrl(h, kind, path)
+    local full = h[kind] .. path
+    if h.relay then return h.relay .. _urlEnc(full) end
+    return full
+end
+
+-- O r.jina.ai devolve {"code":200,"status":20000,"data":{"content":"<json>"}}.
+-- O campo data do envelope tem o mesmo nome do data do catálogo: sem
+-- desembrulhar, o loop do grid lê um hash, não encontra item nenhum e a grade
+-- sai vazia — sem erro, sem pista. Era esse o sintoma.
+local function _unwrap(d)
+    if type(d) == "table" and type(d.data) == "table"
+        and type(d.data.content) == "string" and #d.data.content > 20 then
+        local inner = _jsonDecode(d.data.content)
+        if type(inner) == "table" then return inner end
+    end
+    return d
+end
+
+local function _isCatalog(d)
+    if type(d) ~= "table" or type(d.data) ~= "table" then return false end
+    return type(d.data.content) ~= "string"
+end
+
+local function _getJson(kind, path)
+    local pref = _pref[kind] or 1
+    local order = { pref }
+    for i = 1, #_HOSTS do
+        if i ~= pref then order[#order + 1] = i end
+    end
+
+    _hostLog = ""
+    local n = 0
+    for _, i in ipairs(order) do
+        local h = _HOSTS[i]
+        local body, status = _httpGet(_hostUrl(h, kind, path))
+        local data = _unwrap(_jsonDecode(body))
+
+        -- Um registro por host: nome, status e "!" quando bateu no gate. Antes o
+        -- motivo era guardado numa variável só e o último host tentado apagava a
+        -- explicação do primeiro — a tela dizia "403" sem dizer de quem nem por quê.
+        local gate = (body and body:find("In-experience search is denied", 1, true)) and "!" or ""
+        n = n + 1
+        _hostLog = _hostLog .. (n > 1 and "  " or "") .. h.tag .. ":" .. tostring(status) .. gate
+
+        if _isCatalog(data) then
+            _pref[kind] = i
+            return data
+        end
+        if data and data.errors and data.errors[1] then
+            local m = tostring(data.errors[1].message or "")
+            if #m > 0 then _lastHttp = tostring(status) .. " / " .. m end
+        end
+    end
+    return nil
 end
 
 -- ── catalog categories ────────────────────────────────────────────────────────
@@ -4800,7 +4854,7 @@ local function _fetchPage(cat, keyword, cursor)
         local data = _getJson("cat", _pagePath(cat, kw, nextCur))
         if not data or not data.data then
             if #items == 0 then
-                return {}, "", _lastHttp .. " (host " .. tostring(_hostIdx) .. ")"
+                return {}, "", _lastHttp .. "  [" .. _hostLog .. "]"
             end
             break
         end
@@ -5058,14 +5112,14 @@ do
         _bFetchFailed = false
         _loadPage("")
     end)
-    -- teste de verdade: passa pelos hosts na ordem e diz qual respondeu
+    -- teste de verdade: passa pelos hosts na ordem e mostra o registro de cada um
     Button(row, "TESTAR HTTP", UDim2.fromOffset(116,3), UDim2.fromOffset(90,30), T.Card, function()
         task.spawn(function()
             local data = _getJson("cat", "/search/items/details?limit=10")
             local n = (data and data.data and #data.data) or 0
-            local nome = _hostIdx == 1 and "roproxy" or (_hostIdx == 2 and "roblox" or "jina")
-            local gate = _lastHttp:find("In-experience", 1, true) and " GATE" or ""
-            local msg = ("http=%s  host=%s  itens=%d%s"):format(_lastHttp, nome, n, gate)
+            -- _hostLog traz nome:status de cada host tentado, com "!" onde o gate
+            -- apareceu. É a única leitura que diz o host que respondeu de fato.
+            local msg = ("itens=%d  %s  |  %s"):format(n, _lastHttp, _hostLog)
             Toast(msg, n > 0)
             pcall(function() print("[SilkCore Browse]", msg) end)
         end)
