@@ -2906,6 +2906,7 @@ local NAV = {
         {id = "Corpo", icon = "body", title = "Corpo & morphs", sub = "headless, korblox e escala"},
         {id = "Roupa", icon = "shirt", title = "Partes do corpo", sub = "troque cabeça, tronco, braços e pernas por ID"},
         {id = "Catálogo", icon = "grid", title = "Catálogo de itens", sub = "qualquer ID: acessório, roupa, tool ou parte do corpo"},
+        {id = "Browse", icon = "grid", title = "Browse / Loja", sub = "explore o catálogo do Roblox e emotes diretamente"},
         {id = "Efeitos", icon = "spark", title = "Efeitos", sub = "partículas e rastro no personagem"},
         {id = "Looks", icon = "star", title = "Looks", sub = "salve, aplique, exporte e importe looks completos"},
     }},
@@ -4552,6 +4553,7 @@ end
 -- ══════════════════════════════════════════════════════════════════════════════
 
 -- ── game profile ──────────────────────────────────────────────────────────────
+local function _buildBrowse()
 local _VOLLEYBALL_IDS = {
     [9358981663]=true,[4645842232]=true,[301549746]=true,
     [3669573733]=true,[5295493007]=true,[7126492541]=true,
@@ -4642,6 +4644,7 @@ local _CATS = {
     {id="pants",    label="Calça",     assetType=12,  keyword=nil},
     {id="bundle",   label="Pacotes",   assetType=40,  keyword=nil},
     {id="acc",      label="Acessório", assetType=61,  keyword=nil},
+    {id="emotes",   label="Emotes",    assetType=24,  keyword=nil},
     {id="search",   label="Busca",     assetType=nil, keyword=""},
 }
 
@@ -4690,6 +4693,31 @@ local _browseGrid    = nil
 local _browseCards   = {}
 local _bPrevBtn, _bNextBtn, _bInfoLbl
 
+-- ── emote player ──────────────────────────────────────────────────────────────
+local _activeEmote = nil
+local function _playEmote(id)
+    local char = Morph.Char()
+    local hum  = char and char:FindFirstChildOfClass("Humanoid")
+    if not hum then return false, "sem personagem" end
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then
+        animator = Instance.new("Animator")
+        animator.Parent = hum
+    end
+    if _activeEmote then
+        pcall(function() _activeEmote:Stop() end)
+        _activeEmote = nil
+    end
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://" .. tostring(id)
+    local ok, track = pcall(function() return animator:LoadAnimation(anim) end)
+    if not ok or not track then return false, "falha ao carregar emote" end
+    track.Priority = Enum.AnimationPriority.Action
+    track:Play()
+    _activeEmote = track
+    return true, "emote tocando"
+end
+
 -- ── card factory ──────────────────────────────────────────────────────────────
 local function _makeBrowseCard(parent, item)
     local id     = tonumber(item.id) or 0
@@ -4728,17 +4756,27 @@ local function _makeBrowseCard(parent, item)
         BackgroundTransparency=1, Position=UDim2.fromOffset(11,132), Size=UDim2.fromOffset(126,12),
     }, card)
 
-    local applyColor = isSafe and T.Good or T.Bad
-    local applyTxt   = isSafe and "APLICAR" or "BLOQUEADO"
-    Button(card, applyTxt, UDim2.fromOffset(11,148), UDim2.fromOffset(126,30),
-        applyColor, function()
-            if not isSafe then
-                Toast("corpo slim incompatível — disponível só no HBG", false)
-                return
+    if atId == 24 then
+        -- emote: toca direto no personagem (visível a outros players)
+        Button(card, "TOCAR", UDim2.fromOffset(11,148), UDim2.fromOffset(126,30),
+            T.Accent, function()
+                local ok, msg = _playEmote(id)
+                Toast(msg, ok)
             end
-            catAdd(id, function(a, b) Toast(b, a) end)
-        end
-    )
+        )
+    else
+        local applyColor = isSafe and T.Good or T.Bad
+        local applyTxt   = isSafe and "APLICAR" or "BLOQUEADO"
+        Button(card, applyTxt, UDim2.fromOffset(11,148), UDim2.fromOffset(126,30),
+            applyColor, function()
+                if not isSafe then
+                    Toast("corpo slim incompatível — disponível só no HBG", false)
+                    return
+                end
+                catAdd(id, function(a, b) Toast(b, a) end)
+            end
+        )
+    end
 
     card.MouseEnter:Connect(function() Tween(card, 0.15, {BackgroundColor3=T.Card2}) end)
     card.MouseLeave:Connect(function() Tween(card, 0.2,  {BackgroundColor3=T.Card})  end)
@@ -4812,6 +4850,10 @@ local function _loadPage(cursor)
         _renderPage()
     end)
 end
+
+-- ── NOVA ABA: Browse (separada do Catálogo, mais espaçosa) ───────────────────
+CurTab = Tab("Browse", 0, true)
+Persist.Scope = "browse"
 
 -- ── UI: seção browse ──────────────────────────────────────────────────────────
 Section("Browse Catálogo")
@@ -4923,14 +4965,32 @@ do
     if _bNextBtn then _bNextBtn.Visible = false end
 end
 
--- carrega automaticamente ao abrir a aba
+-- botão parar emote (aparece só quando um emote está tocando)
 do
-    local _origHook = tabHooks["Cat\195\161logo"]
-    tabHooks["Cat\195\161logo"] = function()
-        if _origHook then pcall(_origHook) end
+    local row = Row(36)
+    Button(row, "PARAR EMOTE", UDim2.fromOffset(8,3), UDim2.fromOffset(120,30), T.Bad, function()
+        if _activeEmote then
+            pcall(function() _activeEmote:Stop() end)
+            _activeEmote = nil
+            Toast("emote parado", true)
+        else
+            Toast("nenhum emote ativo", false)
+        end
+    end)
+end
+
+-- carrega automaticamente ao abrir a aba Browse
+do
+    tabHooks["Browse"] = function()
         if #_bItems == 0 and not _bLoading then _loadPage("") end
     end
 end
+end
+_buildBrowse()
+
+-- ── volta para a aba Catálogo para as seções de ID e "No personagem" ──────────
+CurTab = tabs["Catálogo"]
+Persist.Scope = "cat"
 
 Section("Adicionar por ID")
 do
