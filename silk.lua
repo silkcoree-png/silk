@@ -7624,6 +7624,267 @@ function HG.Jitter(base, variance)
 end
 
 -- ============================================================
+-- 4. DUMP PROFUNDO (GC + SCRIPTS) E NEUTRALIZAÇÃO DE DETECÇÃO
+-- ============================================================
+-- Superfície real de um anti-cheat de Roblox. Do lado do servidor ele vê:
+--   (a) tudo que replica — posição, velocity, WalkSpeed, atributos de Humanoid
+--   (b) instâncias que VOCÊ criou dentro do DataModel
+--   (c) o ritmo e o formato dos argumentos que você manda nas remotes
+-- Ele não chama getgc, getgenv ou hookfunction: isso só existe no executor.
+-- Um anti-cheat client-side é um LocalScript comum, e o que ele consegue
+-- checar é instância, nome, propriedade e callback. É isso que o dump
+-- abaixo mapeia e que o report killer corta.
+
+local HG_AC_WORDS = {
+    "anti", "guard", "detect", "integrity", "heartbeat", "suspect",
+    "exploit", "verify", "violation", "speed", "teleport", "fly", "noclip",
+}
+
+local HG_REPORT_WORDS = {
+    "report", "flag", "anticheat", "anti_cheat", "antichat", "detect",
+    "kick", "ban", "punish", "suspicious", "violation",
+}
+
+local function hgWordHit(name, list)
+    if not name then return false end
+    local n = name:lower()
+    for _, w in ipairs(list) do
+        if n:find(w, 1, true) then return true end
+    end
+    return false
+end
+
+local function hgFmtValue(v, depth)
+    depth = depth or 0
+    local t = typeof(v)
+    if t == "Instance" then return v.ClassName .. ":" .. v:GetFullName() end
+    if t == "string" then return string.format("%q", v:sub(1, 120)) end
+    if t == "table" then
+        if depth > 0 then return "{...}" end
+        local parts, n = {}, 0
+        for k, val in pairs(v) do
+            n = n + 1
+            if n > 8 then parts[#parts + 1] = "..." break end
+            parts[#parts + 1] = tostring(k) .. "=" .. hgFmtValue(val, depth + 1)
+        end
+        return "{" .. table.concat(parts, ", ") .. "}"
+    end
+    return tostring(v)
+end
+
+function HG.DumpScripts()
+    local out = {}
+    local function add(fmt, ...) out[#out + 1] = string.format(fmt, ...) end
+
+    add("== GC: funcoes com cara de anti-cheat ==")
+    if type(getgc) ~= "function" then
+        add("  executor sem getgc — sem dump de funcoes")
+    else
+        local seen, hits = {}, 0
+        for _, v in ipairs(getgc(true)) do
+            if type(v) == "function" then
+                local okS, src = pcall(debug.info, v, "s")
+                if okS and hgWordHit(tostring(src), HG_AC_WORDS) then
+                    local okN, nm = pcall(debug.info, v, "n")
+                    local okL, ln = pcall(debug.info, v, "l")
+                    local key = tostring(src) .. ":" .. tostring(ln) .. ":" .. tostring(nm)
+                    if not seen[key] then
+                        seen[key] = true
+                        hits = hits + 1
+                        if hits <= 250 then
+                            add("  [%s:%s] %s", tostring(src), tostring(ln), tostring(nm))
+                        end
+                    end
+                end
+            end
+        end
+        add("  total: %d", hits)
+    end
+
+    add("")
+    add("== Instancias LuaSourceContainer ==")
+    local inst, total = nil, 0
+    if type(getinstances) == "function" then
+        local oki, res = pcall(getinstances)
+        if oki then inst = res end
+    end
+    if not inst then
+        add("  executor sem getinstances")
+    else
+        for _, v in ipairs(inst) do
+            local ok, isS = pcall(function() return v:IsA("LuaSourceContainer") end)
+            if ok and isS then
+                total = total + 1
+                add("  %s [%s]%s", v:GetFullName(), v.ClassName, hgWordHit(v.Name, HG_AC_WORDS) and "  <== suspeito" or "")
+            end
+        end
+        add("  total: %d", total)
+    end
+
+    add("")
+    add("== Fonte dos scripts suspeitos ==")
+    if type(decompile) ~= "function" and type(getscriptbytecode) ~= "function" then
+        add("  executor sem decompile/getscriptbytecode")
+    else
+        local dumped = 0
+        for _, v in ipairs(inst or {}) do
+            local ok, isS = pcall(function() return v:IsA("LocalScript") or v:IsA("ModuleScript") end)
+            if ok and isS and hgWordHit(v.Name, HG_AC_WORDS) then
+                local src
+                if type(decompile) == "function" then
+                    local okd, d = pcall(decompile, v)
+                    if okd and type(d) == "string" then src = d end
+                end
+                if not src and type(getscriptbytecode) == "function" then
+                    local okb, b = pcall(getscriptbytecode, v)
+                    if okb and type(b) == "string" then
+                        src = "-- bytecode, " .. #b .. " bytes (usa um descompilador externo)"
+                    end
+                end
+                if src then
+                    dumped = dumped + 1
+                    add("")
+                    add("---- %s [%s] ----", v:GetFullName(), v.ClassName)
+                    add("%s", src:sub(1, 24000))
+                end
+            end
+        end
+        add("")
+        add("  scripts com fonte extraida: %d", dumped)
+    end
+
+    add("")
+    add("== Remotes com nome de report/flag ==")
+    for _, r in ipairs(hgScanRemotes(true)) do
+        if hgWordHit(r.name, HG_REPORT_WORDS) then
+            add("  %s [%s]", r.path, r.class)
+        end
+    end
+
+    local txt = table.concat(out, "\n")
+    if writefile then pcall(writefile, "SilkcoreACDump.txt", txt) end
+    local copied = false
+    if setclipboard then copied = pcall(setclipboard, txt) end
+    print("[SilkCore] AC dump: " .. #txt .. " chars")
+    return txt, copied
+end
+
+-- Trace de __namecall: mostra toda remote que o JOGO dispara e toda que NÓS
+-- disparamos, com o payload. É esse log que revela qual remote o anti-cheat
+-- usa pra avisar o servidor.
+local hgTrace = { active = false, old = nil, log = {}, max = 400, dropped = {} }
+
+function HG.TraceRemotes(on)
+    if not (getrawmetatable and getnamecallmethod and newcclosure) then
+        return false, "executor sem getrawmetatable/newcclosure"
+    end
+    local mt = getrawmetatable(game)
+
+    if not on then
+        if hgTrace.old then
+            setreadonly(mt, false)
+            mt.__namecall = hgTrace.old
+            setreadonly(mt, true)
+            hgTrace.old, hgTrace.active = nil, false
+        end
+        return true, string.format("%d eventos no log", #hgTrace.log)
+    end
+    if hgTrace.active then return true, "trace já ativo" end
+
+    hgTrace.old = mt.__namecall
+    setreadonly(mt, false)
+    mt.__namecall = newcclosure(function(self, ...)
+        local m = getnamecallmethod()
+        if m == "FireServer" or m == "InvokeServer" then
+            local ours = false
+            if checkcaller then pcall(function() ours = checkcaller() end) end
+            if #hgTrace.log < hgTrace.max then
+                local args = table.pack(...)
+                local parts = {}
+                for i = 1, args.n do parts[i] = hgFmtValue(args[i]) end
+                hgTrace.log[#hgTrace.log + 1] = string.format("[%s] %s(%s)",
+                    ours and "EU" or "JOGO", tostring(self.Name), table.concat(parts, ", "))
+            end
+        end
+        return hgTrace.old(self, ...)
+    end)
+    setreadonly(mt, true)
+    hgTrace.active = true
+    return true, "trace ligado"
+end
+
+function HG.TraceText()
+    return table.concat(hgTrace.log, "\n")
+end
+
+function HG.TraceClear()
+    hgTrace.log = {}
+end
+
+-- Report killer: dropa o FireServer da remote que o anti-cheat usa pra avisar
+-- o servidor. Não destrói o script deles — se ele sumir, o próprio heartbeat
+-- de integridade acusa. Só corta a saída.
+function HG.KillReport(on)
+    if not (getrawmetatable and getnamecallmethod and newcclosure) then
+        return false, "executor sem getrawmetatable/newcclosure"
+    end
+    local mt = getrawmetatable(game)
+
+    if not on then
+        if hgTrace.reportOld then
+            setreadonly(mt, false)
+            mt.__namecall = hgTrace.reportOld
+            setreadonly(mt, true)
+            hgTrace.reportOld = nil
+        end
+        return true, "report killer desligado"
+    end
+    if hgTrace.reportOld then return true, "já instalado" end
+
+    hgTrace.reportOld = mt.__namecall
+    setreadonly(mt, false)
+    mt.__namecall = newcclosure(function(self, ...)
+        local m = getnamecallmethod()
+        if (m == "FireServer" or m == "InvokeServer") and not checkcaller() then
+            local ok, nm = pcall(function() return self.Name end)
+            if ok and hgWordHit(nm, HG_REPORT_WORDS) then
+                if not hgTrace.dropped[nm] then
+                    hgTrace.dropped[nm] = 0
+                    print("[SilkCore] report bloqueado: " .. tostring(nm))
+                end
+                hgTrace.dropped[nm] = hgTrace.dropped[nm] + 1
+                return nil
+            end
+        end
+        return hgTrace.reportOld(self, ...)
+    end)
+    setreadonly(mt, true)
+    return true, "report killer instalado"
+end
+
+-- Tira a GUI do PlayerGui (se ainda estiver lá) e protege contra enumeração.
+function HG.Evade()
+    local done = {}
+    local gui = (guiParent and guiParent:FindFirstChild(GUI_NAME)) or PlayerGui:FindFirstChild(GUI_NAME)
+    if gui and gethui then
+        local ok, dest = pcall(gethui)
+        if ok and dest and gui.Parent ~= dest then
+            gui.Parent = dest
+            done[#done + 1] = "gui fora do PlayerGui"
+        end
+    end
+    if gui then
+        if syn and syn.protect_gui then
+            if pcall(syn.protect_gui, gui) then done[#done + 1] = "syn.protect_gui" end
+        elseif protectgui then
+            if pcall(protectgui, gui) then done[#done + 1] = "protectgui" end
+        end
+    end
+    if #done == 0 then return false, "nenhum método de proteção disponível" end
+    return true, table.concat(done, " · ")
+end
+
+-- ============================================================
 -- AUTO-BLOCK
 -- ============================================================
 
@@ -7894,6 +8155,50 @@ do
         Toast("fake speed → " .. v, true)
     end)
 end
+
+-- ============================================================
+-- UI — DUMP PROFUNDO / NEUTRALIZACAO
+-- ============================================================
+Section("Dump profundo")
+Note("Lê o GC atrás das funções de anti-cheat, lista os scripts do jogo e tenta descompilar os suspeitos. Salva em SilkcoreACDump.txt e copia pra área de transferência.", 60)
+
+BtnRow("DUMP DE SCRIPTS / AC", T.Accent, function()
+    task.spawn(function()
+        local txt, copied = HG.DumpScripts()
+        Toast(string.format("dump AC · %d chars · %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
+    end)
+end)
+
+Toggle("Trace de remotes", false, function(v)
+    local ok, msg = HG.TraceRemotes(v)
+    Toast((ok and "" or "✗ ") .. msg, ok)
+end, "hg_trace")
+
+BtnRow("VER TRACE CAPTURADO", T.Card, function()
+    local txt = HG.TraceText()
+    if txt == "" then Toast("trace vazio — liga o trace e joga um round", false); return end
+    if setclipboard then pcall(setclipboard, txt) end
+    print("[SilkCore] trace:\n" .. txt)
+    Toast(string.format("%d linhas copiadas", select(2, txt:gsub("\n", "")) + 1), true)
+end, 34)
+
+BtnRow("LIMPAR TRACE", T.Card, function()
+    HG.TraceClear()
+    Toast("trace limpo", true)
+end, 34)
+
+Section("Neutralizar detecção")
+Note("O servidor não vê o teu executor — vê o que replica e o que você manda pra ele. O report killer corta a remote que o anti-cheat usa pra avisar. Não apague o script deles: se ele sumir, o heartbeat de integridade acusa na hora.", 60)
+
+Toggle("Report killer (dropa flag/ban)", false, function(v)
+    local ok, msg = HG.KillReport(v)
+    Toast((ok and "" or "✗ ") .. msg, ok)
+end, "hg_reportkill")
+
+BtnRow("PROTEGER A GUI", T.Good, function()
+    local ok, msg = HG.Evade()
+    Toast((ok and "" or "✗ ") .. msg, ok)
+end, 34)
 
 -- ============================================================
 -- UI — AUTO-BLOCK (HOLD BLOCK)
