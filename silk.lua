@@ -6887,7 +6887,9 @@ end -- Hacks tab
 --------------------------------------------------------------------------------
 -- BROOKHAVEN
 --------------------------------------------------------------------------------
-do
+-- Mesmo motivo do HBG: corpo em função própria pra não consumir os 200
+-- registradores do chunk principal.
+local function buildBrookhaven()
 CurTab = Tab("Brookhaven", 0, true)
 Persist.Scope = "bh"
 
@@ -7266,11 +7268,14 @@ BtnRow("FORÇAR PERSONAGEM PADRÃO", T.Card, function()
 end)
 
 end -- Brookhaven tab
+buildBrookhaven()
 
 --------------------------------------------------------------------------------
 -- HBG
 --------------------------------------------------------------------------------
-do
+-- Corpo da aba em função própria: os locals daqui ficam no orçamento de
+-- registradores desta função, não no do chunk principal (limite de 200).
+local function buildHBG()
 CurTab = Tab("HBG", 0, true)
 Persist.Scope = "hbg"
 
@@ -8270,6 +8275,7 @@ end
 Note("Se o hold block não funcionar com payload genérico: ativa o spy → aperta block manual uma vez → o payload é capturado → o hold block passa a usar ele.", 68)
 
 end -- HBG tab
+buildHBG()
 
 --------------------------------------------------------------------------------
 -- ATALHOS + LIMPEZA + BOOT
