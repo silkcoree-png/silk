@@ -5672,9 +5672,11 @@ end
 -- mexendo na bola durante habilidade. Medindo, eu não preciso saber que existe.
 local VBX = {
     cs = game:GetService("CollectionService"),
-    Prev = nil, PrevT = 0, Accel = Vector3.new(0, -workspace.Gravity, 0),
-    FloorY = nil, FloorT = 0, Arc = {}, Dot = nil, Ol = nil,
-    Segs = 14, Span = 3, Ready = false,
+    Prev = nil, PrevT = 0, Accel = Vector3.new(0, -workspace.Gravity, 0), Settle = 0,
+    FloorY = nil, FloorT = 0,
+    Arc = {}, Segs = 28, Span = 5, Ready = false,
+    RingA = nil, RingB = nil, Core = nil, Orb = nil, OrbOl = nil,
+    Txt = nil, Flare = nil, RingN = 3,
 }
 
 function VBX.params()
@@ -5694,105 +5696,222 @@ end
 function VBX.build()
     if VBX.Ready then return end
     VBX.Ready = true
-    VBX.Dot, VBX.Ol = Drawing.new("Circle"), Drawing.new("Circle")
-    VBX.Dot.Filled, VBX.Dot.NumSides = true, 32
-    VBX.Ol.Filled,  VBX.Ol.NumSides  = true, 32
-    for i = 1, VBX.Segs do VBX.Arc[i] = Drawing.new("Line") end
+    for i = 1, VBX.Segs do
+        local L = Drawing.new("Line")
+        L.Thickness, L.Transparency = 1, 0.5
+        VBX.Arc[i] = L
+    end
+    VBX.RingA, VBX.RingB = Drawing.new("Circle"), Drawing.new("Circle")
+    VBX.Core, VBX.Flare = Drawing.new("Circle"), Drawing.new("Circle")
+    for _, c in ipairs({VBX.RingA, VBX.RingB, VBX.Core, VBX.Flare}) do
+        c.Filled, c.NumSides, c.Visible = false, 40, false
+    end
+    VBX.Core.Filled = true
+    VBX.Flare.Filled = true
+    VBX.Orb, VBX.OrbOl = Drawing.new("Circle"), Drawing.new("Circle")
+    VBX.Orb.Filled, VBX.Orb.NumSides = true, 20
+    VBX.OrbOl.Filled, VBX.OrbOl.NumSides = true, 20
+    VBX.Txt = Drawing.new("Text")
+    VBX.Txt.Size, VBX.Txt.Center, VBX.Txt.Outline = 15, true, true
 end
 
 function VBX.hide()
     if not VBX.Ready then return end
-    VBX.Dot.Visible, VBX.Ol.Visible = false, false
     for i = 1, VBX.Segs do VBX.Arc[i].Visible = false end
+    VBX.RingA.Visible, VBX.RingB.Visible = false, false
+    VBX.Core.Visible, VBX.Flare.Visible = false, false
+    VBX.Orb.Visible, VBX.OrbOl.Visible = false, false
+    VBX.Txt.Visible = false
+end
+
+function VBX.floor(pos)
+    local hit = Workspace:Raycast(pos, Vector3.new(0, -600, 0), VBX.params())
+    if hit then VBX.FloorY = hit.Position.Y end
+    VBX.FloorT = os.clock()
+end
+
+-- 0.5*a*t^2 + v*t + d = 0  →  menor raiz positiva
+function VBX.solve(d, v, a)
+    if math.abs(a) < 1e-4 then
+        if math.abs(v) < 1e-4 then return nil end
+        local t = -d / v
+        if t > 0 then return t end
+        return nil
+    end
+    local disc = v * v - 2 * a * d
+    if disc < 0 then return nil end
+    local s = math.sqrt(disc)
+    local t1 = (-v + s) / a
+    local t2 = (-v - s) / a
+    if t1 > 0 and (t2 <= 0 or t1 < t2) then return t1 end
+    if t2 > 0 then return t2 end
+end
+
+function VBX.hideMark()
+    if not VBX.Ready then return end
+    VBX.RingA.Visible, VBX.RingB.Visible = false, false
+    VBX.Core.Visible, VBX.Flare.Visible = false, false
+    VBX.Txt.Visible = false
+end
+
+-- marca de impacto: três anéis + núcleo + contagem. O anel externo respira
+-- enquanto falta tempo e fecha conforme o impacto chega — a animação carrega
+-- informação, não só enfeite.
+function VBX.drawMark(sp, col, urgent, scale, label)
+    VBX.build()
+    local pulse = 0.5 + 0.5 * math.sin(os.clock() * 6)
+    local base = (VB.Dot + 3) * scale
+    local grow = 1 + 0.45 * pulse * (1 - urgent)
+
+    VBX.RingA.Position, VBX.RingA.Visible = sp, true
+    VBX.RingA.Radius = base + (10 + 6 * pulse) * grow
+    VBX.RingA.Thickness = 2
+    VBX.RingA.Color = col
+    VBX.RingA.Filled = false
+    VBX.RingA.Transparency = (0.42 + 0.32 * pulse) * VB.Alpha
+
+    VBX.RingB.Position, VBX.RingB.Visible = sp, true
+    VBX.RingB.Radius = base + 3
+    VBX.RingB.Thickness = 2
+    VBX.RingB.Color = col
+    VBX.RingB.Filled = false
+    VBX.RingB.Transparency = 0.22 * VB.Alpha
+
+    VBX.Core.Position, VBX.Core.Visible = sp, true
+    VBX.Core.Radius = math.max(3, base * 0.55)
+    VBX.Core.Color = col
+    VBX.Core.Filled = true
+    VBX.Core.Transparency = (0.14 + 0.3 * urgent) * VB.Alpha
+
+    VBX.Flare.Position = sp
+    VBX.Flare.Visible = urgent > 0.02
+    VBX.Flare.Radius = base + 26 * (1 - urgent) + 6 * pulse
+    VBX.Flare.Color = col
+    VBX.Flare.Filled = true
+    VBX.Flare.Transparency = 0.88 * VB.Alpha
+
+    VBX.Txt.Text = label
+    VBX.Txt.Position = sp + Vector2.new(0, base + 20)
+    VBX.Txt.Color = col
+    VBX.Txt.Visible = true
 end
 
 function VBX.step(ball)
-    if not (ball and ball.Parent) then VBX.Prev = nil; VBX.hide(); return end
+    local now = os.clock()
+    VBX.build()
 
-    local now  = os.clock()
+    -- FASE 1 — alguém está mirando o saque. O jogo JÁ calculou o destino e
+    -- deixou o ponto no Terrain como attachment "TrajectoryFinish" (dump 37518).
+    -- Aqui a previsão não é estimativa: é o número que o Beam do jogo usa.
+    local aim = Workspace.Terrain:FindFirstChild("TrajectoryFinish")
+    local live = ball ~= nil and ball.Parent ~= nil
+
+    if aim and not live then
+        local sp = proj(aim.WorldPosition)
+        if not sp then VBX.hide(); return end
+        for i = 1, VBX.Segs do VBX.Arc[i].Visible = false end
+        VBX.Orb.Visible, VBX.OrbOl.Visible = false, false
+        VBX.drawMark(sp, VB.BallC, 0.05, 1.35, "MIRA")
+        return
+    end
+
+    if not live then VBX.Prev = nil; VBX.hide(); return end
+
     local p, v = ball.Position, ball.AssemblyLinearVelocity
 
+    -- aceleração medida na bola viva. O dump (54553) mostra que o jogo integra
+    -- pos(t) = p + v*t + accel*0.5*t² — aceleração constante por trecho. Medindo
+    -- accel eu cubro gravidade-base, GravityMultiplier de habilidade e drag sem
+    -- precisar saber qual habilidade foi usada.
     if VBX.Prev and VBX.PrevT > 0 then
         local dtm = now - VBX.PrevT
         if dtm > 0.004 then
             local a = (v - VBX.Prev) / dtm
-            -- impulso de colisão distorce a medida; só aceita até 6 g
-            if a.Magnitude < workspace.Gravity * 6 then
-                VBX.Accel = VBX.Accel:Lerp(a, 0.35)
+            local g = workspace.Gravity
+            if a.Magnitude < g * 8 then
+                if VBX.Settle > 3 and (a - VBX.Accel).Magnitude > g * 1.5 then
+                    VBX.Accel = a        -- impacto: obedece o estado novo na hora
+                    VBX.Settle = 0
+                else
+                    VBX.Accel = VBX.Accel:Lerp(a, 0.45)
+                    VBX.Settle = VBX.Settle + 1
+                end
             end
         end
     end
     VBX.Prev, VBX.PrevT = v, now
 
-    if not VBX.FloorY or (now - VBX.FloorT) > 1 then
-        local hit = Workspace:Raycast(p, Vector3.new(0, -500, 0), VBX.params())
-        if hit then VBX.FloorY = hit.Position.Y end
-        VBX.FloorT = now
-    end
+    if not VBX.FloorY or (now - VBX.FloorT) > 1 then VBX.floor(p) end
     local floorY = VBX.FloorY
-    if not floorY then return end
+    if not floorY then VBX.hide(); return end
 
-    local h, land, cp, cv, prev = 1 / 60, nil, p, v, p
-    for i = 1, math.floor(VBX.Span * 60) do
-        cv = cv + VBX.Accel * h
-        prev = cp
-        cp = cp + cv * h
-        if cp.Y <= floorY then
-            local f = (prev.Y - floorY) / math.max(prev.Y - cp.Y, 1e-4)
-            land = prev:Lerp(cp, f)
-            break
+    local T = VBX.solve(p.Y - floorY, v.Y, VBX.Accel.Y)
+    if not T or T <= 0 or T > VBX.Span then VBX.hide(); return end
+
+    -- amostra de tempo igual. Aceleração constante ⇒ parábola exata, então a
+    -- curva desenhada é a curva real, não uma aproximação por passos.
+    local pts = {}
+    for i = 0, VBX.Segs do
+        local t = T * i / VBX.Segs
+        pts[i + 1] = p + v * t + VBX.Accel * (0.5 * t * t)
+    end
+
+    -- varredura segmento a segmento: a rede é parede fina, e um raio único
+    -- bola→destino tunnelaria por ela. Segmento não.
+    local rp = VBX.params()
+    local cut, cutPos = nil, nil
+    for i = 1, VBX.Segs do
+        local seg = pts[i + 1] - pts[i]
+        if seg.Magnitude > 0.01 then
+            local hit = Workspace:Raycast(pts[i], seg, rp)
+            if hit then cut, cutPos = i, hit.Position; break end
         end
     end
-    if not land then VBX.hide(); return end
 
-    -- a rede é tag "Net" e não está na lista de ignore — se a bola bate nela, o
-    -- raio acusa e a marca vai pro ponto de contato, não pro chão do outro lado
-    local ray = Workspace:Raycast(p, (land - p) * 0.98, VBX.params())
-    if ray then land = ray.Position end
-
-    VBX.build()
-
-    local pts, n = {p}, 0
-    cp, cv = p, v
-    local every = math.max(1, math.floor((VBX.Span * 60) / VBX.Segs))
-    for i = 1, math.floor(VBX.Span * 60) do
-        cv = cv + VBX.Accel * h
-        cp = cp + cv * h
-        if i % every == 0 then pts[#pts + 1] = cp end
-        if cp.Y <= floorY then break end
+    local n, land = VBX.Segs, pts[VBX.Segs + 1]
+    if cut then
+        n, land = cut, cutPos
+        pts[n + 1] = land
     end
-    pts[#pts + 1] = land
 
-    for i = 1, #pts - 1 do
-        n = n + 1
-        if n > VBX.Segs then break end
-        local a, b = proj(pts[i]), proj(pts[i + 1])
-        local L = VBX.Arc[n]
-        if a and b then
-            L.From, L.To, L.Visible = a, b, true
+    local urgent = math.clamp(1 - T / 1.2, 0, 1)
+    local col = VB.BallC:Lerp(Color3.fromRGB(255, 55, 55), urgent)
+    if cut then col = col:Lerp(Color3.fromRGB(255, 190, 60), 0.65) end
+
+    for i = 1, VBX.Segs do
+        local L = VBX.Arc[i]
+        if i <= n then
+            local a, b = proj(pts[i]), proj(pts[i + 1])
+            L.Color, L.Thickness = col, math.max(1, VB.Thick - 1)
+            L.Transparency = (0.12 + 0.55 * (i / VBX.Segs)) * VB.Alpha
+            if a and b then
+                L.From, L.To, L.Visible = a, b, true
+            else
+                L.Visible = false
+            end
         else
             L.Visible = false
         end
     end
-    for i = n + 1, VBX.Segs do VBX.Arc[i].Visible = false end
 
-    local rad = VB.Dot + 3
-    VBX.Ol.Radius, VBX.Dot.Radius     = rad + VB.Outline + 2, rad
-    VBX.Ol.Color,   VBX.Dot.Color     = VB.Dark, VB.BallC
-    VBX.Ol.Transparency = 0.72 * VB.Alpha
-    VBX.Dot.Transparency = 0.32 * VB.Alpha
-    for i = 1, VBX.Segs do
-        local L = VBX.Arc[i]
-        L.Color, L.Thickness = VB.BallC, math.max(1, VB.Thick - 1)
-        L.Transparency = 0.62 * VB.Alpha
+    -- orbe fantasma percorrendo a trajetória: comunica ritmo, não só destino
+    local tp = T * ((now * 0.9) % 1)
+    local gs = proj(p + v * tp + VBX.Accel * (0.5 * tp * tp))
+    if gs then
+        VBX.OrbOl.Position, VBX.Orb.Position = gs, gs
+        VBX.OrbOl.Radius, VBX.Orb.Radius = VB.Dot + 4, VB.Dot + 2
+        VBX.OrbOl.Color, VBX.Orb.Color = VB.Dark, col
+        VBX.OrbOl.Transparency, VBX.Orb.Transparency = 0.72 * VB.Alpha, 0.35 * VB.Alpha
+        VBX.Orb.Visible, VBX.OrbOl.Visible = true, true
+    else
+        VBX.Orb.Visible, VBX.OrbOl.Visible = false, false
     end
 
     local sp = proj(land)
     if sp then
-        VBX.Ol.Position, VBX.Dot.Position = sp, sp
-        VBX.Ol.Visible, VBX.Dot.Visible = true, true
+        VBX.drawMark(sp, col, urgent, 1, string.format("%.2f s", T))
     else
-        VBX.Ol.Visible, VBX.Dot.Visible = false, false
+        VBX.hideMark()
     end
 end
 
@@ -5942,11 +6061,11 @@ Toggle("Marcar onde a bola cai", false, function(v)
     Toast(v and "previsao de queda ligada" or "previsao desligada", v)
 end, "Volley predict")
 
-Slider("Alcance da previsao", 1, 6, 3, "%d s", function(v)
+Slider("Alcance da previsao", 1, 10, 5, "%d s", function(v)
     VBX.Span = v
 end, "Volley predict span")
 
-Note("O ponto marca onde a bola toca o chao. A aceleracao e medida da propria bola quadro a quadro, entao drag e forca de habilidade entram na conta sozinhos. Se a rede estiver no caminho, a marca vai pro ponto de contato. Tudo leitura: nenhuma chamada sai daqui.", 62)
+Note("Duas fases. Mirando o saque, a marca usa o destino que o proprio jogo ja calculou (attachment TrajectoryFinish no Terrain) e escreve MIRA. Com a bola no ar, a aceleracao e medida dela quadro a quadro e a queda sai da equacao exata de parabola que o jogo usa. Rede no caminho corta o arco e pinta de ambar. A contagem e o tempo real ate o impacto. Tudo leitura: nada sai daqui.", 76)
 
 Note("A linha sai da cabeça do adversário na direção em que ele está olhando. O Roblox replica a rotação do pescoço, então dá pra ler a intenção de ataque antes do toque. É desenho de tela: nada é criado no jogo, nada replica pro servidor.", 58)
 
