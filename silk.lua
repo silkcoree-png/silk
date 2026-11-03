@@ -7856,6 +7856,161 @@ function HG.DumpScripts()
     return txt, copied
 end
 
+-- ============================================================
+-- DUMP TOTAL
+-- ============================================================
+-- Puxa tudo que o cliente consegue ler: remotes, fonte de todos os scripts,
+-- instâncias suspeitas, dados do player, atributos e o trace.
+-- Não usa hook nenhum, não escreve nada no DataModel, não cria instância.
+-- Só leitura + arquivo no executor. O jogo não tem como ver isso.
+-- Roda em fatias (task.wait a cada N itens) pra não travar o frame — travada
+-- de 2s é o único rastro comportamental que um dump deixa.
+function HG.DumpAll()
+    local t0 = os.clock()
+    local out, n = {}, 0
+    local function add(fmt, ...)
+        n = n + 1
+        out[n] = string.format(fmt, ...)
+    end
+
+    add("== SILK CORE · DUMP TOTAL ==")
+    add("place=%s  job=%s", tostring(game.PlaceId), tostring(game.JobId))
+    add("executor=%s", tostring(execName))
+    add("api: getgc=%s getinstances=%s decompile=%s getconnections=%s",
+        tostring(type(getgc) == "function"), tostring(type(getinstances) == "function"),
+        tostring(type(decompile) == "function"), tostring(type(getconnections) == "function"))
+    add("")
+
+    -- remotes
+    local remotes = hgScanRemotes(true)
+    add("== REMOTES (%d) ==", #remotes)
+    for i, r in ipairs(remotes) do
+        add("  [%s] %s", r.class, r.path)
+        if i % 40 == 0 then task.wait() end
+    end
+
+    -- instâncias com nome suspeito
+    add("")
+    add("== INSTANCIAS SUSPEITAS ==")
+    local hits = 0
+    for i, v in ipairs(game:GetDescendants()) do
+        if hgWordHit(v.Name, HG_AC_WORDS) and hits < 500 then
+            hits = hits + 1
+            add("  %s [%s]", v:GetFullName(), v.ClassName)
+        end
+        if i % 500 == 0 then task.wait() end
+    end
+    add("  total: %d", hits)
+
+    -- dados do player
+    add("")
+    add("== DADOS DO PLAYER ==")
+    for _, folder in ipairs({"Data", "PlayerData", "leaderstats", "Stats", "Inventory", "Backpack"}) do
+        local f = LocalPlayer:FindFirstChild(folder)
+        if f then
+            for _, v in ipairs(f:GetDescendants()) do
+                if v:IsA("ValueBase") then
+                    add("  %s = %s [%s]", v:GetFullName(), tostring(v.Value), v.ClassName)
+                end
+            end
+            if f:IsA("ValueBase") then
+                add("  %s = %s [%s]", f:GetFullName(), tostring(f.Value), f.ClassName)
+            end
+        end
+    end
+
+    -- atributos
+    add("")
+    add("== ATRIBUTOS ==")
+    local function dumpAttrs(obj, label)
+        if not obj then return end
+        local ok, attrs = pcall(function() return obj:GetAttributes() end)
+        if ok and attrs then
+            for k, v in pairs(attrs) do
+                add("  %s.%s = %s", label, tostring(k), tostring(v))
+            end
+        end
+    end
+    dumpAttrs(LocalPlayer, "Player")
+    dumpAttrs(LocalPlayer.Character, "Character")
+    dumpAttrs(workspace, "Workspace")
+
+    -- fonte dos scripts, em fatias
+    add("")
+    add("== FONTE DOS SCRIPTS ==")
+    local inst
+    if type(getinstances) == "function" then
+        local ok, res = pcall(getinstances)
+        if ok then inst = res end
+    end
+    local dumped, budget = 0, 0
+    if inst then
+        for i, v in ipairs(inst) do
+            local okS, isS = pcall(function() return v:IsA("LuaSourceContainer") end)
+            if okS and isS and dumped < 160 then
+                local src
+                if type(decompile) == "function" then
+                    local okd, d = pcall(decompile, v)
+                    if okd and type(d) == "string" then src = d end
+                end
+                if src then
+                    dumped = dumped + 1
+                    budget = budget + #src
+                    add("")
+                    add("---- %s [%s] %d chars ----", v:GetFullName(), v.ClassName, #src)
+                    add("%s", src:sub(1, 40000))
+                    if budget > 4000000 then
+                        add("-- corte: limite de 4 MB atingido")
+                        break
+                    end
+                end
+            end
+            if i % 8 == 0 then task.wait() end
+        end
+    end
+    add("")
+    add("  scripts com fonte: %d", dumped)
+
+    -- gc: só o índice das funções
+    add("")
+    add("== GC: FUNCOES DE AC ==")
+    if type(getgc) == "function" then
+        local seen, gcHits = {}, 0
+        for i, v in ipairs(getgc(true)) do
+            if type(v) == "function" then
+                local okS, src = pcall(debug.info, v, "s")
+                if okS and hgWordHit(tostring(src), HG_AC_WORDS) then
+                    local okN, nm = pcall(debug.info, v, "n")
+                    local okL, ln = pcall(debug.info, v, "l")
+                    local key = tostring(src) .. ":" .. tostring(ln)
+                    if not seen[key] then
+                        seen[key] = true
+                        gcHits = gcHits + 1
+                        if gcHits <= 300 then add("  [%s:%s] %s", tostring(src), tostring(ln), tostring(nm)) end
+                    end
+                end
+            end
+            if i % 2000 == 0 then task.wait() end
+        end
+        add("  total: %d", gcHits)
+    else
+        add("  executor sem getgc")
+    end
+
+    -- trace, se estiver ligado
+    if #hgTrace.log > 0 then
+        add("")
+        add("== TRACE DE REMOTES (%d) ==", #hgTrace.log)
+        for i = 1, #hgTrace.log do add("  %s", hgTrace.log[i]) end
+    end
+
+    local txt = table.concat(out, "\n")
+    if writefile then pcall(writefile, "SilkcoreFullDump.txt", txt) end
+    local copied = false
+    if setclipboard then copied = pcall(setclipboard, txt) end
+    return txt, copied, os.clock() - t0
+end
+
 -- Trace de __namecall: mostra toda remote que o JOGO dispara e toda que NÓS
 -- disparamos, com o payload. É esse log que revela qual remote o anti-cheat
 -- usa pra avisar o servidor.
@@ -7881,17 +8036,22 @@ function HG.TraceRemotes(on)
     hgTrace.old = mt.__namecall
     setreadonly(mt, false)
     mt.__namecall = newcclosure(function(self, ...)
-        local m = getnamecallmethod()
+        -- todo o log dentro de pcall: se der erro aqui, ele morre aqui.
+        -- erro vazando pro namecall do jogo é a única forma de um hook ser notado.
+        local m
+        pcall(function() m = getnamecallmethod() end)
         if m == "FireServer" or m == "InvokeServer" then
-            local ours = false
-            if checkcaller then pcall(function() ours = checkcaller() end) end
-            if #hgTrace.log < hgTrace.max then
-                local args = table.pack(...)
-                local parts = {}
-                for i = 1, args.n do parts[i] = hgFmtValue(args[i]) end
-                hgTrace.log[#hgTrace.log + 1] = string.format("[%s] %s(%s)",
-                    ours and "EU" or "JOGO", tostring(self.Name), table.concat(parts, ", "))
-            end
+            local args = table.pack(...)
+            pcall(function()
+                local ours = false
+                if checkcaller then pcall(function() ours = checkcaller() end) end
+                if #hgTrace.log < hgTrace.max then
+                    local parts = {}
+                    for i = 1, args.n do parts[i] = hgFmtValue(args[i]) end
+                    hgTrace.log[#hgTrace.log + 1] = string.format("[%s] %s(%s)",
+                        ours and "EU" or "JOGO", tostring(self.Name), table.concat(parts, ", "))
+                end
+            end)
         end
         return hgTrace.old(self, ...)
     end)
@@ -7931,18 +8091,24 @@ function HG.KillReport(on)
     hgTrace.reportOld = mt.__namecall
     setreadonly(mt, false)
     mt.__namecall = newcclosure(function(self, ...)
-        local m = getnamecallmethod()
-        if (m == "FireServer" or m == "InvokeServer") and not checkcaller() then
+        local drop = false
+        pcall(function()
+            local m = getnamecallmethod()
+            if m ~= "FireServer" and m ~= "InvokeServer" then return end
+            local ours = false
+            if checkcaller then pcall(function() ours = checkcaller() end) end
+            if ours then return end
             local ok, nm = pcall(function() return self.Name end)
             if ok and hgWordHit(nm, HG_REPORT_WORDS) then
+                drop = true
                 if not hgTrace.dropped[nm] then
                     hgTrace.dropped[nm] = 0
                     print("[SilkCore] report bloqueado: " .. tostring(nm))
                 end
                 hgTrace.dropped[nm] = hgTrace.dropped[nm] + 1
-                return nil
             end
-        end
+        end)
+        if drop then return nil end
         return hgTrace.reportOld(self, ...)
     end)
     setreadonly(mt, true)
@@ -8253,6 +8419,14 @@ BtnRow("DUMP DE SCRIPTS / AC", T.Accent, function()
     task.spawn(function()
         local txt, copied = HG.DumpScripts()
         Toast(string.format("dump AC · %d chars · %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
+    end)
+end)
+
+BtnRow("DUMP TOTAL (tudo)", T.Good, function()
+    task.spawn(function()
+        Toast("dump total rodando em segundo plano — pode jogar", true)
+        local txt, copied, secs = HG.DumpAll()
+        Toast(string.format("dump total · %d chars · %.1fs · %s", #txt, secs, copied and "copiado!" or "salvo em arquivo"), true)
     end)
 end)
 
