@@ -5571,7 +5571,7 @@ Persist.Scope = "volley"
 
 local Drawing = Drawing or (getgenv and getgenv().Drawing)
 local VB = {
-    On = false, Len = 14, Ball = true, OnlyEnemy = true,
+    On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 4, Outline = 2, Alpha = 1, Dot = 5, ShowDot = true,
     pairs = {}, ballLine = nil, ballOl = nil, ballDot = nil, cache = nil, t = 0,
     Enemy = Color3.fromRGB(255, 60, 60),
@@ -5648,14 +5648,154 @@ local function lookVec(char, head)
     return head.CFrame.LookVector
 end
 
+-- O jogo marca a bola com a tag "Ball" e a rede com "Net" via CollectionService.
+-- Achar por tag é uma consulta ao índice, não uma varredura: o Workspace tem
+-- milhares de partes e o find antigo percorria todas a cada 2 s.
 local function findBall()
-    for _, d in ipairs(Workspace:GetDescendants()) do
-        if d:IsA("BasePart") then
-            local n = d.Name:lower()
-            if n:find("ball") or n:find("volley") then return d end
+    local ok, tagged = pcall(game.GetService, game, "CollectionService")
+    if not ok then return nil end
+    local ok2, list = pcall(tagged.GetTagged, tagged, "Ball")
+    if not ok2 or not list then return nil end
+    for _, t in ipairs(list) do
+        if t.Parent then
+            local part = t:IsA("BasePart") and t or t.PrimaryPart
+            if part then return part end
         end
     end
 end
+
+-- ============================================================
+-- PREVER QUEDA
+-- ============================================================
+-- A aceleração é MEDIDA quadro a quadro — (v - v_anterior) / dt — não assumida.
+-- Fórmula fechada com workspace.Gravity erraria: o dump mostra VectorForce
+-- mexendo na bola durante habilidade. Medindo, eu não preciso saber que existe.
+local VBX = {
+    cs = game:GetService("CollectionService"),
+    Prev = nil, PrevT = 0, Accel = Vector3.new(0, -workspace.Gravity, 0),
+    FloorY = nil, FloorT = 0, Arc = {}, Dot = nil, Ol = nil,
+    Segs = 14, Span = 3, Ready = false,
+}
+
+function VBX.params()
+    local rp = RaycastParams.new()
+    rp.FilterType = Enum.RaycastFilterType.Exclude
+    local f = {}
+    for _, tag in ipairs({"Ball", "BallNoCollide", "BallCollideOnly", "Character"}) do
+        local ok, list = pcall(VBX.cs.GetTagged, VBX.cs, tag)
+        if ok and list then
+            for _, v in ipairs(list) do f[#f + 1] = v end
+        end
+    end
+    rp.FilterDescendantsInstances = f
+    return rp
+end
+
+function VBX.build()
+    if VBX.Ready then return end
+    VBX.Ready = true
+    VBX.Dot, VBX.Ol = Drawing.new("Circle"), Drawing.new("Circle")
+    VBX.Dot.Filled, VBX.Dot.NumSides = true, 32
+    VBX.Ol.Filled,  VBX.Ol.NumSides  = true, 32
+    for i = 1, VBX.Segs do VBX.Arc[i] = Drawing.new("Line") end
+end
+
+function VBX.hide()
+    if not VBX.Ready then return end
+    VBX.Dot.Visible, VBX.Ol.Visible = false, false
+    for i = 1, VBX.Segs do VBX.Arc[i].Visible = false end
+end
+
+function VBX.step(ball)
+    if not (ball and ball.Parent) then VBX.Prev = nil; VBX.hide(); return end
+
+    local now  = os.clock()
+    local p, v = ball.Position, ball.AssemblyLinearVelocity
+
+    if VBX.Prev and VBX.PrevT > 0 then
+        local dtm = now - VBX.PrevT
+        if dtm > 0.004 then
+            local a = (v - VBX.Prev) / dtm
+            -- impulso de colisão distorce a medida; só aceita até 6 g
+            if a.Magnitude < workspace.Gravity * 6 then
+                VBX.Accel = VBX.Accel:Lerp(a, 0.35)
+            end
+        end
+    end
+    VBX.Prev, VBX.PrevT = v, now
+
+    if not VBX.FloorY or (now - VBX.FloorT) > 1 then
+        local hit = Workspace:Raycast(p, Vector3.new(0, -500, 0), VBX.params())
+        if hit then VBX.FloorY = hit.Position.Y end
+        VBX.FloorT = now
+    end
+    local floorY = VBX.FloorY
+    if not floorY then return end
+
+    local h, land, cp, cv, prev = 1 / 60, nil, p, v, p
+    for i = 1, math.floor(VBX.Span * 60) do
+        cv = cv + VBX.Accel * h
+        prev = cp
+        cp = cp + cv * h
+        if cp.Y <= floorY then
+            local f = (prev.Y - floorY) / math.max(prev.Y - cp.Y, 1e-4)
+            land = prev:Lerp(cp, f)
+            break
+        end
+    end
+    if not land then VBX.hide(); return end
+
+    -- a rede é tag "Net" e não está na lista de ignore — se a bola bate nela, o
+    -- raio acusa e a marca vai pro ponto de contato, não pro chão do outro lado
+    local ray = Workspace:Raycast(p, (land - p) * 0.98, VBX.params())
+    if ray then land = ray.Position end
+
+    VBX.build()
+
+    local pts, n = {p}, 0
+    cp, cv = p, v
+    local every = math.max(1, math.floor((VBX.Span * 60) / VBX.Segs))
+    for i = 1, math.floor(VBX.Span * 60) do
+        cv = cv + VBX.Accel * h
+        cp = cp + cv * h
+        if i % every == 0 then pts[#pts + 1] = cp end
+        if cp.Y <= floorY then break end
+    end
+    pts[#pts + 1] = land
+
+    for i = 1, #pts - 1 do
+        n = n + 1
+        if n > VBX.Segs then break end
+        local a, b = proj(pts[i]), proj(pts[i + 1])
+        local L = VBX.Arc[n]
+        if a and b then
+            L.From, L.To, L.Visible = a, b, true
+        else
+            L.Visible = false
+        end
+    end
+    for i = n + 1, VBX.Segs do VBX.Arc[i].Visible = false end
+
+    local rad = VB.Dot + 3
+    VBX.Ol.Radius, VBX.Dot.Radius     = rad + VB.Outline + 2, rad
+    VBX.Ol.Color,   VBX.Dot.Color     = VB.Dark, VB.BallC
+    VBX.Ol.Transparency = 0.72 * VB.Alpha
+    VBX.Dot.Transparency = 0.32 * VB.Alpha
+    for i = 1, VBX.Segs do
+        local L = VBX.Arc[i]
+        L.Color, L.Thickness = VB.BallC, math.max(1, VB.Thick - 1)
+        L.Transparency = 0.62 * VB.Alpha
+    end
+
+    local sp = proj(land)
+    if sp then
+        VBX.Ol.Position, VBX.Dot.Position = sp, sp
+        VBX.Ol.Visible, VBX.Dot.Visible = true, true
+    else
+        VBX.Ol.Visible, VBX.Dot.Visible = false, false
+    end
+end
+
 
 local function sync()
     local seen = {}
@@ -5676,7 +5816,7 @@ local function step(dt)
     sync()
 
     VB.t = VB.t + dt
-    if VB.t > 2 then VB.t = 0; VB.cache = findBall() end
+    if VB.Predict or VB.t > 2 then VB.t = 0; VB.cache = findBall() end
 
     local myTeam = LocalPlayer.Team
     for plr, p in pairs(VB.pairs) do
@@ -5735,6 +5875,8 @@ local function step(dt)
     else
         VB.ballOl.Visible, VB.ballLine.Visible, VB.ballDot.Visible = false, false, false
     end
+
+    if VB.Predict then VBX.step(VB.cache) else VBX.hide() end
 end
 
 local COLORS = {
@@ -5792,6 +5934,19 @@ BtnRow("TROCAR COR DA LINHA", T.Card, function()
 end, 34)
 
 Toggle("Trajetória da bola", true, function(v) VB.Ball = v end, "Volley ball trajec")
+
+Section("Prever queda")
+Toggle("Marcar onde a bola cai", false, function(v)
+    VB.Predict = v
+    if not v then VBX.hide() end
+    Toast(v and "previsao de queda ligada" or "previsao desligada", v)
+end, "Volley predict")
+
+Slider("Alcance da previsao", 1, 6, 3, "%d s", function(v)
+    VBX.Span = v
+end, "Volley predict span")
+
+Note("O ponto marca onde a bola toca o chao. A aceleracao e medida da propria bola quadro a quadro, entao drag e forca de habilidade entram na conta sozinhos. Se a rede estiver no caminho, a marca vai pro ponto de contato. Tudo leitura: nenhuma chamada sai daqui.", 62)
 
 Note("A linha sai da cabeça do adversário na direção em que ele está olhando. O Roblox replica a rotação do pescoço, então dá pra ler a intenção de ataque antes do toque. É desenho de tela: nada é criado no jogo, nada replica pro servidor.", 58)
 
