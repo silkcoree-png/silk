@@ -37,7 +37,7 @@ pcall(RunService.UnbindFromRenderStep, RunService, VOL_BIND)
 
 local guiParent = (gethui and gethui()) or PlayerGui
 for _, parent in ipairs({PlayerGui, guiParent}) do
-    for _, n in ipairs({GUI_NAME, FOV_NAME, ESP_NAME, "SilkcoreToasts", "SilkcoreLoader"}) do
+    for _, n in ipairs({GUI_NAME, FOV_NAME, ESP_NAME, "SilkcoreVolleyLines", "SilkcoreToasts", "SilkcoreLoader"}) do
         local old = parent:FindFirstChild(n)
         if old then old:Destroy() end
     end
@@ -6371,30 +6371,61 @@ if env and env.SilkcoreVolley then
 end
 if env then env.SilkcoreVolley = VB.pairs end
 
+-- ── linha: Frame de GUI, não Drawing ────────────────────────────────────────
+-- A versão anterior criava Drawing.new("Line") DENTRO do passo de render. Isso
+-- funciona em alguns executores e falha em outros — e quando falha o passo
+-- inteiro morre, sem erro na tela, e não desenha nada. Aqui a linha é um Frame
+-- girado: um ScreenGui próprio e três Frames por jogador. Nenhuma API de
+-- executor envolvida, então funciona onde a interface funciona.
+local VBGui = nil
+do
+    local sg = Instance.new("ScreenGui")
+    sg.Name = "SilkcoreVolleyLines"
+    sg.ResetOnSpawn = false
+    -- false de propósito: WorldToViewportPoint devolve coordenada de viewport, que
+    -- já desconta a barra de topo. IgnoreGuiInset=true deslocaria tudo ~36 px.
+    sg.IgnoreGuiInset = false
+    sg.DisplayOrder = 0
+    sg.Parent = guiParent
+    pcall(SilkGuard.track, sg)
+
+    local layer = Instance.new("Frame")
+    layer.Name = "Layer"
+    layer.Size = UDim2.fromScale(1, 1)
+    layer.BackgroundTransparency = 1
+    layer.BorderSizePixel = 0
+    layer.ClipsDescendants = false
+    layer.Parent = sg
+
+    VBGui = sg
+    VB.layer = layer
+end
+
 -- Contorno escuro atrás da linha colorida: é isso que faz a linha aparecer
 -- contra qualquer fundo. Sem ele, vermelho em parede vermelha some.
 local function applyStyle(p)
-    p.ol.Thickness    = VB.Thick + VB.Outline * 2
-    p.ol.Transparency = 0.25
-    p.l.Thickness     = VB.Thick
-    p.l.Transparency  = 1 - VB.Alpha
-    p.d.Radius        = VB.Dot
-    p.d.Thickness     = 2
-    p.d.Transparency  = 1 - VB.Alpha
+    local ol = VB.Thick + VB.Outline * 2
+    p.ol.AnchorPoint = Vector2.new(0.5, 0.5)
+    p.ol.Size        = UDim2.new(0, 0, 0, ol)
+    p.ol.BackgroundTransparency = 0.25
+    p.l.AnchorPoint  = Vector2.new(0.5, 0.5)
+    p.l.Size         = UDim2.new(0, 0, 0, VB.Thick)
+    p.l.BackgroundTransparency  = 1 - VB.Alpha
+    p.d.AnchorPoint  = Vector2.new(0.5, 0.5)
+    p.d.Size         = UDim2.fromOffset(VB.Dot * 2, VB.Dot * 2)
+    p.d.BackgroundTransparency  = 1 - VB.Alpha
 end
 
 local function paint(p)
-    p.l.Color  = VB.Enemy
-    p.d.Color  = VB.Enemy
+    p.l.BackgroundColor3 = VB.Enemy
+    p.d.BackgroundColor3 = VB.Enemy
 end
 
 local function mkpair()
-    local ol = Drawing.new("Line")
-    local l  = Drawing.new("Line")
-    local d  = Drawing.new("Circle")
-    ol.Color, ol.Visible = VB.Dark, false
-    l.Visible, d.Visible = false, false
-    d.Filled, d.NumSides = true, 24
+    local ol = New("Frame", {BackgroundColor3=VB.Dark,  BorderSizePixel=0, Visible=false}, VB.layer)
+    local l  = New("Frame", {BackgroundColor3=VB.Enemy, BorderSizePixel=0, Visible=false}, VB.layer)
+    local d  = New("Frame", {BackgroundColor3=VB.Enemy, BorderSizePixel=0, Visible=false}, VB.layer)
+    Round(d, 999)
     local p = { ol = ol, l = l, d = d }
     applyStyle(p)
     paint(p)
@@ -6403,7 +6434,7 @@ end
 
 local function killpair(p)
     for _, k in ipairs({"ol", "l", "d"}) do
-        if p[k] then pcall(function() p[k]:Remove() end) end
+        if p[k] and p[k].Parent then pcall(function() p[k]:Destroy() end) end
     end
 end
 
@@ -6773,8 +6804,9 @@ local function sync()
     end
 end
 
-local function step(dt)
-    if not Drawing then return end
+local stepErr = nil
+
+local function stepRaw(dt)
     SilkGuard.Beats = SilkGuard.Beats + 1
     sync()
 
@@ -6794,9 +6826,20 @@ local function step(dt)
             local a = proj(o)
             local b = proj(o + lookVec(char, head) * VB.Len)
             if a and b then
-                p.ol.From, p.ol.To, p.ol.Visible = a, b, true
-                p.l.From,  p.l.To,  p.l.Visible  = a, b, true
-                p.d.Position = b
+                -- Frame girado em torno do ponto médio: posição no meio, ângulo
+                -- do vetor, comprimento na largura. Assim a ponta cai exatamente
+                -- em b, sem depender de Drawing.
+                local dx, dy = b.X - a.X, b.Y - a.Y
+                local len = math.sqrt(dx * dx + dy * dy)
+                local mid = (a + b) * 0.5
+                local ang = math.deg(math.atan2(dy, dx))
+                p.ol.Position, p.ol.Rotation, p.ol.Visible =
+                    UDim2.fromOffset(mid.X, mid.Y), ang, true
+                p.ol.Size = UDim2.new(0, len, 0, p.ol.Size.Y.Offset)
+                p.l.Position, p.l.Rotation, p.l.Visible =
+                    UDim2.fromOffset(mid.X, mid.Y), ang, true
+                p.l.Size = UDim2.new(0, len, 0, p.l.Size.Y.Offset)
+                p.d.Position = UDim2.fromOffset(b.X, b.Y)
                 p.d.Visible  = VB.ShowDot
             else
                 p.ol.Visible, p.l.Visible, p.d.Visible = false, false, false
@@ -6806,6 +6849,7 @@ local function step(dt)
         end
     end
 
+    if Drawing then
     if not VB.ballLine then
         VB.ballOl   = Drawing.new("Line")
         VB.ballLine = Drawing.new("Line")
@@ -6838,6 +6882,7 @@ local function step(dt)
     else
         VB.ballOl.Visible, VB.ballLine.Visible, VB.ballDot.Visible = false, false, false
     end
+    end
 
     if VB.Predict then
         local okP, errP = pcall(VBX.step, VB.cache)
@@ -6845,6 +6890,13 @@ local function step(dt)
     else
         VBX.hide()
     end
+end
+
+-- O passo nunca derruba o bind: erro vira texto no diagnóstico e o quadro
+-- seguinte tenta de novo. Antes, um erro de Drawing matava o passo pra sempre.
+local function step(dt)
+    local ok, err = pcall(stepRaw, dt)
+    if not ok then stepErr = tostring(err) end
 end
 
 -- exporta o passo para o SilkGuard: ele estava fora de escopo lá embaixo e o
@@ -6949,10 +7001,27 @@ Note("Duas fases. Mirando o saque, a marca usa o destino que o proprio jogo ja c
 
 Note("A linha sai da cabeça do adversário na direção em que ele está olhando. O Roblox replica a rotação do pescoço, então dá pra ler a intenção de ataque antes do toque. É desenho de tela: nada é criado no jogo, nada replica pro servidor.", 58)
 
-if Drawing then
-    RunService:BindToRenderStep(VOL_BIND, Enum.RenderPriority.Camera.Value + 4, step)
-else
-    Note("Seu executor não expõe a Drawing API, então esta aba não desenha nada. O resto do script continua igual.", 40)
+BtnRow("DIAGNOSTICO DA LINHA", T.Card, function()
+    local n, vis = 0, 0
+    for _, p in pairs(VB.pairs) do
+        n = n + 1
+        if p.l and p.l.Visible then vis = vis + 1 end
+    end
+    local cam = Workspace.CurrentCamera
+    local msg = ("gui=%s layer=%s on=%s pairs=%d visiveis=%d beats=%d cam=%s err=%s"):format(
+        tostring(VBGui ~= nil and VBGui.Parent ~= nil),
+        tostring(VB.layer ~= nil and VB.layer.Parent ~= nil),
+        tostring(VB.On), n, vis, SilkGuard.Beats,
+        tostring(cam ~= nil), tostring(stepErr or VBX.Err or "-"))
+    Toast(msg, VB.On and vis > 0)
+    pcall(function() print("[SilkCore Volei]", msg) end)
+end, 34)
+
+-- a linha não depende mais de Drawing: o passo é sempre amarrado. Se o executor
+-- não tiver Drawing, só a trajetória da bola e a previsão de queda ficam fora.
+RunService:BindToRenderStep(VOL_BIND, Enum.RenderPriority.Camera.Value + 4, step)
+if not Drawing then
+    Note("Seu executor não expõe a Drawing API: a linha de mira funciona igual, mas a trajetória da bola e a previsão de queda não desenham.", 40)
 end
 end
 
