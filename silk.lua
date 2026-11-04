@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.6 · fix16  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix17  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.6 · fix16", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix17", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.6 · fix16"
+SILK_VER = "v2.6 · fix17"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -6840,7 +6840,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE16"
+local BUILD = "BE17"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8124,7 +8124,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.6 · fix16  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix17  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -11491,7 +11491,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.6 fix16", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix17", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11747,7 +11747,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.6 fix16 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix17 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11931,7 +11931,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.6 · fix16", 48)
+Note("SILK CORE v2.6 · fix17", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -12555,6 +12555,51 @@ SP.gen = SP.gen or 0      -- troca a cada aplicacao: derruba o controlador antig
 SP.g2 = SP.g2 or 0        -- troca a cada carga do catalogo: so a ultima desenha
 SP.cards = SP.cards or {}
 SP.kw = SP.kw or ""
+SP.logs = SP.logs or {}
+
+-- Log do pack: cada passo anota o que aconteceu. Quando algo falha, o relatorio
+-- inteiro (cabecalho + passos) vai pro clipboard sozinho.
+function SP.L(msg)
+    SP.logs[#SP.logs + 1] = os.date("%H:%M:%S") .. "  " .. tostring(msg)
+    while #SP.logs > 150 do table.remove(SP.logs, 1) end
+    print("[silk] " .. tostring(msg))
+end
+
+function SP.Cabecalho()
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local ex = "?"
+    if identifyexecutor then
+        local ok, a, b = pcall(identifyexecutor)
+        if ok then ex = tostring(a) .. " " .. tostring(b or "") end
+    end
+    local function tem(n)
+        local ok, f = pcall(function() return getgenv()[n] end)
+        return (ok and type(f) == "function") and "sim" or "nao"
+    end
+    return table.concat({
+        "silk anim log " .. os.date("%Y-%m-%d %H:%M:%S"),
+        "executor: " .. ex,
+        "place: " .. tostring(game.PlaceId),
+        "rig: " .. (hum and hum.RigType.Name or "sem personagem"),
+        "Animate no personagem: " .. tostring(char ~= nil and char:FindFirstChild("Animate") ~= nil),
+        "Animator no humanoid: " .. tostring(hum ~= nil and hum:FindFirstChildOfClass("Animator") ~= nil),
+        "request: " .. tem("request") .. " | http_request: " .. tem("http_request") .. " | setclipboard: " .. tem("setclipboard"),
+    }, "\n")
+end
+
+function SP.Copia(motivo, bom)
+    local txt = SP.Cabecalho() .. "\nmotivo: " .. tostring(motivo or "-") .. "\n\n" .. table.concat(SP.logs, "\n")
+    local ok = false
+    if setclipboard then ok = pcall(setclipboard, txt) elseif toclipboard then ok = pcall(toclipboard, txt) end
+    if ok then
+        Toast(tostring(motivo or "log") .. " — log copiado, cola no chat", bom and true or false)
+    else
+        print(txt)
+        Toast(tostring(motivo or "log") .. " — executor sem setclipboard, log no output", false)
+    end
+    return txt
+end
 
 -- HTTP de executor (request / syn.request / http_request). HttpService nao serve
 -- no cliente. So e usado como reserva: o caminho principal usa AssetService e
@@ -12618,14 +12663,14 @@ function SP.EstadoDe(nome)
 end
 
 -- 48..55 = tipo de animacao do Roblox: 48 climb, 50 fall, 51 idle, 52 jump,
--- 53 run, 54 swim, 55 walk. O tipo e mais confiavel que o nome.
+-- 53 run, 54 swim, 55 walk. O tipo e mais confiavel que o nome do item.
 SP.tipoAnim = SP.tipoAnim or {
     [48] = "climb", [50] = "fall", [51] = "idle", [52] = "jump",
     [53] = "run", [54] = "swim", [55] = "walk",
 }
 
--- Pacotes conhecidos (IDs das animacoes por estado). Reserva pra quando nem
--- AssetService nem o HTTP do executor respondem: o link continua funcionando.
+-- Pacotes conhecidos: ids das animacoes por estado, gravados no script. Reserva
+-- pra quando nem AssetService nem o HTTP do executor respondem.
 SP.packsFixos = SP.packsFixos or {
     [79] = { idle = 619542203, walk = 619544080, run = 619543231, jump = 619542888,
              fall = 619541867, climb = 619541458, swim = 619543721 },
@@ -12640,10 +12685,12 @@ function SP.BundleItens(id)
     local ok, d = pcall(function()
         return game:GetService("AssetService"):GetBundleDetailsAsync(id)
     end)
+    SP.L("AssetService:GetBundleDetailsAsync(" .. tostring(id) .. ") ok=" .. tostring(ok) .. " -> "
+        .. (ok and (type(d) == "table" and ("nome=" .. tostring(d.Name) .. " itens=" .. tostring(type(d.Items) == "table" and #d.Items or "?")) or type(d)) or tostring(d)))
     if ok and type(d) == "table" and type(d.Items) == "table" then
         for _, it in ipairs(d.Items) do
-            -- it.Type vem como Enum: tostring() da "Enum.AvatarItemType.Asset",
-            -- entao comparar com "Asset" dava ZERO item e derrubava o pack pro HTTP
+            -- it.Type vem como Enum (Enum.AvatarItemType.Asset), entao comparar com
+            -- a string "Asset" zerava a lista. O que sai e so o UserOutfit.
             if not tostring(it.Type):find("UserOutfit") then
                 itens[#itens + 1] = { id = tonumber(it.Id), name = tostring(it.Name or ""), tipo = tonumber(it.AssetType) }
             end
@@ -12651,6 +12698,7 @@ function SP.BundleItens(id)
         if #itens > 0 then return itens, tostring(d.Name or "") end
     end
     local body = SilkHttpGet("https://catalog.roblox.com/v1/bundles/" .. tostring(id) .. "/details")
+    SP.L("reserva HTTP bundles/" .. tostring(id) .. "/details -> " .. (body and (#body .. " bytes") or "sem resposta (executor sem request ou bloqueado)"))
     if body then
         local okJ, j = pcall(function() return game:GetService("HttpService"):JSONDecode(body) end)
         if okJ and type(j) == "table" and type(j.items) == "table" then
@@ -12673,15 +12721,19 @@ function SP.MapaDoBundle(id)
             mapa[est] = "rbxassetid://" .. tostring(aid)
             n = n + 1
         end
-        if n > 0 then return mapa, ("pack " .. tostring(id)) end
+        if n > 0 then
+            SP.L("pack " .. tostring(id) .. " e conhecido: " .. n .. " estados gravados no script")
+            return mapa, ("pack " .. tostring(id))
+        end
     end
-
     local itens, nome = SP.BundleItens(id)
     if not itens then return nil, nil, nome end
     local mapa, n = {}, 0
     for _, it in ipairs(itens) do
         local porTipo = it.tipo and SP.tipoAnim[tonumber(it.tipo)] or nil
         local est = it.id and (porTipo or SP.EstadoDe(it.name))
+        SP.L("item '" .. tostring(it.name) .. "' (" .. tostring(it.id) .. ") tipo=" .. tostring(it.tipo)
+            .. " -> " .. tostring(est or "ignorado"))
         if est and not mapa[est] then
             mapa[est] = "rbxassetid://" .. tostring(it.id)
             n = n + 1
@@ -12767,67 +12819,138 @@ function SP.Controlador(char, hum, animator, mapa)
     end)
 end
 
--- Testa o que da pra testar de verdade: se o clipe aceita carregar. NAO usa
--- AnimationTrack.Length como nota — Length fica 0 enquanto o asset esta baixando
--- e, em varios casos, continua 0 com a animacao boa. Era isso que reprovava o pack
--- INTEIRO e mostrava "nenhum clipe desse pack carregou". Quem julga de verdade e a
--- reproducao: SP.Vigia olha se entrou faixa tocando, e o controlador faz igual.
-function SP.Verifica(animator, mapa)
-    local boas, ruins = {}, {}
-    local anims, tracks, lista = {}, {}, {}
-    for est, asset in pairs(mapa) do
+-- "Esta tocando?" — so IsPlaying. Length, TimePosition e Weight nao servem de
+-- prova neste executor: o diagnostico mediu Length=0 na animacao que o PROPRIO
+-- JOGO estava tocando. Quem confirma o pack e o id da faixa (SP.TocaNovo).
+function SP.Toca(t)
+    local ok, r = pcall(function() return t.IsPlaying end)
+    return ok and r == true
+end
+
+-- Foto das faixas tocando agora (vai pro log): mostra o que realmente esta vivo.
+function SP.Snap(animator, rotulo)
+    local n = 0
+    pcall(function()
+        for _, t in ipairs(animator:GetPlayingAnimationTracks()) do
+            n = n + 1
+            local id = t.Animation and t.Animation.AnimationId or "?"
+            SP.L(string.format("  [%s] %s prio=%s play=%s len=%.2f pos=%.2f peso=%.2f", rotulo, tostring(id),
+                tostring(t.Priority.Name), tostring(t.IsPlaying), t.Length, t.TimePosition, t.WeightCurrent))
+        end
+    end)
+    if n == 0 then SP.L("  [" .. rotulo .. "] nenhuma faixa tocando") end
+end
+
+-- Mede um conjunto de clipes: cada faixa toca 1 instante em prioridade Core com
+-- peso 0.001 (nao aparece no boneco). Carregou = Length > 0 OU tocando com o
+-- TimePosition andando.
+function SP.TestaClipes(animator, mapa)
+    local anims, tracks, lista, lens, falhasT = {}, {}, {}, {}, {}
+    for nome, asset in pairs(mapa) do
         local a = Instance.new("Animation")
         a.AnimationId = asset
-        anims[est] = a
+        anims[nome] = a
         lista[#lista + 1] = a
     end
     pcall(function() game:GetService("ContentProvider"):PreloadAsync(lista) end)
-    for est, a in pairs(anims) do
+    for nome, a in pairs(anims) do
         local ok, t = pcall(function() return animator:LoadAnimation(a) end)
         if ok and t then
-            tracks[est] = t
-            boas[est] = mapa[est]
+            tracks[nome] = t
+            pcall(function() t.Priority = Enum.AnimationPriority.Core end)
+            pcall(function() t:Play(0, 0.001, 1) end)
         else
-            ruins[#ruins + 1] = est .. "=" .. tostring((tostring(mapa[est]):gsub("%D", "")))
+            falhasT[nome] = true
         end
     end
-    for _, t in pairs(tracks) do
+    local function medida(t)
+        local ok, l = pcall(function()
+            if t.Length > 0 then return t.Length end
+            if t.IsPlaying and t.TimePosition > 0 then return 0.001 end
+            return 0
+        end)
+        return ok and l or 0
+    end
+    -- 1.2s de amostragem: aqui a medida nao decide nada, so alimenta o log
+    for _ = 1, 6 do
+        local falta = false
+        for _, t in pairs(tracks) do
+            if medida(t) <= 0 then falta = true end
+        end
+        if not falta then break end
+        task.wait(0.2)
+    end
+    for nome, t in pairs(tracks) do
+        lens[nome] = medida(t)
+        pcall(function() t:Stop(0) end)
         pcall(function() t:Destroy() end)
     end
-    return boas, ruins
+    return lens, falhasT
 end
 
--- tem alguma faixa NOVA (que nao estava tocando antes da troca) tocando de verdade?
-function SP.TocaNovo(animator, antes)
+-- Mede os clipes SO para o log. Nao reprova nada: o diagnostico mostrou que
+-- Length nao mede animacao neste ambiente (a animacao do proprio jogo deu 0), e
+-- era essa medida que fazia o pack inteiro cair em "nenhum clipe desse pack
+-- carregou" sem encostar no personagem. Aplica tudo; quem confirma e o id da
+-- faixa que esta tocando, na Vigia.
+function SP.Verifica(animator, mapa)
+    local lens, falhas = SP.TestaClipes(animator, mapa)
+    for est, asset in pairs(mapa) do
+        SP.L("clipe " .. est .. " " .. tostring(asset) .. " -> Length=" .. tostring(lens[est]))
+    end
+    local ruins = {}
+    for est in pairs(falhas or {}) do
+        SP.L("clipe " .. est .. " -> LoadAnimation falhou (entra mesmo assim)")
+        ruins[#ruins + 1] = est .. "=LoadAnimation falhou"
+    end
+    return mapa, ruins
+end
+
+-- entrou faixa NOVA tocando? Com `ids`, so conta faixa cujo Animation.AnimationId
+-- e um dos ids do pack — leitura de texto, essa funciona em qualquer executor.
+function SP.TocaNovo(animator, antes, ids)
     local ok, r = pcall(function()
         for _, t in ipairs(animator:GetPlayingAnimationTracks()) do
-            if not antes[t] and t.IsPlaying then return true end
+            if not antes[t] and SP.Toca(t) then
+                if not ids then return true end
+                local a = t.Animation
+                local aid = a and tonumber(tostring(a.AnimationId):match("(%d+)"))
+                if aid and ids[aid] then return true end
+            end
         end
         return false
     end)
     return ok and r
 end
 
--- Se o Animate novo nao assumiu em ~3 s, liga o controlador proprio. So volta
--- pro original se nem o controlador conseguir tocar nada.
-function SP.Vigia(char, hum, animator, antes, cur, mapa)
+-- Se o Animate novo nao assumiu, liga o controlador proprio. NAO restaura: o
+-- Animate trocado e o do proprio jogo, entao o pior caso e ficar como estava —
+-- restaurar so tirava o pack de quem pediu por ele.
+function SP.Vigia(char, hum, animator, antes, cur, mapa, ids)
     task.spawn(function()
-        for _ = 1, 8 do
+        for i = 1, 8 do
             task.wait(0.4)
             if SP.cur ~= cur or not char.Parent then return end
-            if SP.TocaNovo(animator, antes) then return end
+            if i == 1 or i == 8 then SP.Snap(animator, "vigia " .. i) end
+            if SP.TocaNovo(animator, antes, ids) then
+                SP.L("Vigia: clipe do pack tocando — ok")
+                return
+            end
         end
+        SP.L("Vigia: nada do pack em 2s com o Animate trocado — ligando o controlador proprio")
         SP.Controlador(char, hum, animator, mapa)
         for _ = 1, 6 do
             task.wait(0.4)
             if SP.cur ~= cur or not char.Parent then return end
-            if SP.TocaNovo(animator, antes) then
-                Toast("o Animate do jogo não assumiu — usei o controlador próprio", true)
+            if SP.TocaNovo(animator, antes, ids) then
+                SP.L("controlador proprio tocando o pack")
+                Toast("o Animate do jogo nao assumiu — usei o controlador proprio", true)
                 return
             end
         end
-        SP.Restaurar(true)
-        Toast("nada tocou nem pelo controlador — voltei pro original (veja o output)", false)
+        SP.Snap(animator, "depois do controlador")
+        SP.L("Vigia: nao confirmei clipe tocando — pack MANTIDO (nada de restaurar)")
+        Toast("pack no personagem, mas nao confirmei o clipe tocando (veja o output)", false)
     end)
 end
 
@@ -12845,12 +12968,13 @@ function SP.NoChar(char, avisar)
         return false
     end
 
+    SP.L("NoChar: rig=" .. hum.RigType.Name .. " Animate=" .. tostring(char:FindFirstChild("Animate") ~= nil) .. " pack=" .. tostring(cur.nome))
     -- 1) so entra o que carrega de verdade
     local mapa, ruins = SP.Verifica(animator, cur.mapa)
     if next(mapa) == nil then
-        print("[silk] nenhum clipe do pack '" .. tostring(cur.nome) .. "' carregou: " .. table.concat(ruins, ", "))
-        if avisar then Toast("nenhum clipe desse pack carregou (ids no output) — personagem intacto", false) end
+        SP.L("nenhum clipe do pack '" .. tostring(cur.nome) .. "' carregou: " .. table.concat(ruins, ", "))
         SP.cur = nil
+        if avisar then SP.Copia("nenhum clipe do pack carregou (personagem intacto)") end
         return false
     end
     if #ruins > 0 then
@@ -12858,6 +12982,12 @@ function SP.NoChar(char, avisar)
     end
 
     SP.gen = SP.gen + 1
+    -- ids do pack: e por eles que a Vigia sabe se o clipe do pack entrou mesmo
+    local ids = {}
+    for _, asset in pairs(mapa) do
+        local n = tonumber(tostring(asset):match("(%d+)"))
+        if n then ids[n] = true end
+    end
     local velho = char:FindFirstChild("Animate") or char:WaitForChild("Animate", 3)
 
     local nomes = {}
@@ -12866,6 +12996,7 @@ function SP.NoChar(char, avisar)
     local rig = (hum.RigType == Enum.HumanoidRigType.R6) and " (corpo R6: pack R15 fica deformado)" or ""
     local extra = (#ruins > 0) and (" — sem carregar: " .. #ruins) or ""
 
+    SP.Snap(animator, "antes da troca")
     -- faixas que estao tocando agora: param DEPOIS que a nova assume (sem frame reto)
     local antes = {}
     pcall(function()
@@ -12888,6 +13019,10 @@ function SP.NoChar(char, avisar)
                 end
             end
         end
+        local chaves = {}
+        for k in pairs(estados) do chaves[#chaves + 1] = k end
+        table.sort(chaves)
+        SP.L("Animate do jogo tem os estados: " .. table.concat(chaves, ",") .. " | ids trocados: " .. aplicados)
         if aplicados > 0 then
             pcall(function() velho.Disabled = true end)
             pcall(function() velho:Destroy() end)
@@ -12896,7 +13031,7 @@ function SP.NoChar(char, avisar)
             task.delay(0.35, function()
                 for t in pairs(antes) do pcall(function() t:Stop(0.2) end) end
             end)
-            SP.Vigia(char, hum, animator, antes, cur, mapa)
+            SP.Vigia(char, hum, animator, antes, cur, mapa, ids)
             if avisar then
                 Toast("pack aplicado: " .. tostring(cur.nome or "?") .. " [" .. table.concat(nomes, " + ") .. "]" .. extra .. rig, true)
             end
@@ -12910,21 +13045,19 @@ function SP.NoChar(char, avisar)
         for _ = 1, 6 do
             task.wait(0.4)
             if SP.cur ~= meu or not char.Parent then return end
-            local tocando = false
-            pcall(function()
-                for _, t in ipairs(animator:GetPlayingAnimationTracks()) do
-                    if t.IsPlaying then tocando = true end
-                end
-            end)
-            if tocando then
+            if SP.TocaNovo(animator, {}, ids) then
+                SP.L("controlador proprio tocando o pack")
                 if avisar then
                     Toast("pack aplicado (controlador próprio, esse jogo não usa o Animate padrão): " .. tostring(meu.nome or "?") .. rig, true)
                 end
                 return
             end
         end
-        SP.Restaurar(true)
-        Toast("esse pack não tocou de jeito nenhum — voltei pro original (ids no output)", false)
+        SP.Snap(animator, "controlador sem confirmacao")
+        SP.L("controlador proprio: nao confirmei clipe tocando — pack MANTIDO")
+        if avisar then
+            Toast("pack no personagem, mas nao confirmei o clipe tocando (veja o output)", false)
+        end
     end)
     return true
 end
@@ -12973,6 +13106,68 @@ function SP.Hook()
     end)
 end
 
+function SP.Diag()
+    task.spawn(function()
+        SP.logs = {}
+        SP.L("== diagnóstico ==")
+        local char = LocalPlayer.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        local animator = hum and hum:FindFirstChildOfClass("Animator")
+        local okS, page = pcall(function()
+            local p = CatalogSearchParams.new()
+            p.SearchKeyword = "zombie"
+            p.BundleTypes = { Enum.BundleType.Animations }
+            p.Limit = 30
+            return game:GetService("AvatarEditorService"):SearchCatalog(p):GetCurrentPage()
+        end)
+        SP.L("SearchCatalog('zombie') ok=" .. tostring(okS) .. " -> " .. (okS and (#page .. " resultados") or tostring(page)))
+        local id = okS and page[1] and tonumber(page[1].Id) or nil
+        if id then
+            SP.L("primeiro resultado: " .. tostring(page[1].Name) .. " id=" .. id)
+            local mapa, _, err = SP.MapaDoBundle(id)
+            SP.L("MapaDoBundle -> " .. (mapa and "ok" or tostring(err)))
+            if mapa and animator then
+                local boas, ruins = SP.Verifica(animator, mapa)
+                local n = 0
+                for _ in pairs(boas) do n = n + 1 end
+                SP.L("Verifica: carregaram=" .. n .. " falharam=[" .. table.concat(ruins, ",") .. "]")
+            elseif not animator then
+                SP.L("sem Animator no personagem")
+            end
+            local clip = mapa and (mapa.idle or mapa.walk)
+            if clip and animator then
+                SP.L("TESTE VISÍVEL: tocando " .. tostring(clip) .. " por ~3s com prioridade alta — olha se o boneco muda")
+                local a = Instance.new("Animation")
+                a.AnimationId = clip
+                local okT, t = pcall(function() return animator:LoadAnimation(a) end)
+                if okT and t then
+                    pcall(function() t.Priority = Enum.AnimationPriority.Action4 end)
+                    pcall(function() t.Looped = true end)
+                    pcall(function() t:Play(0.1, 1, 1) end)
+                    for i = 1, 6 do
+                        task.wait(0.5)
+                        local okR2, txt = pcall(function()
+                            return string.format("t=%.1fs play=%s len=%.2f pos=%.2f peso=%.2f", i * 0.5,
+                                tostring(t.IsPlaying), t.Length, t.TimePosition, t.WeightCurrent)
+                        end)
+                        SP.L("  teste: " .. (okR2 and txt or ("erro lendo faixa: " .. tostring(txt))))
+                    end
+                    SP.Snap(animator, "teste visivel")
+                    pcall(function() t:Stop(0.2) end)
+                else
+                    SP.L("  teste: LoadAnimation falhou: " .. tostring(t))
+                end
+            end
+        end
+        local okR, res = pcall(function()
+            local f = request or http_request or (syn and syn.request)
+            return f({ Url = "https://catalog.roblox.com/v1/bundles/" .. tostring(id or 0) .. "/details", Method = "GET" })
+        end)
+        SP.L("request() do executor ok=" .. tostring(okR) .. " -> " .. (okR and type(res) == "table" and ("status " .. tostring(res.StatusCode)) or tostring(res)))
+        SP.Copia("diagnóstico", true)
+    end)
+end
+
 function SP.Aplicar(mapa, nome)
     SP.cur = { mapa = mapa, nome = nome }
     SP.Hook()
@@ -12982,10 +13177,13 @@ function SP.Aplicar(mapa, nome)
 end
 
 function SP.AplicarBundle(bid, nomeHint)
+    SP.logs = {}
+    SP.L("APLICAR pack " .. tostring(bid) .. " (" .. tostring(nomeHint) .. ")")
     Toast("carregando pack...", true)
     local mapa, nome, err = SP.MapaDoBundle(bid)
     if not mapa then
-        Toast(err or "não consegui abrir esse pack", false)
+        SP.L("falhou: " .. tostring(err))
+        SP.Copia(err or "não consegui abrir esse pack")
         return false
     end
     return SP.Aplicar(mapa, nomeHint or nome)
@@ -13083,6 +13281,7 @@ function SP.BuscaHTTP(kw, avancar)
         local url = u .. suf
         if avancar and SP.httpCur and #SP.httpCur > 0 then url = url .. "&cursor=" .. H:UrlEncode(SP.httpCur) end
         local body = SilkHttpGet(url)
+        SP.L("HTTP " .. url .. " -> " .. (body and (#body .. " bytes") or "sem resposta (executor sem request?)"))
         local okJ, j = pcall(function() return body and H:JSONDecode(body) end)
         if okJ and type(j) == "table" and type(j.data) == "table" then
             local ids = {}
@@ -13171,13 +13370,16 @@ function SP.Carregar(avancar)
         end)
         if (not ok) or (not lista) or #lista == 0 then
             err = ok and "o catálogo não devolveu nada" or tostring(e)
+            SP.L("AvatarEditorService:SearchCatalog falhou: " .. err)
             local l2, m2 = SP.BuscaHTTP(SP.kw or "", avancar)
+            SP.L("catálogo por HTTP: " .. (l2 and (#l2 .. " packs") or "nada"))
             if l2 then lista, mais = l2, m2 end
         end
         if g ~= SP.g2 then return end
         SP.carregando = false
         if st.Parent then st:Destroy() end
         if not lista or #lista == 0 then
+            SP.Copia("catálogo de packs não carregou")
             New("TextLabel", {
                 Text = "Nenhum pack encontrado." .. (err and ("\n" .. err) or ""),
                 Font = F.Mono, TextSize = 11, TextColor3 = T.Faint, TextWrapped = true,
@@ -13204,6 +13406,12 @@ end
     end)
     Button(row, "RESTAURAR", UDim2.fromOffset(116, 3), UDim2.fromOffset(100, 30), T.Bad, function()
         SP.Restaurar(false)
+    end)
+    Button(row, "COPIAR LOG", UDim2.fromOffset(224, 3), UDim2.fromOffset(100, 30), T.Card, function()
+        SP.Copia("log", true)
+    end)
+    Button(row, "DIAGNÓSTICO", UDim2.fromOffset(332, 3), UDim2.fromOffset(110, 30), T.Card, function()
+        SP.Diag()
     end)
 end)()
 
