@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.6 · fix15  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix16  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.6 · fix15", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix16", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.6 · fix15"
+SILK_VER = "v2.6 · fix16"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -6840,7 +6840,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE15"
+local BUILD = "BE16"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8124,7 +8124,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.6 · fix15  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix16  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -11491,7 +11491,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.6 fix15", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix16", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11747,7 +11747,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.6 fix15 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix16 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11931,7 +11931,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.6 · fix15", 48)
+Note("SILK CORE v2.6 · fix16", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -12545,35 +12545,20 @@ do
 CurTab = Tab("Animações", 0, false)
 Persist.Scope = "anims"
 
-Section("Sistema de Animacoes")
-Note("Toca animacoes por ID e ajusta a velocidade.", 52)
+Section("Pacotes de animação")
+Note("Catálogo com os packs de animação do Roblox. Escolhe um (ou busca pelo nome) e aperta APLICAR: o pack inteiro entra no personagem — parado, andando, correndo, pulando, caindo, escalando, nadando — e quem estiver olhando vê. Continua depois de morrer. RESTAURAR devolve as animações do jogo.", 74)
 
-local customAnims = {
-    {name = "Zombie", id = "rbxassetid://616163682"},
-    {name = "Levitate", id = "rbxassetid://313762630"},
-    {name = "Astronaut", id = "rbxassetid://891621366"},
-    {name = "Ninja", id = "rbxassetid://656117878"},
-    {name = "Knight", id = "rbxassetid://657564596"},
-    {name = "Mage", id = "rbxassetid://707742142"},
-    {name = "Pirate", id = "rbxassetid://750781874"},
-    {name = "Robot", id = "rbxassetid://616095330"},
-    {name = "Vampire", id = "rbxassetid://1083445855"},
-    {name = "Werewolf", id = "rbxassetid://1083216690"},
-}
+-- Tudo do motor fica na tabela global SP: o chunk principal ja esta no limite de
+-- locals, entao nada aqui vira local de nivel alto.
+SP = SP or {}
+SP.gen = SP.gen or 0      -- troca a cada aplicacao: derruba o controlador antigo
+SP.g2 = SP.g2 or 0        -- troca a cada carga do catalogo: so a ultima desenha
+SP.cards = SP.cards or {}
+SP.kw = SP.kw or ""
 
--- Pack de animação: em vez de tocar um clipe por cima de tudo (Action4), troca os
--- IDs dentro do Animate do personagem e troca o script por uma copia. O proprio
--- jogo entao toca o clipe em cada estado — parado, andando, correndo, pulando —
--- e isso replica pros outros igual o idle normal.
---
--- Duas regras que evitam o bug do "personagem andando parado":
---   1. estado que o pack NAO tem nao e trocado. Nada de encher idle/walk/run com
---      o mesmo clipe: se so veio a corrida, so a corrida muda.
---   2. nada e trocado antes do ID responder. Se nao carregar, o Animate original
---      nem e encostado.
-
--- HTTP de executor: request / syn.request / http_request. HttpService nao serve
--- aqui (o cliente nao tem permissao), mas todo executor decente tem um dos tres.
+-- HTTP de executor (request / syn.request / http_request). HttpService nao serve
+-- no cliente. So e usado como reserva: o caminho principal usa AssetService e
+-- AvatarEditorService, que nao dependem do executor.
 function SilkHttpGet(url)
     for _, nome in ipairs({ "syn", "request", "http_request" }) do
         local fn = nil
@@ -12594,10 +12579,8 @@ function SilkHttpGet(url)
     return nil
 end
 
--- Junta os Animation de dentro do Animate num mapa estado -> {Animation, ...}.
--- Em R15 cada estado e uma pasta (idle/walk/run/...) com Animation1 e Animation2
--- dentro; em R6 o Animation e filho direto do Animate com o nome do estado.
-function SilkAnimateMapa(animScript)
+-- estado -> {Animation, ...} de dentro de um Animate (pasta idle/walk/run/...).
+function SP.Mapa(animScript)
     local mapa = {}
     for _, d in ipairs(animScript:GetDescendants()) do
         if d:IsA("Animation") then
@@ -12614,262 +12597,419 @@ function SilkAnimateMapa(animScript)
     return mapa
 end
 
--- Testa UM id antes de encostar no personagem. Length so enche depois que o asset
--- chega — ler na hora sempre devolve 0 e reprovava animacao boa (era o
--- "esse id nao e uma animacao" em ID certo). Espera ate 1.2s; se ficar
--- inconclusivo, deixa passar: quem decide e a rede de seguranca pos-troca.
-function SilkAssetOk(animator, asset)
-    if not animator then return true end
-    local a = Instance.new("Animation")
-    a.AnimationId = asset
-    pcall(function() game:GetService("ContentProvider"):PreloadAsync({ a }) end)
-    local ok, t = pcall(function() return animator:LoadAnimation(a) end)
-    if not ok or not t then return false end
-    for _ = 1, 6 do
-        local okL, len = pcall(function() return t.Length end)
-        if okL and type(len) == "number" and len > 0 then
-            pcall(function() t:Destroy() end)
-            return true
+-- Nome do item do pack -> estado. Vale a ULTIMA palavra-chave do nome, porque
+-- "Catwalk Glam Run" tem "walk" no meio mas e a corrida.
+function SP.EstadoDe(nome)
+    local n = (tostring(nome or ""):lower():gsub("[^%a]", ""))
+    if n:find("swimidle", 1, true) then return "swimidle" end
+    local chaves = { idle = "idle", walk = "walk", run = "run", sprint = "run",
+                     jump = "jump", fall = "fall", climb = "climb", swim = "swim" }
+    local melhor, pos = nil, 0
+    for k, est in pairs(chaves) do
+        local ult, ini = nil, 1
+        while true do
+            local a = n:find(k, ini, true)
+            if not a then break end
+            ult, ini = a, a + 1
         end
-        task.wait(0.2)
+        if ult and ult > pos then melhor, pos = est, ult end
     end
-    pcall(function() t:Destroy() end)
-    return true
+    return melhor
 end
 
--- mapa: estado -> asset. So troca o estado que (a) voce pediu e (b) existe nesse
--- Animate. Se nada sobrar, nao encosta em nada.
-function SilkPackSwap(mapa)
-    local char = Morph.Char()
-    if not char then Toast("sem personagem", false) return false end
-
-    local velho = char:FindFirstChild("Animate")
-    if not velho then
-        -- o Animate nasce junto com o personagem; se ainda nao chegou, espera
-        velho = char:WaitForChild("Animate", 3)
-    end
-    if not velho then
-        -- jogo com sistema de animacao proprio: nao da pra montar pack por estado.
-        -- cai no motor de emote e toca o primeiro clipe em loop, avisando.
-        local asset = nil
-        for _, a in pairs(mapa) do asset = asset or a end
-        if asset and type(SilkPlayEmote) == "function" then
-            SilkPlayEmote(asset, { looped = true })
-            Toast("esse jogo não usa o Animate padrão — toquei o clipe em loop no seu personagem", true)
-        else
-            Toast("esse jogo não usa o Animate padrão — pack por estado não dá aqui", false)
-        end
-        return false
-    end
-
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    local animator = hum and hum:FindFirstChildOfClass("Animator")
-    if not animator and hum then animator = hum:WaitForChild("Animator", 3) end
-
-    -- O mapa tem que sair DO CLONE: e ele que vai pro personagem. (Pegar os
-    -- Animation do script velho e trocar la nao muda nada no que entra em cena.)
-    local novo = velho:Clone()
-    if not novo then Toast("não consegui copiar o Animate", false) return false end
-
-    local estados = SilkAnimateMapa(novo)
-    local trocar, nomes, quantos = {}, {}, 0
-    for estado, asset in pairs(mapa) do
-        if estados[estado] and #estados[estado] > 0 then
-            trocar[estado] = asset
-            quantos = quantos + 1
-            table.insert(nomes, estado)
-        end
-    end
-    if quantos == 0 then
-        Toast("esse pack não tem nenhum estado desses (parado/andar/correr/pulo)", false)
-        return false
-    end
-
-    local amostra = nil
-    for _, a in pairs(trocar) do amostra = amostra or a end
-    if not SilkAssetOk(animator, amostra) then
-        Toast("não consegui carregar esse ID — personagem intacto", false)
-        return false
-    end
-
-    if not SilkPackOriginal then
-        local okC, copia = pcall(function() return velho:Clone() end)
-        if okC then SilkPackOriginal = copia end
-    end
-
-    local aplicados = 0
-    for estado, asset in pairs(trocar) do
-        for _, obj in ipairs(estados[estado]) do
-            pcall(function() obj.AnimationId = asset end)
-            aplicados = aplicados + 1
-        end
-    end
-    if aplicados == 0 then
-        Toast("não achei os Animation dentro do Animate", false)
-        return false
-    end
-
-    pcall(function() velho:Destroy() end)
-    novo.Parent = char
-
-    -- rede de seguranca: 2.4s sem NADA tocando = devolve o original sozinho
-    task.spawn(function()
-        for _ = 1, 4 do
-            task.wait(0.6)
-            local c2 = Morph.Char()
-            local h2 = c2 and c2:FindFirstChildOfClass("Humanoid")
-            local a2 = h2 and h2:FindFirstChildOfClass("Animator")
-            local tocando = false
-            if a2 then
-                pcall(function()
-                    for _, t in ipairs(a2:GetPlayingAnimationTracks()) do
-                        local okL, len = pcall(function() return t.Length end)
-                        if t.IsPlaying and okL and type(len) == "number" and len > 0 then tocando = true end
-                    end
-                end)
-            end
-            if tocando then return end
-        end
-        SilkPackRestaurar()
-        Toast("esse ID nao carregou (bundle, privado ou inexistente) — voltei pro original", false)
-    end)
-
-    table.sort(nomes)
-    local rig = ""
-    if hum and hum.RigType == Enum.HumanoidRigType.R6 then
-        rig = " (corpo R6: pack R15 fica deformado)"
-    end
-    Toast("pack aplicado: " .. table.concat(nomes, " + ") .. rig, true)
-    return true
-end
-
-function SilkPackRestaurar()
-    local char = Morph.Char()
-    if not char then return end
-    local atual = char:FindFirstChild("Animate")
-    if SilkPackOriginal then
-        local ok, copia = pcall(function() return SilkPackOriginal:Clone() end)
-        if ok and copia then
-            if atual then pcall(function() atual:Destroy() end) end
-            copia.Parent = char
-            Toast("animações originais de volta", true)
-            return
-        end
-    end
-    Toast("não tenho o original salvo (recarrega o personagem)", false)
-end
-
--- Pacotes de animacao conhecidos: os IDs das animacoes que ficam DENTRO do
--- pacote. Serve pra nao depender de HTTP do executor (o HttpService do cliente e
--- bloqueado; so request/syn.request/http_request servem, e nem todo executor tem).
-SILK_PACKS = {
-    [79] = {
-        nome = "Levitation Animation Pack",
-        estados = {
-            idle = 619542203, walk = 619544080, run = 619543231, jump = 619542888,
-            fall = 619541867, climb = 619541458, swim = 619543721,
-        },
-    },
-}
-
--- 48..55 = tipos de animacao do Roblox: 48 climb, 49 death, 50 fall, 51 idle,
--- 52 jump, 53 run, 54 swim, 55 walk. O tipo e mais confiavel que o nome.
-SILK_TIPO_ANIM = {
+-- 48..55 = tipo de animacao do Roblox: 48 climb, 50 fall, 51 idle, 52 jump,
+-- 53 run, 54 swim, 55 walk. O tipo e mais confiavel que o nome.
+SP.tipoAnim = SP.tipoAnim or {
     [48] = "climb", [50] = "fall", [51] = "idle", [52] = "jump",
     [53] = "run", [54] = "swim", [55] = "walk",
 }
 
--- Link de pacote: /bundles/79 é o pacote inteiro, não é asset. Aqui ele vira um
--- pack de verdade: cada animacao entra no estado dela.
-function SilkPackAplicarBundle(bundleId)
-    local id = tonumber(bundleId) or tostring(bundleId)
+-- Pacotes conhecidos (IDs das animacoes por estado). Reserva pra quando nem
+-- AssetService nem o HTTP do executor respondem: o link continua funcionando.
+SP.packsFixos = SP.packsFixos or {
+    [79] = { idle = 619542203, walk = 619544080, run = 619543231, jump = 619542888,
+             fall = 619541867, climb = 619541458, swim = 619543721 },
+}
 
-    local conhecido = SILK_PACKS[id]
-    if conhecido then
-        local mapa = {}
-        for estado, asset in pairs(conhecido.estados) do
-            mapa[estado] = "rbxassetid://" .. tostring(asset)
+-- Itens de um pack: AssetService primeiro (nao precisa de HTTP do executor),
+-- request() do executor so se o primeiro falhar.
+function SP.BundleItens(id)
+    id = tonumber(id)
+    if not id then return nil, "id inválido" end
+    local itens = {}
+    local ok, d = pcall(function()
+        return game:GetService("AssetService"):GetBundleDetailsAsync(id)
+    end)
+    if ok and type(d) == "table" and type(d.Items) == "table" then
+        for _, it in ipairs(d.Items) do
+            -- it.Type vem como Enum: tostring() da "Enum.AvatarItemType.Asset",
+            -- entao comparar com "Asset" dava ZERO item e derrubava o pack pro HTTP
+            if not tostring(it.Type):find("UserOutfit") then
+                itens[#itens + 1] = { id = tonumber(it.Id), name = tostring(it.Name or ""), tipo = tonumber(it.AssetType) }
+            end
         end
-        Toast("aplicando " .. conhecido.nome .. "...", true)
-        return SilkPackSwap(mapa)
+        if #itens > 0 then return itens, tostring(d.Name or "") end
     end
-
     local body = SilkHttpGet("https://catalog.roblox.com/v1/bundles/" .. tostring(id) .. "/details")
-    if not body then
-        Toast("esse pacote não está na minha lista e o executor não deixa consultar o catálogo — cola o ID de uma animação", false)
-        return false
-    end
-    local ok, data = pcall(function() return game:GetService("HttpService"):JSONDecode(body) end)
-    if not ok or type(data) ~= "table" then
-        Toast("o pacote " .. tostring(id) .. " não respondeu", false)
-        return false
-    end
-
-    local itens = data.items or {}
-    if #itens == 0 then
-        Toast("o pacote não trouxe item nenhum", false)
-        return false
-    end
-
-    local mapa = {}
-    for _, it in ipairs(itens) do
-        local aid = tonumber(it.id)
-        if aid then
-            local estado = SILK_TIPO_ANIM[tonumber(it.assetType)]
-            if not estado then
-                local nome = tostring(it.name or ""):lower()
-                if nome:find("swimidle") then estado = "swimidle"
-                elseif nome:find("swim") then estado = "swim"
-                elseif nome:find("idle") then estado = "idle"
-                elseif nome:find("walk") then estado = "walk"
-                elseif nome:find("run") or nome:find("sprint") then estado = "run"
-                elseif nome:find("jump") then estado = "jump"
-                elseif nome:find("fall") then estado = "fall"
-                elseif nome:find("climb") then estado = "climb"
+    if body then
+        local okJ, j = pcall(function() return game:GetService("HttpService"):JSONDecode(body) end)
+        if okJ and type(j) == "table" and type(j.items) == "table" then
+            for _, it in ipairs(j.items) do
+                if not tostring(it.type):find("UserOutfit") then
+                    itens[#itens + 1] = { id = tonumber(it.id), name = tostring(it.name or ""), tipo = tonumber(it.assetType) }
                 end
             end
-            if estado then
-                mapa[estado] = "rbxassetid://" .. aid
-            end
+            if #itens > 0 then return itens, tostring(j.name or "") end
         end
     end
+    return nil, "não consegui abrir o pack " .. tostring(id) .. (ok and "" or (" (" .. tostring(d) .. ")"))
+end
 
-    if next(mapa) == nil then
-        print("[silk] pacote " .. tostring(id) .. " - itens:")
-        for _, it in ipairs(itens) do
-            print("  " .. tostring(it.name) .. " (tipo " .. tostring(it.assetType) .. ") -> " .. tostring(it.id))
+function SP.MapaDoBundle(id)
+    local fixo = SP.packsFixos[tonumber(id)]
+    if fixo then
+        local mapa, n = {}, 0
+        for est, aid in pairs(fixo) do
+            mapa[est] = "rbxassetid://" .. tostring(aid)
+            n = n + 1
         end
-        Toast("esse pacote não tem animação de estado (é emote ou look?) — IDs no output", false)
+        if n > 0 then return mapa, ("pack " .. tostring(id)) end
+    end
+
+    local itens, nome = SP.BundleItens(id)
+    if not itens then return nil, nil, nome end
+    local mapa, n = {}, 0
+    for _, it in ipairs(itens) do
+        local porTipo = it.tipo and SP.tipoAnim[tonumber(it.tipo)] or nil
+        local est = it.id and (porTipo or SP.EstadoDe(it.name))
+        if est and not mapa[est] then
+            mapa[est] = "rbxassetid://" .. tostring(it.id)
+            n = n + 1
+        end
+    end
+    if n == 0 then
+        print("[silk] pack " .. tostring(id) .. " - itens:")
+        for _, it in ipairs(itens) do print("  " .. it.name .. " -> " .. tostring(it.id)) end
+        return nil, nome, "esse item não tem animação de estado (é emote ou look?) — itens no output"
+    end
+    return mapa, nome
+end
+
+function SP.PararTudo(animator)
+    if not animator then return end
+    pcall(function()
+        for _, t in ipairs(animator:GetPlayingAnimationTracks()) do t:Stop(0) end
+    end)
+end
+
+-- Reserva pra jogo SEM Animate padrao: controlador proprio, um clipe por estado.
+-- Troca de clipe quando o estado muda (parado/andar/correr/pulo/queda/escalar/
+-- nadar). Nunca prende um clipe so em loop — era isso que fazia o personagem
+-- andar parado e continuar andando no pulo.
+function SP.Controlador(char, hum, animator, mapa)
+    SP.gen = SP.gen + 1
+    local g = SP.gen
+    local tracks = {}
+    local function pega(est)
+        local t = tracks[est]
+        if t == nil then
+            t = false
+            if mapa[est] then
+                local a = Instance.new("Animation")
+                a.AnimationId = mapa[est]
+                local ok, tr = pcall(function() return animator:LoadAnimation(a) end)
+                if ok and tr then
+                    pcall(function() tr.Priority = Enum.AnimationPriority.Action end)
+                    pcall(function() tr.Looped = true end)
+                    t = tr
+                end
+            end
+            tracks[est] = t
+        end
+        return t or nil
+    end
+    task.spawn(function()
+        local atual, atualNome = nil, nil
+        local HS = Enum.HumanoidStateType
+        while SP.gen == g and char.Parent and hum.Parent do
+            local st = hum:GetState()
+            if st == HS.Dead then break end
+            local root = hum.RootPart
+            local vel = root and root.AssemblyLinearVelocity or Vector3.new()
+            local h = Vector3.new(vel.X, 0, vel.Z).Magnitude
+            local est = nil
+            if st == HS.Climbing then est = "climb"
+            elseif st == HS.Jumping then est = "jump"
+            elseif st == HS.Freefall then est = "fall"
+            elseif st == HS.Swimming then est = (h > 1) and "swim" or "swimidle"
+            elseif st == HS.Seated or st == HS.PlatformStanding or st == HS.Ragdoll
+                or st == HS.FallingDown or st == HS.GettingUp then est = nil
+            else
+                if h > 20 then est = "run" elseif h > 0.8 then est = "walk" else est = "idle" end
+            end
+            if est == "run" and not mapa.run then est = "walk" end
+            if est == "walk" and not mapa.walk then est = "run" end
+            if est == "swimidle" and not mapa.swimidle then est = "swim" end
+            local t = est and pega(est) or nil
+            if est ~= atualNome then
+                if atual then pcall(function() atual:Stop(0.15) end) end
+                atual, atualNome = t, est
+                if atual then pcall(function() atual:Play(0.15) end) end
+            end
+            if atual and (est == "walk" or est == "run") then
+                pcall(function() atual:AdjustSpeed(math.clamp(h / 16, 0.5, 2)) end)
+            end
+            task.wait(0.1)
+        end
+        for _, t in pairs(tracks) do
+            if t then pcall(function() t:Stop(0.15) end) end
+        end
+    end)
+end
+
+-- Testa o que da pra testar de verdade: se o clipe aceita carregar. NAO usa
+-- AnimationTrack.Length como nota — Length fica 0 enquanto o asset esta baixando
+-- e, em varios casos, continua 0 com a animacao boa. Era isso que reprovava o pack
+-- INTEIRO e mostrava "nenhum clipe desse pack carregou". Quem julga de verdade e a
+-- reproducao: SP.Vigia olha se entrou faixa tocando, e o controlador faz igual.
+function SP.Verifica(animator, mapa)
+    local boas, ruins = {}, {}
+    local anims, tracks, lista = {}, {}, {}
+    for est, asset in pairs(mapa) do
+        local a = Instance.new("Animation")
+        a.AnimationId = asset
+        anims[est] = a
+        lista[#lista + 1] = a
+    end
+    pcall(function() game:GetService("ContentProvider"):PreloadAsync(lista) end)
+    for est, a in pairs(anims) do
+        local ok, t = pcall(function() return animator:LoadAnimation(a) end)
+        if ok and t then
+            tracks[est] = t
+            boas[est] = mapa[est]
+        else
+            ruins[#ruins + 1] = est .. "=" .. tostring((tostring(mapa[est]):gsub("%D", "")))
+        end
+    end
+    for _, t in pairs(tracks) do
+        pcall(function() t:Destroy() end)
+    end
+    return boas, ruins
+end
+
+-- tem alguma faixa NOVA (que nao estava tocando antes da troca) tocando de verdade?
+function SP.TocaNovo(animator, antes)
+    local ok, r = pcall(function()
+        for _, t in ipairs(animator:GetPlayingAnimationTracks()) do
+            if not antes[t] and t.IsPlaying then return true end
+        end
+        return false
+    end)
+    return ok and r
+end
+
+-- Se o Animate novo nao assumiu em ~3 s, liga o controlador proprio. So volta
+-- pro original se nem o controlador conseguir tocar nada.
+function SP.Vigia(char, hum, animator, antes, cur, mapa)
+    task.spawn(function()
+        for _ = 1, 8 do
+            task.wait(0.4)
+            if SP.cur ~= cur or not char.Parent then return end
+            if SP.TocaNovo(animator, antes) then return end
+        end
+        SP.Controlador(char, hum, animator, mapa)
+        for _ = 1, 6 do
+            task.wait(0.4)
+            if SP.cur ~= cur or not char.Parent then return end
+            if SP.TocaNovo(animator, antes) then
+                Toast("o Animate do jogo não assumiu — usei o controlador próprio", true)
+                return
+            end
+        end
+        SP.Restaurar(true)
+        Toast("nada tocou nem pelo controlador — voltei pro original (veja o output)", false)
+    end)
+end
+
+-- Aplica SP.cur no personagem. Troca os ids dentro de uma COPIA do Animate e
+-- coloca no lugar do original; o Animate do jogo cuida de cada estado e o que o
+-- pack nao tem fica como estava (nada de encher idle/walk/run com o mesmo clipe).
+function SP.NoChar(char, avisar)
+    local cur = SP.cur
+    if not cur then return false end
+    local hum = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid", 5)
+    if not hum then return false end
+    local animator = hum:FindFirstChildOfClass("Animator") or hum:WaitForChild("Animator", 3)
+    if not animator then
+        if avisar then Toast("sem Animator no personagem", false) end
         return false
     end
 
-    return SilkPackSwap(mapa)
+    -- 1) so entra o que carrega de verdade
+    local mapa, ruins = SP.Verifica(animator, cur.mapa)
+    if next(mapa) == nil then
+        print("[silk] nenhum clipe do pack '" .. tostring(cur.nome) .. "' carregou: " .. table.concat(ruins, ", "))
+        if avisar then Toast("nenhum clipe desse pack carregou (ids no output) — personagem intacto", false) end
+        SP.cur = nil
+        return false
+    end
+    if #ruins > 0 then
+        print("[silk] clipes que NAO carregaram em '" .. tostring(cur.nome) .. "': " .. table.concat(ruins, ", "))
+    end
+
+    SP.gen = SP.gen + 1
+    local velho = char:FindFirstChild("Animate") or char:WaitForChild("Animate", 3)
+
+    local nomes = {}
+    for est in pairs(mapa) do nomes[#nomes + 1] = est end
+    table.sort(nomes)
+    local rig = (hum.RigType == Enum.HumanoidRigType.R6) and " (corpo R6: pack R15 fica deformado)" or ""
+    local extra = (#ruins > 0) and (" — sem carregar: " .. #ruins) or ""
+
+    -- faixas que estao tocando agora: param DEPOIS que a nova assume (sem frame reto)
+    local antes = {}
+    pcall(function()
+        for _, t in ipairs(animator:GetPlayingAnimationTracks()) do antes[t] = true end
+    end)
+
+    if velho then
+        if SP.origChar ~= char then
+            local okC, copia = pcall(function() return velho:Clone() end)
+            if okC and copia then SP.orig, SP.origChar = copia, char end
+        end
+        local novo = velho:Clone()
+        local estados = SP.Mapa(novo)
+        local aplicados = 0
+        for est, asset in pairs(mapa) do
+            local lista = estados[est]
+            if lista then
+                for _, obj in ipairs(lista) do
+                    if pcall(function() obj.AnimationId = asset end) then aplicados = aplicados + 1 end
+                end
+            end
+        end
+        if aplicados > 0 then
+            pcall(function() velho.Disabled = true end)
+            pcall(function() velho:Destroy() end)
+            pcall(function() novo.Disabled = false end)
+            novo.Parent = char
+            task.delay(0.35, function()
+                for t in pairs(antes) do pcall(function() t:Stop(0.2) end) end
+            end)
+            SP.Vigia(char, hum, animator, antes, cur, mapa)
+            if avisar then
+                Toast("pack aplicado: " .. tostring(cur.nome or "?") .. " [" .. table.concat(nomes, " + ") .. "]" .. extra .. rig, true)
+            end
+            return true
+        end
+    end
+
+    SP.Controlador(char, hum, animator, mapa)
+    local meu = cur
+    task.spawn(function()
+        for _ = 1, 6 do
+            task.wait(0.4)
+            if SP.cur ~= meu or not char.Parent then return end
+            local tocando = false
+            pcall(function()
+                for _, t in ipairs(animator:GetPlayingAnimationTracks()) do
+                    if t.IsPlaying then tocando = true end
+                end
+            end)
+            if tocando then
+                if avisar then
+                    Toast("pack aplicado (controlador próprio, esse jogo não usa o Animate padrão): " .. tostring(meu.nome or "?") .. rig, true)
+                end
+                return
+            end
+        end
+        SP.Restaurar(true)
+        Toast("esse pack não tocou de jeito nenhum — voltei pro original (ids no output)", false)
+    end)
+    return true
 end
 
--- Campo de ID: numero de asset. Se for link de bundle, vai pro resolvedor. O
--- estado que recebe o clipe sai do seletor da aba (padrao: anda + corre).
--- Campo de ID: numero de asset, ou link de pacote. Um clipe so entra em todos os
--- estados do Animate (parado, andar, correr, pular, cair, nadar) — e isso que faz
--- ele ficar no personagem enquanto voce anda/pula, e todo mundo ve.
-function SilkPackAplicar(id)
-    local bruto = tostring(id or "")
+function SP.Restaurar(silencioso)
+    SP.cur = nil
+    SP.gen = SP.gen + 1
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local animator = hum and hum:FindFirstChildOfClass("Animator")
+    if SP.orig and SP.origChar == char then
+        local ok, copia = pcall(function() return SP.orig:Clone() end)
+        if ok and copia then
+            local atual = char:FindFirstChild("Animate")
+            if atual then
+                pcall(function() atual.Disabled = true end)
+                pcall(function() atual:Destroy() end)
+            end
+            SP.PararTudo(animator)
+            copia.Parent = char
+            if not silencioso then Toast("animações originais de volta", true) end
+            return
+        end
+    end
+    SP.PararTudo(animator)
+    if not silencioso then Toast("animações originais (nenhum pack tinha trocado o Animate)", true) end
+end
+
+-- Persistencia: personagem novo (morreu / resetou) = pack aplicado de novo.
+function SP.Hook()
+    if SP.hooked then return end
+    SP.hooked = true
+    LocalPlayer.CharacterAdded:Connect(function(char)
+        if not SP.cur or SP.manter == false then return end
+        task.spawn(function()
+            local hum = char:WaitForChild("Humanoid", 10)
+            if not hum then return end
+            char:WaitForChild("Animate", 5)
+            task.wait(0.6)
+            if SP.cur and char.Parent then
+                local ok, err = pcall(SP.NoChar, char, false)
+                if not ok then warn("[silk] pack no respawn: " .. tostring(err)) end
+            end
+        end)
+    end)
+end
+
+function SP.Aplicar(mapa, nome)
+    SP.cur = { mapa = mapa, nome = nome }
+    SP.Hook()
+    local char = LocalPlayer.Character
+    if not char then Toast("sem personagem", false) return false end
+    return SP.NoChar(char, true)
+end
+
+function SP.AplicarBundle(bid, nomeHint)
+    Toast("carregando pack...", true)
+    local mapa, nome, err = SP.MapaDoBundle(bid)
+    if not mapa then
+        Toast(err or "não consegui abrir esse pack", false)
+        return false
+    end
+    return SP.Aplicar(mapa, nomeHint or nome)
+end
+
+-- Campo de link/ID: /bundles/N ou numero de pack -> pack inteiro. Qualquer outra
+-- coisa e um clipe unico (emote) e cai no tocador de clipe.
+function SP.AplicarCampo(txt)
+    local bruto = tostring(txt or "")
+    if bruto:gsub("%s", "") == "" then Toast("cola o link do pack ou um ID primeiro", false) return false end
     local bid = bruto:match("/bundles/(%d+)")
-    if bid then
-        return SilkPackAplicarBundle(bid)
+    if bid then return SP.AplicarBundle(tonumber(bid)) end
+    local num = bruto:match("^%s*(%d+)%s*$")
+    if num and tonumber(num) < 10000000 then
+        local itens = SP.BundleItens(num)
+        if itens and #itens > 0 then return SP.AplicarBundle(tonumber(num)) end
     end
-    local asset = SilkAnimId(id)
-    if asset == "" then Toast("cola o link do pack ou um ID primeiro", false) return false end
-    local mapa = {}
-    for _, estado in ipairs({ "idle", "walk", "run", "jump", "fall", "climb", "swim", "swimidle" }) do
-        mapa[estado] = asset
-    end
-    return SilkPackSwap(mapa)
+    SilkTocaAnim("clipe", bruto, true)
+    return true
 end
 
--- Antes daqui saia Humanoid:LoadAnimation + Play() cru: prioridade Core, sem
--- preload e sem travar. Core perde ate pro idle do jogo (o idle e Movement),
--- entao na pratica nao aparecia nem pra quem clicou. Agora tudo entra no mesmo
--- motor do navegador de emotes: Action4, preload e rearme.
+-- Clipe unico por ID (emote). Toca com prioridade alta, mas sai sozinho quando
+-- voce anda ou pula, igual emote de verdade — a menos que "Travar animação"
+-- esteja ligado. Link de pack aqui vai pro motor de pack.
 function SilkTocaAnim(nome, id, loopado)
     local char = LocalPlayer.Character
     local hum = char and char:FindFirstChildOfClass("Humanoid")
@@ -12877,8 +13017,9 @@ function SilkTocaAnim(nome, id, loopado)
         Toast("sem personagem", false)
         return
     end
-    if HackState and HackState.animPack then
-        SilkPackAplicar(id)
+    local bruto = tostring(id or "")
+    if bruto:find("/bundles/") then
+        SP.AplicarCampo(bruto)
         return
     end
     local ok, msg = SilkPlayEmote(id, { looped = loopado })
@@ -12886,34 +13027,298 @@ function SilkTocaAnim(nome, id, loopado)
         Toast("nao deu: " .. tostring(msg), false)
         return
     end
+    local track = SilkAnimAtiva
+    task.spawn(function()
+        task.wait(0.5)
+        local HS = Enum.HumanoidStateType
+        while track and SilkAnimAtiva == track and track.IsPlaying do
+            if not HackState.animLock then
+                local st = hum:GetState()
+                if hum.MoveDirection.Magnitude > 0.1 or st == HS.Jumping or st == HS.Freefall then
+                    pcall(function() track:Stop(0.2) end)
+                    break
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
     local rig = (hum.RigType == Enum.HumanoidRigType.R6) and "R6" or "R15"
-    Toast(nome .. " tocando [" .. rig .. "] — todo mundo ve se o asset for publico", true)
+    Toast(nome .. " tocando [" .. rig .. "] — sai quando você andar/pular", true)
 end
 
-for _, animData in ipairs(customAnims) do
-    BtnRow("Play: "..animData.name, T.Accent, function()
-        SilkTocaAnim(animData.name, animData.id, true)
+-- ── catalogo de packs ────────────────────────────────────────────────────────
+-- Fonte principal: AvatarEditorService:SearchCatalog filtrado em bundles de
+-- animacao (sem HTTP do executor). Reserva: catalog.roblox.com via request().
+function SP.BuscaAES(kw, avancar)
+    local AES = game:GetService("AvatarEditorService")
+    if (not avancar) or (not SP.pages) then
+        local p = CatalogSearchParams.new()
+        p.SearchKeyword = kw or ""
+        p.BundleTypes = { Enum.BundleType.Animations }
+        p.Limit = 30
+        SP.pages = AES:SearchCatalog(p)
+    else
+        SP.pages:AdvanceToNextPageAsync()
+    end
+    local lista = {}
+    for _, it in ipairs(SP.pages:GetCurrentPage()) do
+        local id = tonumber(it.Id or it.id)
+        if id then lista[#lista + 1] = { id = id, name = tostring(it.Name or it.name or "?") } end
+    end
+    return lista, not SP.pages.IsFinished
+end
+
+function SP.BuscaHTTP(kw, avancar)
+    local H = game:GetService("HttpService")
+    local base = "https://catalog.roblox.com/v1/search/items?limit=30&sortOrder=Desc"
+    local urls = {
+        base .. "&category=12&subcategory=AnimationBundles",
+        base .. "&category=AvatarAnimations&subcategory=AnimationBundles",
+        base .. "&category=12",
+    }
+    if avancar and SP.httpBase then urls = { SP.httpBase } end
+    local suf = ""
+    if kw and #kw > 0 then suf = "&keyword=" .. H:UrlEncode(kw) end
+    for _, u in ipairs(urls) do
+        local url = u .. suf
+        if avancar and SP.httpCur and #SP.httpCur > 0 then url = url .. "&cursor=" .. H:UrlEncode(SP.httpCur) end
+        local body = SilkHttpGet(url)
+        local okJ, j = pcall(function() return body and H:JSONDecode(body) end)
+        if okJ and type(j) == "table" and type(j.data) == "table" then
+            local ids = {}
+            for _, it in ipairs(j.data) do
+                if it.itemType == "Bundle" and tonumber(it.id) then ids[#ids + 1] = tonumber(it.id) end
+            end
+            if #ids > 0 then
+                SP.httpBase, SP.httpCur = u, tostring(j.nextPageCursor or "")
+                local nomes = {}
+                local b2 = SilkHttpGet("https://catalog.roblox.com/v1/bundles/details?bundleIds=" .. table.concat(ids, ","))
+                local ok2, j2 = pcall(function() return b2 and H:JSONDecode(b2) end)
+                if ok2 and type(j2) == "table" then
+                    for _, b in ipairs(j2) do nomes[tonumber(b.id)] = tostring(b.name or "") end
+                end
+                local lista = {}
+                for _, id in ipairs(ids) do
+                    lista[#lista + 1] = { id = id, name = nomes[id] or ("pack " .. tostring(id)) }
+                end
+                return lista, #SP.httpCur > 0
+            end
+        end
+    end
+    return nil
+end
+
+function SP.Card(item)
+    local card = New("Frame", {
+        Size = UDim2.fromOffset(148, 186), BackgroundColor3 = T.Card, BorderSizePixel = 0,
+    }, SP.grid)
+    Round(card, 8)
+    Stroke(card, T.Stroke, 1)
+    local thumb = New("ImageLabel", {
+        Size = UDim2.fromOffset(126, 96), Position = UDim2.fromOffset(11, 8),
+        BackgroundColor3 = T.Bg, BorderSizePixel = 0, ScaleType = Enum.ScaleType.Fit,
+        Image = "rbxthumb://type=BundleThumbnail&id=" .. tostring(item.id) .. "&w=150&h=150",
+    }, card)
+    Round(thumb, 6)
+    local nm = New("TextLabel", {
+        Text = item.name, Font = F.Bold, TextSize = 11, TextColor3 = T.Text,
+        TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top,
+        TextWrapped = true, TextTruncate = Enum.TextTruncate.AtEnd,
+        BackgroundTransparency = 1, Position = UDim2.fromOffset(11, 109), Size = UDim2.fromOffset(126, 34),
+    }, card)
+    Button(card, "APLICAR", UDim2.fromOffset(11, 148), UDim2.fromOffset(126, 30), T.Accent, function()
+        if SP.aplicando then
+            Toast("espera o pack anterior terminar de carregar", false)
+            return
+        end
+        SP.aplicando = true
+        pcall(SP.AplicarBundle, item.id, item.name)
+        SP.aplicando = false
+    end)
+    card.MouseEnter:Connect(function() Tween(card, 0.15, {BackgroundColor3 = T.Card2}) end)
+    card.MouseLeave:Connect(function() Tween(card, 0.2, {BackgroundColor3 = T.Card}) end)
+    return card
+end
+
+function SP.Limpa()
+    for _, c in ipairs(SP.cards) do
+        if c.Parent then c:Destroy() end
+    end
+    SP.cards = {}
+    if SP.grid then
+        for _, ch in ipairs(SP.grid:GetChildren()) do
+            if ch:IsA("TextLabel") then ch:Destroy() end
+        end
+    end
+end
+
+function SP.Carregar(avancar)
+    if not SP.grid then return end
+    SP.g2 = SP.g2 + 1
+    local g = SP.g2
+    SP.carregando = true
+    SP.carregou = true
+    SP.Limpa()
+    local st = New("TextLabel", {
+        Text = "Carregando...", Font = F.Mono, TextSize = 11, TextColor3 = T.Faint,
+        BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 32),
+        TextXAlignment = Enum.TextXAlignment.Left,
+    }, SP.grid)
+    task.spawn(function()
+        local lista, mais, err
+        local ok, e = pcall(function()
+            lista, mais = SP.BuscaAES(SP.kw or "", avancar)
+        end)
+        if (not ok) or (not lista) or #lista == 0 then
+            err = ok and "o catálogo não devolveu nada" or tostring(e)
+            local l2, m2 = SP.BuscaHTTP(SP.kw or "", avancar)
+            if l2 then lista, mais = l2, m2 end
+        end
+        if g ~= SP.g2 then return end
+        SP.carregando = false
+        if st.Parent then st:Destroy() end
+        if not lista or #lista == 0 then
+            New("TextLabel", {
+                Text = "Nenhum pack encontrado." .. (err and ("\n" .. err) or ""),
+                Font = F.Mono, TextSize = 11, TextColor3 = T.Faint, TextWrapped = true,
+                TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top,
+                BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 60),
+            }, SP.grid)
+        else
+            for i, it in ipairs(lista) do
+                if g ~= SP.g2 then return end
+                local okc, c = pcall(SP.Card, it)
+                if okc and c then SP.cards[#SP.cards + 1] = c end
+                if i % 6 == 0 then task.wait() end
+            end
+        end
+        if SP.info then SP.info.Text = #SP.cards .. " packs" end
+        if SP.prox then SP.prox.Visible = (mais and #SP.cards > 0) and true or false end
     end)
 end
 
-Section("Pack de animação")
-Note("Cola o link do pack (roblox.com/bundles/...) ou o ID de uma animação e aperta APLICAR. O pack entra no seu personagem em todos os estados — parado, andando, correndo, pulando, caindo, nadando — e quem estiver olhando vê igual ao idle normal do jogo. ORIGINAL devolve as animacoes do jogo.", 74)
-do
+;(function()
+    local row = Row(36)
+    Button(row, "RECARREGAR", UDim2.fromOffset(8, 3), UDim2.fromOffset(100, 30), T.Accent, function()
+        SP.Carregar(false)
+    end)
+    Button(row, "RESTAURAR", UDim2.fromOffset(116, 3), UDim2.fromOffset(100, 30), T.Bad, function()
+        SP.Restaurar(false)
+    end)
+end)()
+
+;(function()
+    local chips, sel = {}, "Todos"
+    local nomes = { "Todos", "Zombie", "Ninja", "Stylish", "Rthro", "Toy", "Cartoony", "Superhero",
+        "Levitation", "Robot", "Vampire", "Werewolf", "Mage", "Knight", "Pirate", "Astronaut",
+        "Elder", "Bubbly", "Sneaky", "Oldschool", "Confident", "Popstar", "Princess", "Cowboy",
+        "Ghost", "Patrol", "Catwalk", "Wicked" }
+    local row = Row(84)
+    local bar = New("ScrollingFrame", {
+        Size = UDim2.new(1, -16, 0, 34), Position = UDim2.fromOffset(8, 8),
+        BackgroundTransparency = 1, BorderSizePixel = 0,
+        ScrollBarThickness = 4, ScrollBarImageColor3 = T.Faint, ScrollBarImageTransparency = 0.3,
+        ScrollingDirection = Enum.ScrollingDirection.X, ScrollingEnabled = true,
+        ElasticBehavior = Enum.ElasticBehavior.Never,
+        CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.X, ClipsDescendants = true,
+    }, row)
+    New("UIListLayout", {
+        FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6),
+        SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Top,
+    }, bar)
+    bar.InputChanged:Connect(function(input)
+        if input.UserInputType ~= Enum.UserInputType.MouseWheel then return end
+        local span = math.max(0, bar.AbsoluteCanvasSize.X - bar.AbsoluteSize.X)
+        local x = bar.CanvasPosition.X - input.Position.Z * 60
+        bar.CanvasPosition = Vector2.new(math.clamp(x, 0, span), 0)
+    end)
+
+    local box = Field(row, UDim2.fromOffset(8, 48), UDim2.new(1, -112, 0, 30), "buscar pack pelo nome...", "")
+
+    local function pinta()
+        for nm, b in pairs(chips) do
+            local on = (nm == sel)
+            b.BackgroundColor3 = on and T.Accent or T.Card3
+            b.TextColor3 = on and textOn(T.Accent) or T.Sub
+        end
+    end
+    for i, nm in ipairs(nomes) do
+        local b = New("TextButton", {
+            Text = nm, Font = F.Bold, TextSize = 10, AutoButtonColor = false,
+            BackgroundColor3 = T.Card3, TextColor3 = T.Sub, BorderSizePixel = 0,
+            Size = UDim2.fromOffset(0, 24), AutomaticSize = Enum.AutomaticSize.X, LayoutOrder = i,
+        }, bar)
+        New("UIPadding", { PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8) }, b)
+        Round(b, 5)
+        chips[nm] = b
+        b.MouseButton1Click:Connect(Safe(function()
+            sel = nm
+            SP.kw = (nm == "Todos") and "" or nm
+            box.Text = SP.kw
+            pinta()
+            SP.Carregar(false)
+        end, "animchip" .. i))
+    end
+    pinta()
+    onTheme(pinta)
+
+    local function busca()
+        SP.kw = box.Text or ""
+        sel = (SP.kw == "") and "Todos" or ""
+        pinta()
+        SP.Carregar(false)
+    end
+    Button(row, "BUSCAR", UDim2.new(1, -96, 0, 48), UDim2.fromOffset(84, 30), T.Accent, busca)
+    box.FocusLost:Connect(function(enter) if enter then busca() end end)
+end)()
+
+;(function()
+    local outer = New("Frame", {
+        Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+        BackgroundTransparency = 1, LayoutOrder = nextOrder(),
+    }, CurTab)
+    SP.grid = New("Frame", {
+        Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1,
+    }, outer)
+    New("UIGridLayout", {
+        CellSize = UDim2.fromOffset(148, 186), CellPadding = UDim2.fromOffset(8, 8),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+    }, SP.grid)
+end)()
+
+;(function()
+    local row = Row(36)
+    SP.info = Label(row, "0 packs", 10, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+        UDim2.new(0.3, 0, 0, 3), UDim2.fromOffset(140, 30))
+    SP.prox = Button(row, "PRÓXIMA >", UDim2.new(1, -108, 0, 3), UDim2.fromOffset(96, 30), T.Card, function()
+        SP.Carregar(true)
+    end)
+    SP.prox.Visible = false
+end)()
+
+tabHooks["Animações"] = function()
+    if not SP.carregou and not SP.carregando then SP.Carregar(false) end
+end
+
+Section("Pack por link ou ID")
+Note("Cola o link do pack (roblox.com/bundles/...) ou o ID dele e aperta APLICAR. Se for o ID/link de um clipe único (emote), toca como emote. RESTAURAR devolve as animações originais.", 52)
+;(function()
     local row = Row(46)
     Label(row, "Pack / ID", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.3, 0, 1, 0))
     local packField = Field(row, UDim2.new(0.32, 0, 0.5, -15), UDim2.new(0.30, 0, 0, 30), "link do pack ou ID")
     Button(row, "APLICAR", UDim2.new(0.63, 0, 0.5, -15), UDim2.fromOffset(74, 30), T.Accent, function()
-        SilkPackAplicar(packField.Text)
+        SP.AplicarCampo(packField.Text)
     end)
     Button(row, "ORIGINAL", UDim2.new(0.63, 80, 0.5, -15), UDim2.fromOffset(90, 30), T.Card, function()
-        SilkPackRestaurar()
+        SP.Restaurar(false)
     end)
-end
+end)()
 
-Toggle("Os botões Play acima viram PACK", false, function(v)
-    HackState.animPack = v
-    Toast(v and "Play agora aplica o clipe como pack (todos os estados)" or "Play voltou a tocar so o clipe", v)
-end, "anim_pack")
+Toggle("Manter o pack depois de morrer", true, function(v)
+    SP.manter = v
+    Toast(v and "o pack volta sozinho quando você renascer" or "o pack some quando você morrer", v)
+end, "anim_keep")
+
 
 Section("Controle de Animacoes")
 Note("Quem ve: todo mundo. A animacao roda no Animator do SEU personagem e o Roblox replica igual ao idle/vitoria — nao existe animacao 'so local' quando ela sai pelo Animator do personagem. As duas unicas coisas que barram: asset privado (o cliente do outro nao carrega) e rig diferente (animacao R15 em corpo R6 nao tem osso pra deformar).", 72)
@@ -13017,7 +13422,7 @@ BtnRow("Parar animação atual", T.Card, function()
     end
 end)
 
-Section("Emotes Customizados")
+Section("Clipe único / emote por ID")
 do
     local row = Row(50)
     Label(row, "Animation ID", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.3, 0, 1, 0))
@@ -13049,7 +13454,7 @@ BtnRow("List Current Animations", T.Card, function()
     end
 end)
 
-Note("IDs do catalogo Roblox. A animacao roda no seu personagem.", 68)
+Note("Aqui entra UM clipe (emote, dança, gesto). Ele toca em loop e para sozinho quando você anda ou pula; liga \"Travar animação\" pra ele não sair. Pra trocar o jeito de andar/correr/pular usa os packs lá em cima.", 52)
 
 end -- Animacoes
 
