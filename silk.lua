@@ -6355,7 +6355,7 @@ local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 4, Outline = 2, Alpha = 1, Dot = 5, ShowDot = true,
     pairs = {}, ballLine = nil, ballOl = nil, ballDot = nil, cache = nil, t = 0,
-    ForceFrame = false,
+    ForceFrame = true,
     Enemy = Color3.fromRGB(255, 60, 60),
     BallC = Color3.fromRGB(255, 214, 84),
     Dark  = Color3.fromRGB(0, 0, 0),
@@ -6996,10 +6996,14 @@ end
 VOL_STEP = step
 
 -- lista de pares mantida fora do quadro de render
+pcall(sync)
 pcall(function() Players.PlayerAdded:Connect(function() task.spawn(sync) end) end)
 pcall(function() Players.PlayerRemoving:Connect(function() task.spawn(sync) end) end)
 task.spawn(function()
-    while VBGui and VBGui.Parent do
+    -- para sozinho quando outra execucao substitui a tabela de pares; nao
+    -- depende de VBGui continuar com pai, que era um jeito silencioso de morrer
+    -- no primeiro quadro e deixar pairs vazio pra sempre.
+    while (not env) or (env.SilkcoreVolley == VB.pairs) do
         local ok, err = pcall(sync)
         if not ok and not stepErr then stepErr = "sync: " .. tostring(err) end
         task.wait(0.35)
@@ -7026,6 +7030,23 @@ Section("Linha de mira")
 Toggle("Ativar linha de mira", false, function(v)
     VB.On = v
     Toast(v and "linha de mira ligada" or "linha de mira desligada", v)
+    -- autorrelato: 6 s depois de ligar, se nada estiver visivel, o motivo aparece
+    -- na tela sem precisar apertar diagnostico.
+    if v then
+        task.delay(6, function()
+            if not VB.On then return end
+            local n, vis = 0, 0
+            for _, p in pairs(VB.pairs) do
+                n = n + 1
+                if p.l and p.l.Visible then vis = vis + 1 end
+            end
+            if #Players:GetPlayers() > 1 and vis == 0 then
+                local bk = (HAS_DRAWING and not VB.ForceFrame) and "drawing" or "frame"
+                Toast(("ligada, nada visivel: bk=%s pairs=%d err=%s"):format(
+                    bk, n, tostring(stepErr or "-")), false)
+            end
+        end)
+    end
 end, "Volley aim line")
 
 Toggle("Só inimigos (ignorar meu time)", true, function(v)
@@ -7090,7 +7111,7 @@ VB.OnlyEnemy = Persist.Get("volley:Volley enemy only", true) ~= false
 VB.Ball      = Persist.Get("volley:Volley ball trajec", true) ~= false
 VB.ShowDot   = Persist.Get("volley:Volley dot on", true) ~= false
 VB.Predict   = Persist.Get("volley:Volley predict", false) == true
-VB.ForceFrame = Persist.Get("volley:Volley use drawing", true) == false
+VB.ForceFrame = Persist.Get("volley:Volley use drawing", false) ~= true
 
 Slider("Alcance da previsao", 1, 10, 8, "%d s", function(v)
     VBX.Span = v
@@ -7112,7 +7133,7 @@ Note("Duas fases. Mirando o saque, a marca usa o destino que o proprio jogo ja c
 Note("A linha sai do centro do corpo do adversário — medida pela caixa do modelo, não pelo nome da parte, porque neste jogo o HumanoidRootPart fica no chão — na direção em que ele está olhando. O Roblox replica a rotação do pescoço, então dá pra ler a intenção de ataque antes do toque. A direção é suavizada por lerp: o pescoço replica a 10-20 Hz e sem isso a linha andava aos pulos. É desenho de tela: nada é criado no jogo, nada replica pro servidor.", 58)
 
 if HAS_DRAWING then
-    Toggle("Desenho por Drawing (mais liso)", true, function(v)
+    Toggle("Desenho por Drawing (experimental)", false, function(v)
         VB.ForceFrame = not v
         rebuild()
         Toast(v and "desenho: Drawing" or "desenho: Frame de GUI", true)
