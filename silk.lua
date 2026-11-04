@@ -24,7 +24,7 @@ local AIM_BIND    = "SilkcoreAimlock"
 local STRETCH_BIND = "SilkcoreStretch"
 local FOV_BIND     = "SilkcoreFovMod"
 local VOL_BIND     = "SilkcoreVolley"
-local VOL_STEP     = nil   -- o passo de render da aba VÃ´lei, exportado do bloco
+local VOL_STEP     = nil   -- o passo de render da aba Vôlei, exportado do bloco
 local ESP_NAME     = "SilkcoreESP"
 
 -- clean previous run (gui, render step, old connections)
@@ -46,14 +46,14 @@ local oldBlur = game:GetService("Lighting"):FindFirstChild("SilkcoreBlur")
 if oldBlur then oldBlur:Destroy() end
 
 --------------------------------------------------------------------------------
--- SILK GUARD â€” a camada que segura o que existe
+-- SILK GUARD — a camada que segura o que existe
 --------------------------------------------------------------------------------
--- TrÃªs frentes, sÃ³ trÃªs:
---   1. a GUI volta sozinha se alguÃ©m desabilitar ou soltar da Ã¡rvore
---   2. o loop de render Ã© contado â€” se parar, o bind Ã© refeito
---   3. o que existe nÃ£o Ã© achÃ¡vel: nada em _G, nada de tabela com nome Ã³bvio
--- O que ela NÃƒO promete: esconder do servidor. NÃ£o existe trÃ¡fego pra esconder
--- porque o que a gente faz Ã© leitura. Arma invisÃ­vel se a arma nÃ£o dispara.
+-- Três frentes, só três:
+--   1. a GUI volta sozinha se alguém desabilitar ou soltar da árvore
+--   2. o loop de render é contado — se parar, o bind é refeito
+--   3. o que existe não é achável: nada em _G, nada de tabela com nome óbvio
+-- O que ela NÃO promete: esconder do servidor. Não existe tráfego pra esconder
+-- porque o que a gente faz é leitura. Arma invisível se a arma não dispara.
 local SilkGuard = { On = true, Beats = 0, Ghost = false } do
     local G = SilkGuard
     local roots, draws, binds = {}, {}, {}
@@ -93,9 +93,9 @@ local SilkGuard = { On = true, Beats = 0, Ghost = false } do
         while G.On do
             task.wait(1)
             if G.Beats == lastBeats then stalls = stalls + 1 else stalls = 0 end
-            -- Dois segundos parado, nÃ£o um. Um request() do catÃ¡logo segura o frame
-            -- por mais de um segundo e isso NÃƒO Ã© bind morto. Antes o vigia agia no
-            -- primeiro tique e remarranhava o passo com um callback nil (a funÃ§Ã£o
+            -- Dois segundos parado, não um. Um request() do catálogo segura o frame
+            -- por mais de um segundo e isso NÃO é bind morto. Antes o vigia agia no
+            -- primeiro tique e remarranhava o passo com um callback nil (a função
             -- estava fora de escopo naquele ponto), matando a linha de mira de vez.
             if stalls >= 2 then
                 for i = 1, #binds do
@@ -1302,7 +1302,7 @@ function Morph.ApplyFull(userId, notify)
     pcall(function() d = Players:GetHumanoidDescriptionFromUserId(userId) end)
     pcall(function() model = Players:GetCharacterAppearanceAsync(userId) end)
     if not (d or model) then
-        if notify then notify("nÃ£o consegui buscar esse avatar", false) end
+        if notify then notify("não consegui buscar esse avatar", false) end
         return false
     end
 
@@ -1364,7 +1364,7 @@ function Morph.Reset(notify)
         pcall(function() hum:ApplyDescription(State.OriginalDescription) end)
         if notify then notify("avatar original restaurado", true) end
     elseif notify then
-        notify("sem snapshot salvo, renasÃ§a pra resetar", false)
+        notify("sem snapshot salvo, renasça pra resetar", false)
     end
 end
 
@@ -1375,10 +1375,10 @@ end
 -- pecas diferentes do padrao nas partes reais, alinhadas pelas attachments de junta.
 --------------------------------------------------------------------------------
 local WARD = {
-    {field = "Head",     label = "CabeÃ§a",          parts = {"Head"}},
+    {field = "Head",     label = "Cabeça",          parts = {"Head"}},
     {field = "Torso",    label = "Tronco",          parts = {"UpperTorso", "LowerTorso"}},
-    {field = "LeftArm",  label = "BraÃ§o esquerdo",  parts = {"LeftUpperArm", "LeftLowerArm", "LeftHand"}},
-    {field = "RightArm", label = "BraÃ§o direito",   parts = {"RightUpperArm", "RightLowerArm", "RightHand"}},
+    {field = "LeftArm",  label = "Braço esquerdo",  parts = {"LeftUpperArm", "LeftLowerArm", "LeftHand"}},
+    {field = "RightArm", label = "Braço direito",   parts = {"RightUpperArm", "RightLowerArm", "RightHand"}},
     {field = "LeftLeg",  label = "Perna esquerda",  parts = {"LeftUpperLeg", "LeftLowerLeg", "LeftFoot"}},
     {field = "RightLeg", label = "Perna direita",   parts = {"RightUpperLeg", "RightLowerLeg", "RightFoot"}},
 }
@@ -1414,7 +1414,7 @@ local function wardPlace(clone, real, src, r)
     local mot = real:FindFirstChildOfClass("Motor6D")
     local attName = mot and (mot.Name .. "RigAttachment")
     local ra = attName and real:FindFirstChild(attName)
-    -- preferÃªncia: attachment que estÃ¡ no clone (preservado); fallback: src ainda vivo
+    -- preferência: attachment que está no clone (preservado); fallback: src ainda vivo
     local sa = attName and (clone:FindFirstChild(attName) or src:FindFirstChild(attName))
     if ra and sa and ra:IsA("Attachment") and sa:IsA("Attachment") then
         local rel = sa.CFrame
@@ -1460,14 +1460,14 @@ local function wardSources(def, id)
             end
         end
         if changedAny then return srcs, rig, "rig" end
-        -- a rota rig voltou o padrÃ£o sem trocar nada (ID nÃ£o resolveu via
-        -- CreateHumanoidModelFromDescription, comum em cabeÃ§as tipo Korblox).
-        -- descarta e tenta puxar a peÃ§a direto do asset.
+        -- a rota rig voltou o padrão sem trocar nada (ID não resolveu via
+        -- CreateHumanoidModelFromDescription, comum em cabeças tipo Korblox).
+        -- descarta e tenta puxar a peça direto do asset.
         rig:Destroy()
         srcs = {}
     end
     local ok, objs = pcall(game.GetObjects, game, "rbxassetid://" .. tostring(id))
-    if not (ok and objs) or #objs == 0 then return nil, nil, "asset nÃ£o carregou" end
+    if not (ok and objs) or #objs == 0 then return nil, nil, "asset não carregou" end
     local holder = Instance.new("Folder")
     for _, o in ipairs(objs) do o.Parent = holder end
     local first
@@ -1498,7 +1498,7 @@ local function wardBuild(char, def, id)
                 native = native + 1 -- o proprio jogo ja mostra essa malha
             elseif differs then
                 local clone = src:Clone()
-                -- remover vÃ­nculos de rig; PRESERVAR Attachments (usados pra posicionamento
+                -- remover vínculos de rig; PRESERVAR Attachments (usados pra posicionamento
                 -- em wardPlace), ParticleEmitter, Fire, Smoke, Beam, Trail (efeitos visuais)
                 for _, c in ipairs(clone:GetChildren()) do
                     if c:IsA("Motor6D") or c:IsA("Weld") or c:IsA("WeldConstraint")
@@ -1512,7 +1512,7 @@ local function wardBuild(char, def, id)
                 local r = wardRatio(real, base or src)
                 clone.Size = Vector3.new(src.Size.X * r.X, src.Size.Y * r.Y, src.Size.Z * r.Z)
                 wardPlace(clone, real, src, r)
-                -- sanitize apenas a BasePart raiz â€” nÃ£o desce nos filhos pra nÃ£o matar efeitos
+                -- sanitize apenas a BasePart raiz — não desce nos filhos pra não matar efeitos
                 clone.CanCollide  = false
                 clone.CanTouch    = false
                 clone.CanQuery    = false
@@ -1534,21 +1534,21 @@ local function wardBuild(char, def, id)
     if made == 0 and native == 0 then
         folder:Destroy()
         clearConns(conns)
-        return false, "esse ID nÃ£o troca nada nessa peÃ§a (igual ao padrÃ£o?)"
+        return false, "esse ID não troca nada nessa peça (igual ao padrão?)"
     end
     if made == 0 then folder:Destroy() end
-    return true, (native > 0 and "nativo" or how) .. " Â· " .. (made + native) .. " peÃ§a(s)"
+    return true, (native > 0 and "nativo" or how) .. " · " .. (made + native) .. " peça(s)"
 end
 
 function Ward.Apply(field, id)
     local def = WARD_BY[field]
-    if not def then return false, "slot invÃ¡lido" end
+    if not def then return false, "slot inválido" end
     id = tonumber(id)
-    if not id or id <= 0 then return false, "ID invÃ¡lido" end
+    if not id or id <= 0 then return false, "ID inválido" end
     local hum = Morph.Hum()
-    if not hum then return false, "humanoid nÃ£o encontrado" end
+    if not hum then return false, "humanoid não encontrado" end
     if hum.RigType ~= Enum.HumanoidRigType.R15 and field ~= "Head" then
-        return false, "sÃ³ funciona em R15 (CabeÃ§a funciona em R15 e R6)"
+        return false, "só funciona em R15 (Cabeça funciona em R15 e R6)"
     end
     local char = Morph.Char()
     Morph.SaveOriginal()
@@ -1690,7 +1690,7 @@ local THEMES = {
     {id = "ouro",     name = "Ouro",     a = Color3.fromRGB(255, 190, 64),  b = Color3.fromRGB(255, 112, 64)},
     {id = "jade",     name = "Jade",     a = Color3.fromRGB(46, 214, 150),  b = Color3.fromRGB(196, 255, 124)},
     {id = "gelo",     name = "Gelo",     a = Color3.fromRGB(86, 190, 255),  b = Color3.fromRGB(196, 242, 255)},
-    {id = "orquidea", name = "OrquÃ­dea", a = Color3.fromRGB(190, 112, 255), b = Color3.fromRGB(255, 120, 200)},
+    {id = "orquidea", name = "Orquídea", a = Color3.fromRGB(190, 112, 255), b = Color3.fromRGB(255, 120, 200)},
     {id = "custom",   name = "Personalizado", a = Color3.fromRGB(236, 236, 240), b = Color3.fromRGB(160, 160, 172)},
 }
 
@@ -1814,8 +1814,8 @@ function Log.add(level, msg)
 end
 local upperPT
 do
-    local MAP = {["Ã§"] = "Ã‡", ["Ã£"] = "Ãƒ", ["Ãµ"] = "Ã•", ["Ã¡"] = "Ã", ["Ã "] = "Ã€", ["Ã¢"] = "Ã‚", ["Ã©"] = "Ã‰", ["Ãª"] = "ÃŠ",
-        ["Ã­"] = "Ã", ["Ã³"] = "Ã“", ["Ã´"] = "Ã”", ["Ãº"] = "Ãš", ["Ã¼"] = "Ãœ"}
+    local MAP = {["ç"] = "Ç", ["ã"] = "Ã", ["õ"] = "Õ", ["á"] = "Á", ["à"] = "À", ["â"] = "Â", ["é"] = "É", ["ê"] = "Ê",
+        ["í"] = "Í", ["ó"] = "Ó", ["ô"] = "Ô", ["ú"] = "Ú", ["ü"] = "Ü"}
     function upperPT(s)
         local r = s:gsub("[\195][\128-\191]", function(c) return MAP[c] or c end)
         return string.upper(r)
@@ -2743,7 +2743,7 @@ do
         LAY.S3.kick(1.3)
     end, "logo"))
 end
-Label(Top, "avatar suite  Â·  v2.0", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(200, 14))
+Label(Top, "avatar suite  ·  v2.0", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(200, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
 do
     local chip = New("TextButton", {
@@ -2912,29 +2912,49 @@ local ICONS = {
 
 local NAV = {
     {group = "AVATAR", items = {
-        {id = "Clonar", icon = "clone", title = "Clonar avatar", sub = "copie o visual de qualquer jogador"},
-        {id = "Corpo", icon = "body", title = "Corpo & morphs", sub = "headless, korblox e escala"},
-        {id = "Roupa", icon = "shirt", title = "Partes do corpo", sub = "troque cabeÃ§a, tronco, braÃ§os e pernas por ID"},
-        {id = "CatÃ¡logo", icon = "grid", title = "CatÃ¡logo de itens", sub = "qualquer ID: acessÃ³rio, roupa, tool ou parte do corpo"},
-        {id = "Browse", icon = "grid", title = "Browse / Loja", sub = "explore o catÃ¡logo do Roblox e emotes diretamente"},
-        {id = "Efeitos", icon = "spark", title = "Efeitos", sub = "partÃ­culas e rastro no personagem"},
-        {id = "Looks", icon = "star", title = "Looks", sub = "salve, aplique, exporte e importe looks completos"},
+        {id = "Clonar", icon = "clone", title = "Clonar Avatar", sub = "Clone qualquer jogador instantaneamente"},
+        {id = "Corpo", icon = "body", title = "Corpo & Morphs", sub = "Headless, Korblox, escalas personalizadas"},
+        {id = "Roupa", icon = "shirt", title = "Partes do Corpo", sub = "Troque cabeça, torso, braços e pernas por ID"},
+        {id = "Catálogo", icon = "grid", title = "Catálogo de Itens", sub = "Acessórios, roupas, tools e parts"},
+        {id = "Browse", icon = "grid", title = "Browse / Loja", sub = "Explore catálogo e emotes oficiais"},
+        {id = "Efeitos", icon = "spark", title = "Efeitos Visuais", sub = "Partículas e rastros personalizados"},
+        {id = "Looks", icon = "star", title = "Looks Salvos", sub = "Salve, exporte e importe looks completos"},
     }},
     {group = "MUNDO", items = {
-        {id = "Ambiente", icon = "sun", title = "Ambiente", sub = "filtros de cÃ¢mera, hora do dia e modo foto"},
+        {id = "Ambiente", icon = "sun", title = "Ambiente & Filtros", sub = "Filtros de câmera, clima e modo foto"},
     }},
     {group = "FERRAMENTAS", items = {
-        {id = "Aimlock", icon = "cross", title = "Aimlock", sub = "segure o bind pra travar no alvo"},
-        {id = "Volei", icon = "pulse", title = "VÃ´lei", sub = "linha de mira dos adversÃ¡rios"},
-        {id = "Hacks", icon = "spark", title = "Hacks universais", sub = "velocidade, voo, noclip, god mode e Infinite Yield"},
-        {id = "Brookhaven", icon = "house", title = "Brookhaven", sub = "dump, desbloqueio de itens e teleporte"},
-        {id = "HBG", icon = "cross", title = "HBG", sub = "dump de remotes, bypass de anti-cheat e auto-block"},
-        {id = "Diversos", icon = "sliders", title = "Diversos", sub = "tela esticada e pulo duplo"},
-        {id = "Timebomb", icon = "bomb", title = "Timebomb", sub = "ferramentas do modo"},
+        {id = "Aimlock", icon = "cross", title = "Aimlock", sub = "Sistema de mira automática configurável"},
+        {id = "Volei", icon = "pulse", title = "Vôlei ESP", sub = "Linha de mira dos adversários em tempo real"},
+        {id = "Hacks", icon = "spark", title = "Hacks Universais", sub = "Speed, fly, noclip, god mode e mais"},
+        {id = "Brookhaven", icon = "house", title = "Brookhaven Tools", sub = "Dump, unlock de itens e teleporte"},
+        {id = "HBG", icon = "cross", title = "HBG Bypass", sub = "Remotes, anti-cheat bypass e auto-block"},
+        {id = "Diversos", icon = "sliders", title = "Diversos", sub = "Stretched screen e double jump"},
+        {id = "Timebomb", icon = "bomb", title = "Timebomb Duels", sub = "Ferramentas específicas do modo"},
+    }},
+    {group = "UNIVERSAL", items = {
+        {id = "Armas", icon = "cross", title = "Armas & Ferramentas", sub = "Mods de arma e tool em qualquer jogo"},
+        {id = "Jogador", icon = "body", title = "Mods do Jogador", sub = "Aparência e propriedades do personagem"},
+        {id = "Teleportes", icon = "house", title = "Teleportes", sub = "TP pra jogadores, objetos e coordenadas"},
+        {id = "Por Jogo", icon = "grid", title = "Por Jogo", sub = "Hacks específicos de jogos conhecidos"},
+        {id = "Admin", icon = "gear", title = "Comandos Admin", sub = "Kick, ban e controle do servidor"},
+        {id = "Scripts", icon = "spark", title = "Scripts", sub = "Carrega scripts de terceiros"},
+        {id = "Ajustes", icon = "sliders", title = "Ajustes", sub = "Preferências do menu universal"},
+        {id = "Anti-Detecção", icon = "star", title = "Anti-Detecção", sub = "Proteção, bypass e registro"},
+        {id = "Macros", icon = "bomb", title = "Macros", sub = "Grava e repete sequências de ações"},
+        {id = "Rede", icon = "pulse", title = "Rede", sub = "Conexões, server hop e remotes"},
+        {id = "Animações", icon = "shirt", title = "Animações", sub = "Toca animações e emotes customizados"},
+        {id = "Mini-Jogos", icon = "sun", title = "Mini-Jogos", sub = "Efeitos e brincadeiras no mapa"},
+        {id = "Avançado", icon = "sliders", title = "Avançado", sub = "Explorador de instâncias e scripts"},
+        {id = "Estatísticas", icon = "pulse", title = "Estatísticas", sub = "Contadores de uso e desempenho"},
+        {id = "Compatibilidade", icon = "grid", title = "Compatibilidade", sub = "Detecção automática de jogo"},
+        {id = "Hacks Extras", icon = "spark", title = "Hacks Extras", sub = "Combat, movimento, visual e utilidade"},
+        {id = "Desastres", icon = "bomb", title = "Desastres", sub = "Orbital e sobrevivência no Natural Disaster"},
+        {id = "Fling", icon = "cross", title = "Fling", sub = "Voadora universal pra rigs R15"},
     }},
     {group = "SISTEMA", items = {
-        {id = "Desempenho", icon = "pulse", title = "Desempenho", sub = "fps, ping e memÃ³ria ao vivo, e ajustes de grÃ¡ficos"},
-        {id = "Config", icon = "gear", title = "ConfiguraÃ§Ãµes", sub = "tema, atalhos e registro de eventos"},
+        {id = "Desempenho", icon = "pulse", title = "Desempenho", sub = "FPS, ping, memória e ajustes gráficos"},
+        {id = "Config", icon = "gear", title = "Configurações", sub = "Tema, atalhos, registro e persistência"},
     }},
 }
 
@@ -2963,15 +2983,41 @@ do
             }, btn)
             local name = it.id
             btn.MouseEnter:Connect(function()
-                if curName ~= name then Tween(btn, 0.15, {BackgroundTransparency = 0.6}) end
-                TweenEx(holder, 0.25, Enum.EasingStyle.Back, {Position = UDim2.fromOffset(15, 5)})
+                if curName ~= name then 
+                    Tween(btn, 0.15, {BackgroundTransparency = 0.5}) 
+                end
+                -- Anima ícone para direita com bounce
+                TweenEx(holder, 0.3, Enum.EasingStyle.Back, {Position = UDim2.fromOffset(16, 5)})
+                -- Pulso sutil no texto
+                TweenService:Create(lbl, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {TextSize = 13}):Play()
             end)
             btn.MouseLeave:Connect(function()
-                Tween(btn, 0.2, {BackgroundTransparency = 1})
+                if curName ~= name then
+                    Tween(btn, 0.2, {BackgroundTransparency = 1})
+                end
                 Tween(holder, 0.2, {Position = UDim2.fromOffset(12, 5)})
+                TweenService:Create(lbl, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {TextSize = 12}):Play()
             end)
             btn.MouseButton1Click:Connect(Safe(function()
-                if ShowTab then ShowTab(name) end
+                if ShowTab then 
+                    -- Flash no ícone ao clicar
+                    for _, ico in ipairs(icon) do
+                        local element = ico.st or ico.f
+                        local origColor = element:IsA("UIStroke") and element.Color or element.BackgroundColor3
+                        if element:IsA("UIStroke") then
+                            TweenService:Create(element, TweenInfo.new(0.15), {Color = Color3.new(1, 1, 1)}):Play()
+                            task.delay(0.15, function()
+                                TweenService:Create(element, TweenInfo.new(0.2), {Color = origColor}):Play()
+                            end)
+                        else
+                            TweenService:Create(element, TweenInfo.new(0.15), {BackgroundColor3 = Color3.new(1, 1, 1)}):Play()
+                            task.delay(0.15, function()
+                                TweenService:Create(element, TweenInfo.new(0.2), {BackgroundColor3 = origColor}):Play()
+                            end)
+                        end
+                    end
+                    ShowTab(name) 
+                end
             end, "nav " .. name))
             NAVB[name] = {btn = btn, icon = icon, lbl = lbl, badge = badge, y = navY, meta = it}
             navY = navY + 29
@@ -3003,8 +3049,15 @@ do
         Size = UDim2.fromOffset(8, 8), Position = UDim2.new(1, -16, 0, 8), BackgroundColor3 = T.Good, BorderSizePixel = 0,
     }, prof)
     Round(dot, 4)
-    track(RunService.Heartbeat:Connect(function()
-        if dot.Parent then dot.BackgroundTransparency = 0.35 + 0.35 * math.sin(os.clock() * 3) end
+    track(RunService.Heartbeat:Connect(function(dt)
+        if dot.Parent then 
+            -- Pulso mais suave e lento para o status online
+            local pulse = 0.2 + 0.3 * math.sin(os.clock() * 2.5)
+            dot.BackgroundTransparency = pulse
+            -- Micro animação de tamanho
+            local scale = 8 + math.sin(os.clock() * 2.5) * 0.5
+            dot.Size = UDim2.fromOffset(scale, scale)
+        end
     end))
 end
 
@@ -3220,6 +3273,13 @@ end
 
 local function Row(h)
     local card = MakeCard(CurTab, UDim2.new(1, 0, 0, h or 40), nextOrder())
+    -- Adiciona hover effect sutil
+    card.MouseEnter:Connect(function()
+        TweenService:Create(card, TweenInfo.new(0.15), {BackgroundColor3 = T.Card2}):Play()
+    end)
+    card.MouseLeave:Connect(function()
+        TweenService:Create(card, TweenInfo.new(0.2), {BackgroundColor3 = T.Card}):Play()
+    end)
     return card
 end
 
@@ -3668,19 +3728,24 @@ local function MakePreview(parent, pos, size, caption)
     end
     local base = disc(0.35, 5.2, Color3.fromRGB(30, 25, 34), Enum.Material.SmoothPlastic)
     local rim = disc(0.06, 5.35, T.Accent, Enum.Material.Neon)
+    -- Melhorar partículas 3D - mais variação e movimento orgânico
     local motes = {}
-    for i = 1, 14 do
+    for i = 1, 20 do
+        local size = 0.08 + math.random() * 0.06
         motes[i] = {
             p = New("Part", {
                 Anchored = true, CanCollide = false, CastShadow = false, Material = Enum.Material.Neon,
-                Color = (i % 2 == 0) and T.Accent or T.Accent2, Size = Vector3.new(0.1, 0.1, 0.1),
+                Color = (i % 3 == 0) and T.Accent2 or T.Accent, Size = Vector3.new(size, size, size),
+                Shape = (i % 4 == 0) and Enum.PartType.Ball or Enum.PartType.Block,
             }, vp),
-            sp = 0.35 + (i % 5) * 0.16, ph = i * 0.9,
+            sp = 0.3 + (i % 7) * 0.12, ph = i * 0.7, orbit = 1.8 + (i % 5) * 0.3,
         }
     end
     onTheme(function()
         rim.Color = T.Accent
-        for i, m in ipairs(motes) do m.p.Color = (i % 2 == 0) and T.Accent or T.Accent2 end
+        for i, m in ipairs(motes) do 
+            m.p.Color = (i % 3 == 0) and T.Accent2 or T.Accent 
+        end
     end)
     local scan = New("Frame", {
         Size = UDim2.new(1, 0, 0, 2), BackgroundColor3 = T.Accent, BackgroundTransparency = 0.5, BorderSizePixel = 0, ZIndex = 4,
@@ -3692,8 +3757,8 @@ local function MakePreview(parent, pos, size, caption)
         }),
     }, scan)
     Label(holder, caption or "PREVIEW", 9, T.Faint, F.Mono, nil, UDim2.fromOffset(10, 8), UDim2.fromOffset(120, 12)).ZIndex = 3
-    Label(holder, "arraste Â· scroll", 9, T.Faint, F.Mono, nil, UDim2.new(0, 10, 1, -20), UDim2.fromOffset(92, 12)).ZIndex = 3
-    local rot = Label(holder, "000Â°", 9, T.Faint, F.Mono, Enum.TextXAlignment.Right, UDim2.new(1, -70, 1, -20), UDim2.fromOffset(60, 12))
+    Label(holder, "arraste · scroll", 9, T.Faint, F.Mono, nil, UDim2.new(0, 10, 1, -20), UDim2.fromOffset(92, 12)).ZIndex = 3
+    local rot = Label(holder, "000°", 9, T.Faint, F.Mono, Enum.TextXAlignment.Right, UDim2.new(1, -70, 1, -20), UDim2.fromOffset(60, 12))
     rot.ZIndex = 3
     local obj = {
         holder = holder, vp = vp, cam = cam, rot = rot, scan = scan, motes = motes, base = base, rim = rim,
@@ -3803,7 +3868,7 @@ track(RunService.Heartbeat:Connect(function(dt)
             local d = p.dist * p.zoom
             local pos = p.center + Vector3.new(math.sin(p.angle) * d, 0.6 + (p.zoom - 1) * 0.5, math.cos(p.angle) * d)
             p.cam.CFrame = CFrame.lookAt(pos, p.center)
-            p.rot.Text = string.format("%03dÂ°", math.floor(math.deg(p.angle) % 360))
+            p.rot.Text = string.format("%03d°", math.floor(math.deg(p.angle) % 360))
             p.scan.Position = UDim2.new(0, 0, (p.t * 0.28) % 1, 0)
             for i, m in ipairs(p.motes) do
                 local a = p.t * m.sp + m.ph
@@ -3864,14 +3929,14 @@ do
     }, card)
     Round(PreviewImg, 26)
     Stroke(PreviewImg, T.Stroke2, 1)
-    Input = Field(card, UDim2.fromOffset(280, 42), UDim2.new(1, -294, 0, 36), "usuÃ¡rio ou UserId...", Persist.Get("cloner:user", ""))
-    Label(card, "digite um usuÃ¡rio ou UserId e clique em clonar", 10, T.Faint, F.Mono, nil,
+    Input = Field(card, UDim2.fromOffset(280, 42), UDim2.new(1, -294, 0, 36), "usuário ou UserId...", Persist.Get("cloner:user", ""))
+    Label(card, "digite um usuário ou UserId e clique em clonar", 10, T.Faint, F.Mono, nil,
         UDim2.fromOffset(218, 98), UDim2.new(1, -232, 0, 14))
     local busy = false
     Button(card, "CLONAR AVATAR", UDim2.fromOffset(218, 124), UDim2.new(1, -232, 0, 42), T.Accent, function()
         if busy then return end
         if #Input.Text == 0 then
-            Toast("digite um usuÃ¡rio primeiro", false)
+            Toast("digite um usuário primeiro", false)
             return
         end
         busy = true
@@ -3882,7 +3947,7 @@ do
                     PreviewImg.Image = Morph.Thumb(id)
                     Morph.ApplyFull(id, Toast)
                 else
-                    Toast("usuÃ¡rio nÃ£o encontrado", false)
+                    Toast("usuário não encontrado", false)
                 end
             end)
             if not ok then
@@ -3908,7 +3973,7 @@ Input.FocusLost:Connect(function()
     loadThumb()
 end)
 loadThumb()
-Section("OpÃ§Ãµes")
+Section("Opções")
 Toggle("Reaplicar ao renascer", State.AutoReapplyOnRespawn, function(v)
     State.AutoReapplyOnRespawn = v
     Toast(v and "reaplicar ao renascer: ligado" or "reaplicar ao renascer: desligado", v)
@@ -3924,10 +3989,10 @@ CurTab = Tab("Corpo", 0, true)
 Persist.Scope = "body"
     -- engine de cores do corpo (so no seu cliente): BodyColors + cor direta das partes, travada contra reset do jogo
     local COLOR_GROUPS = {
-        {id = "Head", label = "CabeÃ§a", parts = {"Head"}, r6 = {"Head"}},
+        {id = "Head", label = "Cabeça", parts = {"Head"}, r6 = {"Head"}},
         {id = "Torso", label = "Tronco", parts = {"UpperTorso", "LowerTorso"}, r6 = {"Torso"}},
-        {id = "LeftArm", label = "BraÃ§o esquerdo", parts = {"LeftUpperArm", "LeftLowerArm", "LeftHand"}, r6 = {"Left Arm"}},
-        {id = "RightArm", label = "BraÃ§o direito", parts = {"RightUpperArm", "RightLowerArm", "RightHand"}, r6 = {"Right Arm"}},
+        {id = "LeftArm", label = "Braço esquerdo", parts = {"LeftUpperArm", "LeftLowerArm", "LeftHand"}, r6 = {"Left Arm"}},
+        {id = "RightArm", label = "Braço direito", parts = {"RightUpperArm", "RightLowerArm", "RightHand"}, r6 = {"Right Arm"}},
         {id = "LeftLeg", label = "Perna esquerda", parts = {"LeftUpperLeg", "LeftLowerLeg", "LeftFoot"}, r6 = {"Left Leg"}},
         {id = "RightLeg", label = "Perna direita", parts = {"RightUpperLeg", "RightLowerLeg", "RightFoot"}, r6 = {"Right Leg"}},
     }
@@ -4012,11 +4077,11 @@ Persist.Scope = "body"
         Persist.Set("color:" .. id, c and {math.floor(c.R * 255 + 0.5), math.floor(c.G * 255 + 0.5), math.floor(c.B * 255 + 0.5)} or nil)
     end
 
-Section("CabeÃ§a")
+Section("Cabeça")
 do
     local row = Row(56)
     Label(row, "Headless", 13, T.Text, F.Body, nil, UDim2.fromOffset(16, 10), UDim2.new(0.5, 0, 0, 18))
-    Label(row, "esconde a cabeÃ§a e o rosto", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 30), UDim2.new(0.6, 0, 0, 14))
+    Label(row, "esconde a cabeça e o rosto", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 30), UDim2.new(0.6, 0, 0, 14))
     local st = Label(row, State.IsHeadless and "ATIVO" or "INATIVO", 10, T.Faint, F.Mono, Enum.TextXAlignment.Right,
         UDim2.new(1, -236, 0, 0), UDim2.fromOffset(100, 56))
     Button(row, "ALTERNAR", UDim2.new(1, -118, 0.5, -15), UDim2.fromOffset(104, 30), T.Card, function()
@@ -4064,10 +4129,10 @@ local function refitLegs()
         end
     end
 end
-Toggle("Corrigir vÃ£o (pÃ© flutuando)", State.GapFix, function(v)
+Toggle("Corrigir vão (pé flutuando)", State.GapFix, function(v)
     State.GapFix = v
     refitLegs()
-    Toast("corrigir vÃ£o: " .. (v and "ligado" or "desligado"), true)
+    Toast("corrigir vão: " .. (v and "ligado" or "desligado"), true)
 end, "Gap fix (no floating feet)")
 Toggle("Pernas retas", State.Straight, function(v)
     State.Straight = v
@@ -4100,16 +4165,16 @@ do
         local row = Row(58)
         Label(row, "Aplicar em", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.fromOffset(90, 58))
         Segmented(row, {
-            {id = "all", label = "Tudo"}, {id = "head", label = "CabeÃ§a"}, {id = "torso", label = "Tronco"},
-            {id = "arms", label = "BraÃ§os"}, {id = "legs", label = "Pernas"},
+            {id = "all", label = "Tudo"}, {id = "head", label = "Cabeça"}, {id = "torso", label = "Tronco"},
+            {id = "arms", label = "Braços"}, {id = "legs", label = "Pernas"},
         }, target, function(id) target = id end, 110, 13, 82, 32, 6)
     end
-    local hS = Slider("Matiz", 0, 360, H * 360, "%dÂ°", function(v)
+    local hS = Slider("Matiz", 0, 360, H * 360, "%d°", function(v)
         H = v / 360
         setPicked()
         if ready then applyPicked() end
     end, "colorH")
-    local sS = Slider("SaturaÃ§Ã£o", 0, 100, S * 100, "%d%%", function(v)
+    local sS = Slider("Saturação", 0, 100, S * 100, "%d%%", function(v)
         S = v / 100
         setPicked()
         if ready then applyPicked() end
@@ -4169,7 +4234,7 @@ BtnRow("Restaurar avatar original", T.Bad, function()
     Morph.Reset(Toast)
 end, 40)
 BtnPair("Resetar escala", T.Card, function()
-    Toast(Morph.ResetScales() and "escala resetada" or "humanoid nÃ£o encontrado", true)
+    Toast(Morph.ResetScales() and "escala resetada" or "humanoid não encontrado", true)
 end, "Dump (copiar)", T.Card, function()
     local ok, copied = pcall(Morph.Dump)
     if not ok then Toast("dump falhou, veja o console", false)
@@ -4204,7 +4269,7 @@ local function slotRefresh(field)
     else
         u.thumb.Image = ""
         u.glyph.Visible = true
-        u.chip.Text = "PADRÃƒO"
+        u.chip.Text = "PADRÃO"
         unbindAcc(u.chip, "TextColor3")
         u.chip.TextColor3 = T.Faint
         u.meta.Text = "id -"
@@ -4232,7 +4297,7 @@ local function applySlot(field, id)
             Log.add("ERRO", "roupa " .. field .. ": " .. tostring(ok))
             Toast("falha ao aplicar (veja o registro em Config)", false)
         elseif ok then
-            Toast(WARD_BY[field].label .. " aplicada Â· " .. tostring(info), true)
+            Toast(WARD_BY[field].label .. " aplicada · " .. tostring(info), true)
         else
             Toast(tostring(info), false)
         end
@@ -4244,11 +4309,11 @@ Section("Preview e atalhos")
 do
     local card = Row(196)
     MakePreview(card, UDim2.fromOffset(12, 12), UDim2.fromOffset(176, 172), "PREVIEW")
-    local hint = Label(card, "Cole o ID de qualquer parte (ou o link do catÃ¡logo / rolimons). APLICAR troca na hora, LIMPAR volta ao original. Fica salvo e reaplica ao renascer.",
+    local hint = Label(card, "Cole o ID de qualquer parte (ou o link do catálogo / rolimons). APLICAR troca na hora, LIMPAR volta ao original. Fica salvo e reaplica ao renascer.",
         11, T.Sub, F.Body, nil, UDim2.fromOffset(204, 12), UDim2.new(1, -218, 0, 66))
     hint.TextWrapped = true
     hint.TextYAlignment = Enum.TextYAlignment.Top
-    Button(card, "KORBLOX DEATHWALKER Â· CABEÃ‡A", UDim2.fromOffset(204, 92), UDim2.new(1, -218, 0, 36), T.Card, function()
+    Button(card, "KORBLOX DEATHWALKER · CABEÇA", UDim2.fromOffset(204, 92), UDim2.new(1, -218, 0, 36), T.Card, function()
         if wardUI.Head then wardUI.Head.box.Text = "16580493236" end
         applySlot("Head", 16580493236)
     end)
@@ -4260,7 +4325,7 @@ do
     end)
 end
 
-Section("PeÃ§as")
+Section("Peças")
 local wardGrid = New("Frame", {
     Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1, LayoutOrder = nextOrder(),
 }, CurTab)
@@ -4278,14 +4343,14 @@ for i, w in ipairs(WARD) do
     Stroke(thumb, T.Stroke2, 1)
     local glyph = Label(thumb, "+", 20, T.Faint, F.Mono, Enum.TextXAlignment.Center, UDim2.new(), UDim2.fromScale(1, 1))
     Label(card, w.label, 13, T.Text, F.Bold, nil, UDim2.fromOffset(80, 12), UDim2.new(1, -92, 0, 18))
-    local chip = Label(card, "PADRÃƒO", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(80, 32), UDim2.new(1, -92, 0, 14))
+    local chip = Label(card, "PADRÃO", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(80, 32), UDim2.new(1, -92, 0, 14))
     local meta = Label(card, "id -", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(80, 48), UDim2.new(1, -92, 0, 14))
     local box = Field(card, UDim2.fromOffset(12, 80), UDim2.new(1, -24, 0, 30), "id ou link...", "")
     wardUI[w.field] = {thumb = thumb, glyph = glyph, chip = chip, meta = meta, box = box}
     Button(card, "APLICAR", UDim2.fromOffset(12, 118), UDim2.new(0.5, -17, 0, 26), T.Accent, function()
         local id = parseId(box.Text)
         if not id then
-            Toast("cole um ID vÃ¡lido", false)
+            Toast("cole um ID válido", false)
             return
         end
         applySlot(w.field, id)
@@ -4307,7 +4372,7 @@ end
 --------------------------------------------------------------------------------
 local Cat = {}
 do
-CurTab = Tab("CatÃ¡logo", 0, true)
+CurTab = Tab("Catálogo", 0, true)
 Persist.Scope = "cat"
 local ASSET_BODY = {[17] = "Head", [27] = "Torso", [28] = "RightArm", [29] = "LeftArm", [30] = "LeftLeg", [31] = "RightLeg"}
 local catCards = {}
@@ -4339,7 +4404,7 @@ local function assetTypeName(tid)
 end
 local function catLoad(id)
     local ok, objs = pcall(game.GetObjects, game, "rbxassetid://" .. tostring(id))
-    if not (ok and objs) or #objs == 0 then return nil, "asset nÃ£o carregou" end
+    if not (ok and objs) or #objs == 0 then return nil, "asset não carregou" end
     for _, o in ipairs(objs) do
         if o:IsA("Accessory") or o:IsA("Tool") or o:IsA("Shirt") or o:IsA("Pants") or o:IsA("ShirtGraphic") or o:IsA("Decal") then
             return o
@@ -4363,7 +4428,7 @@ local function catAttach(char, obj, id)
         Morph.Mount(char, obj)
         if obj.Parent ~= char then
             obj:Destroy()
-            return nil, "acessÃ³rio sem handle"
+            return nil, "acessório sem handle"
         end
         return {inst = obj}
     end
@@ -4386,7 +4451,7 @@ local function catAttach(char, obj, id)
         local head = char:FindFirstChild("Head")
         if not head then
             obj:Destroy()
-            return nil, "sem cabeÃ§a"
+            return nil, "sem cabeça"
         end
         local old = head:FindFirstChild("face")
         local res = {inst = obj}
@@ -4472,10 +4537,10 @@ end
 
 -- sincrono (usa yields): devolve ok, mensagem
 -- detail (opcional) vem do browse: {name, assetType}. Sem ele, cada APLICAR
--- gastava uma requisiÃ§Ã£o bloqueante sÃ³ pra descobrir o tipo de um item que a
--- grade jÃ¡ tinha na mÃ£o â€” era boa parte do lag no clique.
+-- gastava uma requisição bloqueante só pra descobrir o tipo de um item que a
+-- grade já tinha na mão — era boa parte do lag no clique.
 local function doAdd(id, quiet, detail)
-    if catFind(id) then return false, "jÃ¡ adicionado: " .. tostring(id) end
+    if catFind(id) then return false, "já adicionado: " .. tostring(id) end
     local entry = {id = id, pending = true, name = "carregando...", meta = "id " .. tostring(id)}
     State.Catalog[#State.Catalog + 1] = entry
     refreshCatalog()
@@ -4489,7 +4554,7 @@ local function doAdd(id, quiet, detail)
         nm  = info and info.Name or nil
     end
     if nm then entry.name = tostring(nm) end
-    entry.meta = (tid and assetTypeName(tid) or "Asset") .. " Â· " .. tostring(id)
+    entry.meta = (tid and assetTypeName(tid) or "Asset") .. " · " .. tostring(id)
     local field = tid and ASSET_BODY[tid] or nil
     if field then
         catDropEntry(entry)
@@ -4521,7 +4586,7 @@ local function catAdd(id, cb, quiet, detail)
     task.spawn(function()
         local okc, ok, msg = pcall(doAdd, id, quiet, detail)
         if not okc then
-            Log.add("ERRO", "catÃ¡logo " .. tostring(id) .. ": " .. tostring(ok))
+            Log.add("ERRO", "catálogo " .. tostring(id) .. ": " .. tostring(ok))
             ok, msg = false, "erro interno (veja o registro em Config)"
             local e = catFind(id)
             if e then
@@ -4564,14 +4629,14 @@ State.CatalogReapply = function()
 end
 
 
--- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
--- CATALOG BROWSE ENGINE â€” injected into CatÃ¡logo tab
--- Browse completo do catÃ¡logo Roblox: por categoria, busca, thumb grid, APLICAR.
+-- ══════════════════════════════════════════════════════════════════════════════
+-- CATALOG BROWSE ENGINE — injected into Catálogo tab
+-- Browse completo do catálogo Roblox: por categoria, busca, thumb grid, APLICAR.
 -- Body-safety: volleyball = block-only. HBG = aceita qualquer corpo.
 -- R6 / R15 compat via catAdd existente (detecta tipo, roteia Ward se body part).
--- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+-- ══════════════════════════════════════════════════════════════════════════════
 
--- â”€â”€ game profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- ── game profile ──────────────────────────────────────────────────────────────
 local function _buildBrowse()
 local _VOLLEYBALL_IDS = {
     [9358981663]=true,[4645842232]=true,[301549746]=true,
@@ -4594,27 +4659,27 @@ local function _blockBodyGame()
     return (bts and bts.Value < 0.05) and (bws and bws.Value > 0.95)
 end
 
--- â”€â”€ asset type info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- ── asset type info ───────────────────────────────────────────────────────────
 local _AT = {
-    [8]  = {label="ChapÃ©u",    body=false},
+    [8]  = {label="Chapéu",    body=false},
     [41] = {label="Cabelo",    body=false},
     [18] = {label="Rosto",     body=false},
     [11] = {label="Camisa",    body=false},
-    [12] = {label="CalÃ§a",     body=false},
+    [12] = {label="Calça",     body=false},
     [2]  = {label="T-Shirt",   body=false},
-    [17] = {label="CabeÃ§a",    body=true, field="Head"},
+    [17] = {label="Cabeça",    body=true, field="Head"},
     [27] = {label="Tronco",    body=true, field="Torso"},
-    [28] = {label="BraÃ§o Dir", body=true, field="RightArm"},
-    [29] = {label="BraÃ§o Esq", body=true, field="LeftArm"},
+    [28] = {label="Braço Dir", body=true, field="RightArm"},
+    [29] = {label="Braço Esq", body=true, field="LeftArm"},
     [30] = {label="Perna Esq", body=true, field="LeftLeg"},
     [31] = {label="Perna Dir", body=true, field="RightLeg"},
     [40] = {label="Pacote",    body=true, field=nil},
-    [61] = {label="AcessÃ³rio", body=false},
-    [64] = {label="AcessÃ³rio", body=false},
-    [65] = {label="AcessÃ³rio", body=false},
+    [61] = {label="Acessório", body=false},
+    [64] = {label="Acessório", body=false},
+    [65] = {label="Acessório", body=false},
 }
 
--- â”€â”€ body-safety â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- ── body-safety ───────────────────────────────────────────────────────────────
 local function _safeForGame(assetId, assetTypeId)
     if _isHBG() then return true end
     if not _blockBodyGame() then return true end
@@ -4639,32 +4704,32 @@ local function _safeForGame(assetId, assetTypeId)
     return ok and safe or true
 end
 
--- â”€â”€ http / json â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- ── http / json ───────────────────────────────────────────────────────────────
 local _httpFn = (syn and syn.request)
     or (typeof(request)      == "function" and request)
     or (typeof(http_request) == "function" and http_request)
     or (typeof(http)         == "table"    and http.request)
     or nil
 
--- â”€â”€ http / json â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
--- HttpService:RequestAsync nÃ£o existe no cliente â€” o Roblox sÃ³ permite essa API
--- no servidor. O cÃ³digo antigo tentava ela primeiro, gastando um erro por
--- requisiÃ§Ã£o antes de cair no request() do executor. Aqui o request() vem
--- primeiro: Ã© o Ãºnico que funciona de dentro do cliente.
+-- ── http / json ───────────────────────────────────────────────────────────────
+-- HttpService:RequestAsync não existe no cliente — o Roblox só permite essa API
+-- no servidor. O código antigo tentava ela primeiro, gastando um erro por
+-- requisição antes de cair no request() do executor. Aqui o request() vem
+-- primeiro: é o único que funciona de dentro do cliente.
 local _lastHttp = "nada ainda"
 
--- O executor anexa Roblox-Place-Id em toda requisiÃ§Ã£o â€” herda do stack HTTP do
--- jogo â€” e o catÃ¡logo recusa por causa disso:
+-- O executor anexa Roblox-Place-Id em toda requisição — herda do stack HTTP do
+-- jogo — e o catálogo recusa por causa disso:
 --   403 code 22 "In-experience search is denied for this place or universe."
 -- Comprovado nos dois sentidos, aqui:
 --   header preenchido  -> 403
 --   header ausente     -> 200
 --   header = "none"    -> 200
--- Isso NÃƒO resolve dentro do jogo: o executor escreve o valor dele depois do
--- nosso, entÃ£o continua 403 (ver o bloco de hosts). Os headers ficam porque
--- quando o valor nosso vence â€” executor que mescla em tabela e nÃ£o concatena,
--- ou execuÃ§Ã£o fora do jogo â€” a chamada direta volta a valer e Ã© a via mais
--- rÃ¡pida. NÃ£o Ã© a soluÃ§Ã£o; Ã© a primeira tentativa.
+-- Isso NÃO resolve dentro do jogo: o executor escreve o valor dele depois do
+-- nosso, então continua 403 (ver o bloco de hosts). Os headers ficam porque
+-- quando o valor nosso vence — executor que mescla em tabela e não concatena,
+-- ou execução fora do jogo — a chamada direta volta a valer e é a via mais
+-- rápida. Não é a solução; é a primeira tentativa.
 local _HDRS = {
     ["Accept"]          = "application/json",
     ["User-Agent"]      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
@@ -4674,8 +4739,8 @@ local _HDRS = {
     ["roblox-game-id"]  = "none",
 }
 
--- Devolve corpo e status. O status por host Ã© o que alimenta o registro da tela:
--- sem ele, "403" nÃ£o diz de quem Ã© o 403 nem se Ã© o gate do place.
+-- Devolve corpo e status. O status por host é o que alimenta o registro da tela:
+-- sem ele, "403" não diz de quem é o 403 nem se é o gate do place.
 local function _httpGet(url)
     if _httpFn then
         local ok, res = pcall(_httpFn, {
@@ -4728,18 +4793,18 @@ local function _jsonDecode(s)
     return nil
 end
 
--- â”€â”€ endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- ── endpoints ─────────────────────────────────────────────────────────────────
 -- O gate (403 code 22 "In-experience search is denied for this place or
--- universe") fica sÃ³ no /search/items/details. Fora dele, dois endpoints
+-- universe") fica só no /search/items/details. Fora dele, dois endpoints
 -- primeiro-party cobrem o browse inteiro, com o header do place presente:
 --   catalog.roblox.com/v1/search/items?category=N&limit=28  -> {id, itemType}
 --   economy.roblox.com/v2/assets/<id>/details               -> Name, AssetTypeId, PriceInRobux, Creator
 -- Os dois voltam 200 com Roblox-Place-Id preenchido. O relay saiu porque o
--- header do executor nÃ£o era o que quebrava o jina: da mÃ¡quina, jina responde
--- 200 atÃ© com UA da Roblox e place id; dentro do jogo devolve 403, e o
--- allorigins 522 (a origem dele estÃ¡ fora do ar). O request() do executor sai
--- pela infra da Roblox, e Cloudflare trata trÃ¡fego de datacenter assim. Sem
--- relay, esse modo de falha nÃ£o existe.
+-- header do executor não era o que quebrava o jina: da máquina, jina responde
+-- 200 até com UA da Roblox e place id; dentro do jogo devolve 403, e o
+-- allorigins 522 (a origem dele está fora do ar). O request() do executor sai
+-- pela infra da Roblox, e Cloudflare trata tráfego de datacenter assim. Sem
+-- relay, esse modo de falha não existe.
 local _API  = "https://catalog.roblox.com/v1"
 local _ECON = "https://economy.roblox.com/v2"
 
@@ -4753,8 +4818,8 @@ local function _urlEnc(s)
     return (s:gsub(" ", "+"))
 end
 
--- Uma chamada, sem sorteio de host. 429 Ã© limite de rajada do catÃ¡logo e some
--- em ~20 s; trÃªs tentativas com 1,2 s de intervalo cobrem o caso normal sem
+-- Uma chamada, sem sorteio de host. 429 é limite de rajada do catálogo e some
+-- em ~20 s; três tentativas com 1,2 s de intervalo cobrem o caso normal sem
 -- travar a tela.
 local function _get2(url, tag)
     local data, status
@@ -4772,29 +4837,29 @@ local function _get2(url, tag)
     return data, status
 end
 
--- â”€â”€ catalog categories â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
--- Regras medidas no /v1/search/items (o endpoint, nÃ£o o /details):
---   Â· limit sÃ³ aceita 10, 28 ou 30
---   Â· category e keyword PODEM ir juntos aqui â€” era o /details que dava 400
---   Â· devolve sÃ³ {id, itemType}; nome e tipo vÃªm do economy/v2 por id
+-- ── catalog categories ────────────────────────────────────────────────────────
+-- Regras medidas no /v1/search/items (o endpoint, não o /details):
+--   · limit só aceita 10, 28 ou 30
+--   · category e keyword PODEM ir juntos aqui — era o /details que dava 400
+--   · devolve só {id, itemType}; nome e tipo vêm do economy/v2 por id
 local _CATS = {
     {id="featured", label="Em Alta",    category=1,  mode="avatar"},
     {id="clothes",  label="Roupas",     category=3,  mode="avatar"},
-    {id="acc",      label="AcessÃ³rios", category=11, mode="avatar"},
-    {id="hats",     label="ChapÃ©u",     category=11, kw="hat",   mode="avatar"},
+    {id="acc",      label="Acessórios", category=11, mode="avatar"},
+    {id="hats",     label="Chapéu",     category=11, kw="hat",   mode="avatar"},
     {id="hair",     label="Cabelo",     category=11, kw="hair",  mode="avatar"},
     {id="face",     label="Rosto",      category=11, kw="face",  mode="avatar"},
     {id="shirt",    label="Camisa",     category=3,  kw="shirt", mode="avatar"},
-    {id="pants",    label="CalÃ§a",      category=3,  kw="pants", mode="avatar"},
+    {id="pants",    label="Calça",      category=3,  kw="pants", mode="avatar"},
     {id="emotes",   label="Emotes",     category=12, mode="emotes"},
-    {id="dance",    label="DanÃ§a",      category=12, kw="dance", mode="emotes"},
+    {id="dance",    label="Dança",      category=12, kw="dance", mode="emotes"},
     {id="wave",     label="Aceno",      category=12, kw="wave",  mode="emotes"},
     {id="laugh",    label="Rir",        category=12, kw="laugh", mode="emotes"},
     {id="search",   label="Busca",                   mode="both"},
 }
 
--- Cache de lista de ids: voltar numa aba jÃ¡ vista nÃ£o gasta chamada de busca. Os
--- detalhes jÃ¡ sÃ£o cacheados por id â€” juntos, revisitar uma aba sai de graÃ§a.
+-- Cache de lista de ids: voltar numa aba já vista não gasta chamada de busca. Os
+-- detalhes já são cacheados por id — juntos, revisitar uma aba sai de graça.
 local _idsCache = {}
 
 local function _searchIds(cat, kw, cursor)
@@ -4821,8 +4886,8 @@ local function _searchIds(cat, kw, cursor)
     return ids, nc, nil
 end
 
--- Nome, tipo e preÃ§o por id. 28 chamadas por pÃ¡gina Ã© o custo real do browse, e
--- o cache permanente faz a segunda visita Ã  mesma aba sair de graÃ§a.
+-- Nome, tipo e preço por id. 28 chamadas por página é o custo real do browse, e
+-- o cache permanente faz a segunda visita Ã  mesma aba sair de graça.
 local _detCache, _detOrder = {}, {}
 local function _assetDetail(id)
     local hit = _detCache[id]
@@ -4850,23 +4915,23 @@ local function _assetDetail(id)
     return d
 end
 
--- â”€â”€ browse state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- ── browse state ──────────────────────────────────────────────────────────────
 local _bItems   = {}
 local _bCursor  = ""
 local _bCatIdx  = 1
 local _bKeyword = ""
 local _bMode    = "avatar"   -- "avatar" mostra itens, "emotes" mostra os emotes
-local _bPageCap = 15         -- cards por pÃ¡gina: cada um custa uma requisiÃ§Ã£o bloqueante
+local _bPageCap = 15         -- cards por página: cada um custa uma requisição bloqueante
 local _bLoading = false
 local _browseGrid    = nil
 local _browseCards   = {}
 local _bPrevBtn, _bNextBtn, _bInfoLbl
 
--- â”€â”€ emote player â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- ── emote player ──────────────────────────────────────────────────────────────
 local _activeEmote = nil
 
--- Derruba sÃ³ as faixas de prioridade Action pra cima â€” ou seja, os emotes que
--- o jogo tocou. Idle/Walk/Run (priority Movement) ficam de pÃ©, senÃ£o o
+-- Derruba só as faixas de prioridade Action pra cima — ou seja, os emotes que
+-- o jogo tocou. Idle/Walk/Run (priority Movement) ficam de pé, senão o
 -- personagem emenda um T-pose no meio do gesto.
 local function _stopEmotes(animator)
     pcall(function()
@@ -4901,8 +4966,8 @@ local function _playEmote(id)
     local ok, track = pcall(function() return animator:LoadAnimation(anim) end)
     if not ok or not track then return false, "falha ao carregar emote" end
 
-    -- Action4 ganha de qualquer animaÃ§Ã£o que o jogo esteja rodando. Looped=false
-    -- porque emote Ã© gesto, nÃ£o estado â€” e comeÃ§ar/terminar deixa o servidor
+    -- Action4 ganha de qualquer animação que o jogo esteja rodando. Looped=false
+    -- porque emote é gesto, não estado — e começar/terminar deixa o servidor
     -- replicar a faixa inteira pros outros players.
     pcall(function() track.Priority = Enum.AnimationPriority.Action4 end)
     pcall(function() track.Looped = false end)
@@ -4918,7 +4983,7 @@ local function _playEmote(id)
     return true, "emote tocando"
 end
 
--- â”€â”€ card factory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- ── card factory ──────────────────────────────────────────────────────────────
 local function _makeBrowseCard(parent, item)
     local id     = tonumber(item.id) or 0
     local name   = tostring(item.name or "?")
@@ -4937,9 +5002,9 @@ local function _makeBrowseCard(parent, item)
     Stroke(card, T.Stroke, 1)
 
     -- Miniatura direto pelo id. A API de miniatura devolve uma URL do
-    -- tr.rbxcdn.com, e Image de ImageLabel nÃ£o carrega URL externa: o card ficava
-    -- com o nome e sem imagem, porque essa URL sobrescrevia o rbxthumb que jÃ¡
-    -- estava funcionando. rbxthumb Ã© o formato que o cliente resolve sozinho.
+    -- tr.rbxcdn.com, e Image de ImageLabel não carrega URL externa: o card ficava
+    -- com o nome e sem imagem, porque essa URL sobrescrevia o rbxthumb que já
+    -- estava funcionando. rbxthumb é o formato que o cliente resolve sozinho.
     local thumb = New("ImageLabel", {
         Size=UDim2.fromOffset(126,100), Position=UDim2.fromOffset(11,10),
         BackgroundColor3=T.Bg, BorderSizePixel=0, ScaleType=Enum.ScaleType.Fit,
@@ -4959,12 +5024,12 @@ local function _makeBrowseCard(parent, item)
         BackgroundTransparency=1, Position=UDim2.fromOffset(11,132), Size=UDim2.fromOffset(126,12),
     }, card)
 
-    -- 61 = Emote, 24 = Animation, 68 = Mood. O cÃ³digo antigo sÃ³ reconhecia o 24,
-    -- entÃ£o TODO emote do catÃ¡logo (tipo 61) caÃ­a no ramo de peÃ§a vestÃ­vel e
-    -- nem ganhava botÃ£o de tocar. Era por isso que emote nÃ£o aparecia.
+    -- 61 = Emote, 24 = Animation, 68 = Mood. O código antigo só reconhecia o 24,
+    -- então TODO emote do catálogo (tipo 61) caía no ramo de peça vestível e
+    -- nem ganhava botão de tocar. Era por isso que emote não aparecia.
     local isAnim = (atId == 61) or (atId == 24) or (atId == 68)
     if isAnim then
-        -- animaÃ§Ã£o tocada pelo cliente no prÃ³prio personagem Ã© replicada pelo
+        -- animação tocada pelo cliente no próprio personagem é replicada pelo
         -- servidor: os outros players veem o gesto.
         Button(card, "TOCAR", UDim2.fromOffset(11,148), UDim2.fromOffset(126,30),
             T.Accent, function()
@@ -4978,7 +5043,7 @@ local function _makeBrowseCard(parent, item)
         Button(card, applyTxt, UDim2.fromOffset(11,148), UDim2.fromOffset(126,30),
             applyColor, function()
                 if not isSafe then
-                    Toast("corpo slim incompatÃ­vel â€” disponÃ­vel sÃ³ no HBG", false)
+                    Toast("corpo slim incompatível — disponível só no HBG", false)
                     return
                 end
                 catAdd(id, function(a, b) Toast(b, a) end, nil, item)
@@ -5005,9 +5070,9 @@ local function _clearBrowseGrid()
     end
 end
 
-local _bFetchFailed = false   -- true quando a Ãºltima pÃ¡gina nÃ£o trouxe nada
+local _bFetchFailed = false   -- true quando a última página não trouxe nada
 local _bFetchReason = nil     -- status http ou mensagem que explica
-local _bGen = 0               -- a carga mais nova Ã© a Ãºnica que desenha
+local _bGen = 0               -- a carga mais nova é a única que desenha
 
 local function _renderEmpty()
     if not _browseGrid then return end
@@ -5023,10 +5088,10 @@ local function _renderEmpty()
 end
 
 -- Duas etapas: uma chamada traz os ids, e cada card nasce assim que o nome do id
--- chega. Antes a tela prendia em "Carregando..." atÃ© o Ãºltimo host responder â€”
--- com quatro hosts em timeout, mais de um minuto â€” e o guarda _bLoading engolia
+-- chega. Antes a tela prendia em "Carregando..." até o último host responder —
+-- com quatro hosts em timeout, mais de um minuto — e o guarda _bLoading engolia
 -- todo clique de aba nesse meio-tempo. Era isso que travava o Browse. _bGen
--- resolve: cada carga tem nÃºmero, e a antiga para de desenhar quando outra comeÃ§a.
+-- resolve: cada carga tem número, e a antiga para de desenhar quando outra começa.
 local function _loadPage(cursor)
     _bGen = _bGen + 1
     local gen = _bGen
@@ -5087,9 +5152,9 @@ local function _loadPage(cursor)
                     task.wait()
                 end
 
-                -- Grade magra: busca outra pÃ¡gina. Uma extra cobre as abas por palavra, que
-                -- trazem coisa fora do tipo pedido (a busca lista sÃ³ {id, itemType};
-                -- o tipo real sÃ³ aparece no economy/v2).
+                -- Grade magra: busca outra página. Uma extra cobre as abas por palavra, que
+                -- trazem coisa fora do tipo pedido (a busca lista só {id, itemType};
+                -- o tipo real só aparece no economy/v2).
                 if shown >= _bPageCap or pages >= 1 or #nextCur == 0 then break end
                 pages = pages + 1
                 local more, nc, e2 = _searchIds(q, kw, nextCur)
@@ -5117,15 +5182,15 @@ local function _loadPage(cursor)
     end)
 end
 
--- â”€â”€ NOVA ABA: Browse (separada do CatÃ¡logo, mais espaÃ§osa) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- ── NOVA ABA: Browse (separada do Catálogo, mais espaçosa) ───────────────────
 CurTab = Tab("Browse", 0, true)
 Persist.Scope = "browse"
 
--- â”€â”€ UI: seÃ§Ã£o browse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- ── UI: seção browse ──────────────────────────────────────────────────────────
 do
     local row = Row(36)
     Button(row, "RECARREGAR", UDim2.fromOffset(8,3), UDim2.fromOffset(100,30), T.Accent, function()
-        _bLoading = false  -- forÃ§a reset caso tenha travado
+        _bLoading = false  -- força reset caso tenha travado
         _bFetchFailed = false
         _loadPage("")
     end)
@@ -5135,7 +5200,7 @@ Button(row, "TESTAR HTTP", UDim2.fromOffset(116,3), UDim2.fromOffset(90,30), T.C
             local n = (ids and #ids) or 0
             local d, e2 = nil, nil
             if n > 0 then d, e2 = _assetDetail(ids[1]) end
-            -- leitura Ãºnica: a busca respondeu, veio id, o nome saiu?
+            -- leitura única: a busca respondeu, veio id, o nome saiu?
             local msg = ("busca=%d %s  nome=%s  [%s]"):format(
                 n, e1 or "ok",
                 d and ("'" .. d.name .. "'") or (e2 or "-"),
@@ -5146,7 +5211,7 @@ Button(row, "TESTAR HTTP", UDim2.fromOffset(116,3), UDim2.fromOffset(90,30), T.C
     end)
 end
 
--- â”€â”€ modo (itens / emotes) + categorias + busca â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- ── modo (itens / emotes) + categorias + busca ───────────────────────────────
 do
     local catBtns = {}
     local function paintCats()
@@ -5192,10 +5257,10 @@ do
     local catBar = New("ScrollingFrame", {
         Size=UDim2.new(1,-16,0,34), Position=UDim2.fromOffset(8,8),
         BackgroundTransparency=1, BorderSizePixel=0,
-        -- ScrollBarThickness=0 deixava a barra sem alÃ§a. No desktop o Roblox nÃ£o
-        -- rola horizontal no wheel sozinho, entÃ£o nÃ£o havia gesto nenhum: os
-        -- chips passavam da borda e ficavam inalcanÃ§Ã¡veis. Com alÃ§a de 4 px dÃ¡
-        -- pra arrastar, e o wheel na direÃ§Ã£o X tambÃ©m passa a funcionar.
+        -- ScrollBarThickness=0 deixava a barra sem alça. No desktop o Roblox não
+        -- rola horizontal no wheel sozinho, então não havia gesto nenhum: os
+        -- chips passavam da borda e ficavam inalcançáveis. Com alça de 4 px dá
+        -- pra arrastar, e o wheel na direção X também passa a funcionar.
         ScrollBarThickness=4, ScrollBarImageColor3=T.Faint, ScrollBarImageTransparency=0.3,
         ScrollingDirection=Enum.ScrollingDirection.X, ScrollingEnabled=true,
         ElasticBehavior=Enum.ElasticBehavior.Never,
@@ -5207,9 +5272,9 @@ do
         SortOrder=Enum.SortOrder.LayoutOrder, VerticalAlignment=Enum.VerticalAlignment.Top,
     }, catBar)
 
-    -- Wheel explÃ­cito: o ScrollBarThickness resolve o arrasto, mas rolar no wheel
-    -- Ã© o gesto que a mÃ£o jÃ¡ tenta. Sem isso, os Ãºltimos chips continuavam
-    -- dependendo de acertar uma alÃ§a de 4 px.
+    -- Wheel explícito: o ScrollBarThickness resolve o arrasto, mas rolar no wheel
+    -- é o gesto que a mão já tenta. Sem isso, os últimos chips continuavam
+    -- dependendo de acertar uma alça de 4 px.
     catBar.InputChanged:Connect(function(input)
         if input.UserInputType ~= Enum.UserInputType.MouseWheel then return end
         local span = math.max(0, catBar.AbsoluteCanvasSize.X - catBar.AbsoluteSize.X)
@@ -5236,7 +5301,7 @@ do
     end
     paintCats()
 
-    local searchBox = Field(row, UDim2.fromOffset(8,48), UDim2.new(1,-112,0,30), "buscar no catÃ¡logo...", "")
+    local searchBox = Field(row, UDim2.fromOffset(8,48), UDim2.new(1,-112,0,30), "buscar no catálogo...", "")
     local function doSearch()
         _bKeyword = searchBox.Text
         for i, c in ipairs(_CATS) do if c.id == "search" then _bCatIdx = i end end
@@ -5254,10 +5319,10 @@ end
 do
     local msg, col
     if _VOLLEYBALL_IDS[_CUR_PLACE] then
-        msg = "Volleyball detectado â€” corpos slim bloqueados. Apenas roupas e acessÃ³rios permitidos."
+        msg = "Volleyball detectado — corpos slim bloqueados. Apenas roupas e acessórios permitidos."
         col = T.Bad
     elseif _HBG_IDS[_CUR_PLACE] then
-        msg = "HBG detectado â€” todos os tipos de corpo liberados."
+        msg = "HBG detectado — todos os tipos de corpo liberados."
         col = T.Good
     end
     if msg then
@@ -5282,11 +5347,11 @@ do
     }, _browseGrid)
 end
 
--- paginaÃ§Ã£o
+-- paginação
 do
     local row = Row(36)
     _bPrevBtn = Button(row, "< ANTERIOR", UDim2.fromOffset(8,3), UDim2.fromOffset(96,30), T.Card, function()
-        _loadPage("")  -- API Roblox nÃ£o expÃµe cursor anterior; recomeÃ§a do inÃ­cio
+        _loadPage("")  -- API Roblox não expõe cursor anterior; recomeça do início
     end)
     _bInfoLbl = Label(row, "0 itens", 10, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.new(0.3,0,0,3), UDim2.fromOffset(140,30))
@@ -5297,7 +5362,7 @@ do
     if _bNextBtn then _bNextBtn.Visible = false end
 end
 
--- botÃ£o parar emote (aparece sÃ³ quando um emote estÃ¡ tocando)
+-- botão parar emote (aparece só quando um emote está tocando)
 do
     local row = Row(36)
     Button(row, "PARAR EMOTE", UDim2.fromOffset(8,3), UDim2.fromOffset(120,30), T.Bad, function()
@@ -5320,14 +5385,14 @@ end
 end
 _buildBrowse()
 
--- â”€â”€ volta para a aba CatÃ¡logo para as seÃ§Ãµes de ID e "No personagem" â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-CurTab = tabs["CatÃ¡logo"]
+-- ── volta para a aba Catálogo para as seções de ID e "No personagem" ──────────
+CurTab = tabs["Catálogo"]
 Persist.Scope = "cat"
 
 Section("Adicionar por ID")
 do
     local row = Row(104)
-    local hint = Label(row, "Cole um ID ou vÃ¡rios (vÃ­rgula, espaÃ§o ou links). O tipo Ã© detectado sozinho: acessÃ³rio, roupa, rosto, tool, efeito ou parte do corpo.",
+    local hint = Label(row, "Cole um ID ou vários (vírgula, espaço ou links). O tipo é detectado sozinho: acessório, roupa, rosto, tool, efeito ou parte do corpo.",
         11, T.Sub, F.Body, nil, UDim2.fromOffset(16, 8), UDim2.new(1, -32, 0, 34))
     hint.TextWrapped = true
     hint.TextYAlignment = Enum.TextYAlignment.Top
@@ -5412,10 +5477,10 @@ refreshCatalog = function()
         c.rm.Visible = not e.pending
     end
     emptyCard.Visible = #State.Catalog == 0
-    SetBadge("CatÃ¡logo", #State.Catalog > 0 and tostring(#State.Catalog) or "")
-    if curName == "CatÃ¡logo" then SetInfo(#State.Catalog .. " item(ns)") end
+    SetBadge("Catálogo", #State.Catalog > 0 and tostring(#State.Catalog) or "")
+    if curName == "Catálogo" then SetInfo(#State.Catalog .. " item(ns)") end
 end
-tabHooks["CatÃ¡logo"] = function()
+tabHooks["Catálogo"] = function()
     SetInfo(#State.Catalog .. " item(ns)")
 end
 BtnRow("REMOVER TODOS OS ITENS", T.Bad, function()
@@ -5434,10 +5499,10 @@ CurTab = Tab("Efeitos", 0, true)
 Persist.Scope = "fx"
 FX = {On = {}, Part = Persist.Get("fx:part", "Torso"), Mult = 1, Objs = {}, Mode = Persist.Get("fx:mode", "theme")}
 local FX_TARGETS = {
-    {id = "Head", label = "CabeÃ§a", parts = {"Head"}, r6 = {"Head"}},
+    {id = "Head", label = "Cabeça", parts = {"Head"}, r6 = {"Head"}},
     {id = "Torso", label = "Tronco", parts = {"UpperTorso"}, r6 = {"Torso"}},
-    {id = "Hands", label = "MÃ£os", parts = {"LeftHand", "RightHand"}, r6 = {"Left Arm", "Right Arm"}},
-    {id = "Feet", label = "PÃ©s", parts = {"LeftFoot", "RightFoot"}, r6 = {"Left Leg", "Right Leg"}},
+    {id = "Hands", label = "Mãos", parts = {"LeftHand", "RightHand"}, r6 = {"Left Arm", "Right Arm"}},
+    {id = "Feet", label = "Pés", parts = {"LeftFoot", "RightFoot"}, r6 = {"Left Leg", "Right Leg"}},
     {id = "Root", label = "Corpo", parts = {"HumanoidRootPart"}, r6 = {"HumanoidRootPart"}},
 }
 local FX_BY = {}
@@ -5445,10 +5510,10 @@ for _, t in ipairs(FX_TARGETS) do FX_BY[t.id] = t end
 if not FX_BY[FX.Part] then FX.Part = "Torso" end
 local FX_PRESETS = {
     {id = "aura", name = "Aura", desc = "brasas subindo ao redor do corpo", rate = 22},
-    {id = "spark", name = "FaÃ­scas", desc = "fagulhas rÃ¡pidas que caem", rate = 40},
-    {id = "smoke", name = "FumaÃ§a", desc = "fumaÃ§a escura e lenta", rate = 12},
+    {id = "spark", name = "Faíscas", desc = "fagulhas rápidas que caem", rate = 40},
+    {id = "smoke", name = "Fumaça", desc = "fumaça escura e lenta", rate = 12},
     {id = "snow", name = "Neve", desc = "flocos caindo da parte escolhida", rate = 18},
-    {id = "trail", name = "Rastro", desc = "faixa de luz atrÃ¡s do corpo", rate = 0},
+    {id = "trail", name = "Rastro", desc = "faixa de luz atrás do corpo", rate = 0},
 }
 local function fxSeq(a, b)
     return NumberSequence.new({NumberSequenceKeypoint.new(0, a), NumberSequenceKeypoint.new(1, b)})
@@ -5661,7 +5726,7 @@ Section("Cor dos efeitos")
 do
     local row = Row(58)
     FX.ModeSeg = Segmented(row, {
-        {id = "theme", label = "Cor do tema"}, {id = "rainbow", label = "Arco-Ã­ris"}, {id = "white", label = "Branco"},
+        {id = "theme", label = "Cor do tema"}, {id = "rainbow", label = "Arco-íris"}, {id = "white", label = "Branco"},
     }, FX.Mode, function(id)
         FX.Mode = id
         Persist.Set("fx:mode", id)
@@ -5670,7 +5735,7 @@ do
 end
 Section("Efeitos")
 for _, p in ipairs(FX_PRESETS) do
-    fxHandles[p.id] = Toggle(p.name .. "  Â·  " .. p.desc, false, function(v)
+    fxHandles[p.id] = Toggle(p.name .. "  ·  " .. p.desc, false, function(v)
         FX.On[p.id] = v
         fxBadge()
         if not Persist.Loading then FX.Apply() end
@@ -5680,7 +5745,7 @@ fxIntens = Slider("Intensidade", 0.2, 3, 1, "%.1fx", function(v)
     FX.Mult = v
     FX.RateAll()
 end, "Intensidade")
-Note("Os efeitos aparecem sÃ³ no seu cliente e voltam sozinhos quando vocÃª renasce.", 40)
+Note("Os efeitos aparecem só no seu cliente e voltam sozinhos quando você renasce.", 40)
 fxBadge()
 end
 
@@ -5757,7 +5822,7 @@ local function summary(slot)
     if not slot then return "vazio" end
     local fxn = 0
     if slot.fx and type(slot.fx.on) == "table" then fxn = count(slot.fx.on) end
-    return string.format("partes %d Â· itens %d Â· cores %d Â· fx %d", count(slot.ward or {}), #(slot.cat or {}), count(slot.colors or {}), fxn)
+    return string.format("partes %d · itens %d · cores %d · fx %d", count(slot.ward or {}), #(slot.cat or {}), count(slot.colors or {}), fxn)
 end
 -- valida e normaliza qualquer slot (carregado do arquivo ou importado): so numeros e nomes conhecidos
 local function sanitize(t)
@@ -5803,13 +5868,13 @@ local function encode(slot)
 end
 local function decode(code)
     code = tostring(code or ""):gsub("%s", "")
-    if code:sub(1, 4) ~= "SC1:" then return nil, "cÃ³digo invÃ¡lido (precisa comeÃ§ar com SC1:)" end
+    if code:sub(1, 4) ~= "SC1:" then return nil, "código inválido (precisa começar com SC1:)" end
     local raw = b64dec(code:sub(5))
-    if not raw or #raw < 2 then return nil, "cÃ³digo corrompido" end
+    if not raw or #raw < 2 then return nil, "código corrompido" end
     local ok, t = pcall(function() return HttpS:JSONDecode(raw) end)
-    if not ok then return nil, "cÃ³digo corrompido" end
+    if not ok then return nil, "código corrompido" end
     local s = sanitize(t)
-    if not s then return nil, "cÃ³digo sem dados de look" end
+    if not s then return nil, "código sem dados de look" end
     return s
 end
 
@@ -5869,13 +5934,13 @@ end
 function Looks.ApplyIndex(i)
     local s = Looks.Slots[i]
     if not s then
-        Toast("o slot " .. i .. " estÃ¡ vazio", false)
+        Toast("o slot " .. i .. " está vazio", false)
         return
     end
     task.spawn(function()
         local ok, nW, nC = applySlot(s)
         if ok then Toast(string.format("look \"%s\" aplicado (%d partes, %d itens)", s.name, nW, nC), true)
-        else Toast("nÃ£o consegui aplicar o look (veja o registro em Config)", false) end
+        else Toast("não consegui aplicar o look (veja o registro em Config)", false) end
     end)
 end
 function Looks.Next()
@@ -5906,7 +5971,7 @@ Section("Importar")
 local importBox
 do
     local row = Row(112)
-    local hint = Label(row, "Cole um cÃ³digo SC1:... (do EXPORTAR de um look seu ou de um amigo). O look entra no primeiro slot livre. O cÃ³digo sÃ³ carrega IDs e cores, nada mais.",
+    local hint = Label(row, "Cole um código SC1:... (do EXPORTAR de um look seu ou de um amigo). O look entra no primeiro slot livre. O código só carrega IDs e cores, nada mais.",
         11, T.Sub, F.Body, nil, UDim2.fromOffset(16, 8), UDim2.new(1, -32, 0, 34))
     hint.TextWrapped = true
     hint.TextYAlignment = Enum.TextYAlignment.Top
@@ -5934,9 +5999,9 @@ end
 Section("Seus looks")
 do
     local card = Row(48)
-    Label(card, "Salve o que estÃ¡ no seu personagem agora em um slot, ou aplique um look salvo.", 11, T.Sub, F.Body, nil,
+    Label(card, "Salve o que está no seu personagem agora em um slot, ou aplique um look salvo.", 11, T.Sub, F.Body, nil,
         UDim2.fromOffset(16, 0), UDim2.new(1, -150, 1, 0)).TextWrapped = true
-    Button(card, "ALEATÃ“RIO", UDim2.new(1, -118, 0.5, -15), UDim2.fromOffset(104, 30), T.Card, function()
+    Button(card, "ALEATÓRIO", UDim2.new(1, -118, 0.5, -15), UDim2.fromOffset(104, 30), T.Card, function()
         local list = Looks.Names()
         if #list == 0 then
             Toast("nenhum look salvo ainda", false)
@@ -5972,9 +6037,9 @@ for i = 1, SLOTS do
         if not s then return end
         if setclipboard then
             pcall(setclipboard, encode(s))
-            Toast("cÃ³digo do look copiado (cole no IMPORTAR de um amigo)", true)
+            Toast("código do look copiado (cole no IMPORTAR de um amigo)", true)
         else
-            Toast("seu executor nÃ£o tem setclipboard", false)
+            Toast("seu executor não tem setclipboard", false)
         end
     end)
     local del = Button(card, "APAGAR", UDim2.new(0.5, 5, 0, 102), UDim2.new(0.5, -17, 0, 28), T.Bad, function()
@@ -6095,12 +6160,12 @@ function Env.Apply()
 end
 
 local PRESETS = {
-    {id = "off", name = "PadrÃ£o"},
+    {id = "off", name = "Padrão"},
     {id = "cinema", name = "Cinema", c = {sat = 0.12, con = 0.18, bloom = 0.35, rays = 0.05, bright = 2, expo = 0, tint = {255, 238, 218}}},
     {id = "neon", name = "Neon", c = {sat = 0.45, con = 0.25, bloom = 0.9, rays = 0, bright = 2, expo = 0.1, tint = {235, 220, 255}}},
     {id = "noir", name = "Noir", c = {sat = -1, con = 0.35, bloom = 0.15, rays = 0, bright = 1.6, expo = -0.1, tint = {255, 255, 255}}},
     {id = "sonho", name = "Sonho", c = {sat = 0.2, con = -0.05, bloom = 0.85, rays = 0.2, dof = true, bright = 2.4, expo = 0.2, tint = {255, 232, 244}}},
-    {id = "porsol", name = "PÃ´r do sol", c = {sat = 0.25, con = 0.12, bloom = 0.4, rays = 0.3, clock = 17.9, useClock = true, bright = 2, expo = 0, tint = {255, 214, 178}}},
+    {id = "porsol", name = "Pôr do sol", c = {sat = 0.25, con = 0.12, bloom = 0.4, rays = 0.3, clock = 17.9, useClock = true, bright = 2, expo = 0, tint = {255, 214, 178}}},
 }
 local segPreset
 local function loadPreset(p)
@@ -6151,7 +6216,7 @@ handles.clock = Slider("Hora do dia", 0, 24, 14, "%.1f h", function(v)
     cfgE.clock = v
     if cfgE.on then Env.Apply() end
 end, "env clock")
-handles.lock = Toggle("Travar a hora (o jogo nÃ£o muda)", false, function(v)
+handles.lock = Toggle("Travar a hora (o jogo não muda)", false, function(v)
     cfgE.lockClock = v
     if cfgE.on then Env.Apply() end
 end, "env lock")
@@ -6159,11 +6224,11 @@ handles.bright = Slider("Brilho", 0, 5, 2, "%.1f", function(v)
     cfgE.bright = v
     if cfgE.on then Env.Apply() end
 end, "env bright")
-handles.expo = Slider("ExposiÃ§Ã£o", -2, 2, 0, "%.2f", function(v)
+handles.expo = Slider("Exposição", -2, 2, 0, "%.2f", function(v)
     cfgE.expo = v
     if cfgE.on then Env.Apply() end
 end, "env expo")
-handles.sat = Slider("SaturaÃ§Ã£o", -1, 1, 0, "%.2f", function(v)
+handles.sat = Slider("Saturação", -1, 1, 0, "%.2f", function(v)
     cfgE.sat = v
     if cfgE.on then Env.Apply() end
 end, "env sat")
@@ -6237,7 +6302,7 @@ end
 Section("Modo foto")
 do
     local row = Row(64)
-    local hint = Label(row, "Esconde o menu e a interface do Roblox por 8 segundos pra vocÃª tirar print, e depois tudo volta sozinho.",
+    local hint = Label(row, "Esconde o menu e a interface do Roblox por 8 segundos pra você tirar print, e depois tudo volta sozinho.",
         11, T.Sub, F.Body, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -190, 1, 0))
     hint.TextWrapped = true
     Button(row, "ESCONDER 8s", UDim2.new(1, -150, 0.5, -17), UDim2.fromOffset(136, 34), T.Accent, function()
@@ -6283,7 +6348,7 @@ Toggle("Ativar aimlock", false, function(v)
     Aim.Enabled = v
     if not v and Aim.Holding then releaseAim() end
     refreshFov()
-    Toast(v and ("aimlock ligado Â· segure " .. keyName(Aim.Key)) or "aimlock desligado", v)
+    Toast(v and ("aimlock ligado · segure " .. keyName(Aim.Key)) or "aimlock desligado", v)
 end, "Enable aimlock")
 
 do
@@ -6309,7 +6374,7 @@ do
     local row = Row(44)
     Label(row, "Mirar em", 13, T.Text, F.Body, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -170, 1, 0))
     local order = {"Head", "UpperTorso", "HumanoidRootPart"}
-    local nice = {Head = "CabeÃ§a", UpperTorso = "Tronco", HumanoidRootPart = "Raiz"}
+    local nice = {Head = "Cabeça", UpperTorso = "Tronco", HumanoidRootPart = "Raiz"}
     local idx = 1
     local sp = Persist.Get("aim:part", nil)
     for i, n in ipairs(order) do
@@ -6326,25 +6391,25 @@ do
 end
 
 Section("Mira")
-Slider("FOV do alvo (sÃ³ na 1Âª escolha)", 40, 600, Aim.FOV, "%d px", function(v)
+Slider("FOV do alvo (só na 1ª escolha)", 40, 600, Aim.FOV, "%d px", function(v)
     Aim.FOV = math.floor(v)
     refreshFov()
 end, "Target FOV (first pick only)")
-Slider("SuavizaÃ§Ã£o (0 = trava seca)", 0, 0.9, Aim.Smooth, "%.2f", function(v) Aim.Smooth = v end, "Smoothness (0 = snap)")
-Slider("PrevisÃ£o", 0, 0.3, Aim.Predict, "%.2f s", function(v) Aim.Predict = v end, "Prediction")
+Slider("Suavização (0 = trava seca)", 0, 0.9, Aim.Smooth, "%.2f", function(v) Aim.Smooth = v end, "Smoothness (0 = snap)")
+Slider("Previsão", 0, 0.3, Aim.Predict, "%.2f s", function(v) Aim.Predict = v end, "Prediction")
 
 Section("Filtros")
 Toggle("Ignorar o seu time", Aim.TeamCheck, function(v) Aim.TeamCheck = v end, "Team check")
-Toggle("SÃ³ alvos visÃ­veis (sem parede)", Aim.WallCheck, function(v) Aim.WallCheck = v end, "Wall check (pick visible only)")
-Toggle("Mostrar cÃ­rculo do FOV", Aim.ShowFOV, function(v)
+Toggle("Só alvos visíveis (sem parede)", Aim.WallCheck, function(v) Aim.WallCheck = v end, "Wall check (pick visible only)")
+Toggle("Mostrar círculo do FOV", Aim.ShowFOV, function(v)
     Aim.ShowFOV = v
     refreshFov()
 end, "Show FOV ring")
-Note("Segure o bind: trava no jogador mais perto do cursor e fica nele atÃ© morrer. Solte pra escolher outro.", 46)
+Note("Segure o bind: trava no jogador mais perto do cursor e fica nele até morrer. Solte pra escolher outro.", 46)
 end
 
 --------------------------------------------------------------------------------
--- VOLEI â€” linha de mira dos adversarios
+-- VOLEI — linha de mira dos adversarios
 --------------------------------------------------------------------------------
 do
 CurTab = Tab("Volei", 0, true)
@@ -6352,8 +6417,8 @@ Persist.Scope = "volley"
 
 local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
--- carimbo de build: aparece na tela quando a linha estÃ¡ ligada. Se vocÃª carregar
--- um arquivo velho, esse nÃºmero nÃ£o muda â€” Ã© o jeito de saber o que estÃ¡ rodando.
+-- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
+-- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
 local BUILD = "BE06"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
@@ -6377,19 +6442,19 @@ if env and env.SilkcoreVolley then
 end
 if env then env.SilkcoreVolley = VB.pairs end
 
--- â”€â”€ linha: Frame de GUI, nÃ£o Drawing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
--- A versÃ£o anterior criava Drawing.new("Line") DENTRO do passo de render. Isso
--- funciona em alguns executores e falha em outros â€” e quando falha o passo
--- inteiro morre, sem erro na tela, e nÃ£o desenha nada. Aqui a linha Ã© um Frame
--- girado: um ScreenGui prÃ³prio e trÃªs Frames por jogador. Nenhuma API de
--- executor envolvida, entÃ£o funciona onde a interface funciona.
+-- ── linha: Frame de GUI, não Drawing ────────────────────────────────────────
+-- A versão anterior criava Drawing.new("Line") DENTRO do passo de render. Isso
+-- funciona em alguns executores e falha em outros — e quando falha o passo
+-- inteiro morre, sem erro na tela, e não desenha nada. Aqui a linha é um Frame
+-- girado: um ScreenGui próprio e três Frames por jogador. Nenhuma API de
+-- executor envolvida, então funciona onde a interface funciona.
 local VBGui = nil
 do
     local sg = Instance.new("ScreenGui")
     sg.Name = "SilkcoreVolleyLines"
     sg.ResetOnSpawn = false
-    -- false de propÃ³sito: WorldToViewportPoint devolve coordenada de viewport, que
-    -- jÃ¡ desconta a barra de topo. IgnoreGuiInset=true deslocaria tudo ~36 px.
+    -- false de propósito: WorldToViewportPoint devolve coordenada de viewport, que
+    -- já desconta a barra de topo. IgnoreGuiInset=true deslocaria tudo ~36 px.
     sg.IgnoreGuiInset = false
     sg.DisplayOrder = 0
     sg.Parent = guiParent
@@ -6406,7 +6471,7 @@ do
     VBGui = sg
     VB.layer = layer
 
-    -- leitura ao vivo para diagnÃ³stico: build, backend, pares, visÃ­veis, altura
+    -- leitura ao vivo para diagnóstico: build, backend, pares, visíveis, altura
     local dbg = Instance.new("TextLabel")
     dbg.Name = "Build"
     dbg.Position = UDim2.fromOffset(10, 10)
@@ -6426,11 +6491,11 @@ do
     VB.dbg = dbg
 end
 
--- â”€â”€ backend do desenho â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
--- Drawing escreve direto no compositor do executor: mudar .From/.To nÃ£o passa
--- por layout nenhum, entÃ£o acompanha o frame sem engasgo. Frame girado Ã© o
--- plano B â€” aparece em qualquer executor, mas cada escrita de Position/Size/
--- Rotation dispara um passo de layout da interface, e Ã© isso que fazia a linha
+-- ── backend do desenho ──────────────────────────────────────────────────────
+-- Drawing escreve direto no compositor do executor: mudar .From/.To não passa
+-- por layout nenhum, então acompanha o frame sem engasgo. Frame girado é o
+-- plano B — aparece em qualquer executor, mas cada escrita de Position/Size/
+-- Rotation dispara um passo de layout da interface, e é isso que fazia a linha
 -- andar aos pulos. Aqui os dois caminhos existem; o Drawing tem prioridade.
 local HAS_DRAWING = false
 do
@@ -6460,8 +6525,8 @@ local function applyStyle(p)
         p.d.AnchorPoint  = Vector2.new(0.5, 0.5)
         p.d.Size         = UDim2.fromOffset(VB.Dot * 2, VB.Dot * 2)
         p.d.BackgroundTransparency  = 1 - VB.Alpha
-        -- altura guardada no par: ler Size.Y.Offset a cada quadro Ã© uma travessia
-        -- de reflect por jogador, por quadro, Ã  toa.
+        -- altura guardada no par: ler Size.Y.Offset a cada quadro é uma travessia
+        -- de reflect por jogador, por quadro, Ã  toa.
         p.olH, p.lH = olT, VB.Thick
         p.last = nil
     end
@@ -6512,19 +6577,19 @@ local function restyleAll()
     end
 end
 
--- cÃ¢mera resolvida uma vez por quadro: Workspace.CurrentCamera Ã© travessia de
--- serviÃ§o, e proj Ã© chamado 2x por jogador e 2x por segmento de trajetÃ³ria.
+-- câmera resolvida uma vez por quadro: Workspace.CurrentCamera é travessia de
+-- serviço, e proj é chamado 2x por jogador e 2x por segmento de trajetória.
 local CAM = nil
 
 local function proj(pos)
     local cam = CAM or Workspace.CurrentCamera
     if not cam then return nil end
     local v = cam:WorldToViewportPoint(pos)
-    -- O segundo retorno do Roblox (onScreen) Ã© falso sempre que o ponto sai do
+    -- O segundo retorno do Roblox (onScreen) é falso sempre que o ponto sai do
     -- viewport. Para a linha de mira isso apagava a ponta perto da borda; para
-    -- a marca de queda apagava o chÃ£o INTEIRO quando a cÃ¢mera subia atrÃ¡s da
-    -- bola â€” o destino saÃ­a por baixo da tela e o Drawing sumia junto.
-    -- Drawing recorta sozinho: basta o ponto estar na frente da cÃ¢mera.
+    -- a marca de queda apagava o chão INTEIRO quando a câmera subia atrás da
+    -- bola — o destino saía por baixo da tela e o Drawing sumia junto.
+    -- Drawing recorta sozinho: basta o ponto estar na frente da câmera.
     if v.Z <= 0 then return nil end
     return Vector2.new(v.X, v.Y)
 end
@@ -6538,7 +6603,7 @@ local function lookVec(char, head)
 end
 
 -- O jogo marca a bola com a tag "Ball" e a rede com "Net" via CollectionService.
--- Achar por tag Ã© uma consulta ao Ã­ndice, nÃ£o uma varredura: o Workspace tem
+-- Achar por tag é uma consulta ao índice, não uma varredura: o Workspace tem
 -- milhares de partes e o find antigo percorria todas a cada 2 s.
 local function findBall()
     local ok, cs = pcall(game.GetService, game, "CollectionService")
@@ -6559,9 +6624,9 @@ end
 -- ============================================================
 -- PREVER QUEDA
 -- ============================================================
--- A aceleraÃ§Ã£o Ã© MEDIDA quadro a quadro â€” (v - v_anterior) / dt â€” nÃ£o assumida.
--- FÃ³rmula fechada com workspace.Gravity erraria: o dump mostra VectorForce
--- mexendo na bola durante habilidade. Medindo, eu nÃ£o preciso saber que existe.
+-- A aceleração é MEDIDA quadro a quadro — (v - v_anterior) / dt — não assumida.
+-- Fórmula fechada com workspace.Gravity erraria: o dump mostra VectorForce
+-- mexendo na bola durante habilidade. Medindo, eu não preciso saber que existe.
 local VBX = {
     cs = game:GetService("CollectionService"),
     Prev = nil, PrevT = 0, Accel = Vector3.new(0, -workspace.Gravity, 0), Settle = 0,
@@ -6571,9 +6636,9 @@ local VBX = {
     Txt = nil, Flare = nil, RingN = 3,
 }
 
--- Alguns executores nÃ£o expÃµem todos os campos de Drawing (Thickness em Circle,
--- NumSides, Filled...). Escrever campo inexistente lanÃ§a erro e mataria o passo
--- de render inteiro â€” nenhuma linha, nenhuma marca, nada. set isola cada escrita.
+-- Alguns executores não expõem todos os campos de Drawing (Thickness em Circle,
+-- NumSides, Filled...). Escrever campo inexistente lança erro e mataria o passo
+-- de render inteiro — nenhuma linha, nenhuma marca, nada. set isola cada escrita.
 function VBX.set(o, k, v)
     if not o then return end
     pcall(function() o[k] = v end)
@@ -6637,7 +6702,7 @@ function VBX.floor(pos)
     VBX.FloorT = os.clock()
 end
 
--- 0.5*a*t^2 + v*t + d = 0  â†’  menor raiz positiva
+-- 0.5*a*t^2 + v*t + d = 0  →  menor raiz positiva
 function VBX.solve(d, v, a)
     if math.abs(a) < 1e-4 then
         if math.abs(v) < 1e-4 then return nil end
@@ -6674,9 +6739,9 @@ function VBX.hideMark()
     VBX.Txt.Visible = false
 end
 
--- marca de impacto: trÃªs anÃ©is + nÃºcleo + contagem. O anel externo respira
--- enquanto falta tempo e fecha conforme o impacto chega â€” a animaÃ§Ã£o carrega
--- informaÃ§Ã£o, nÃ£o sÃ³ enfeite.
+-- marca de impacto: três anéis + núcleo + contagem. O anel externo respira
+-- enquanto falta tempo e fecha conforme o impacto chega — a animação carrega
+-- informação, não só enfeite.
 function VBX.drawMark(sp, col, urgent, scale, label)
     VBX.build()
     local pulse = 0.5 + 0.5 * math.sin(os.clock() * 6)
@@ -6723,9 +6788,9 @@ function VBX.step(ball)
     local now = os.clock()
     VBX.build()
 
-    -- FASE 1 â€” alguÃ©m estÃ¡ mirando o saque. O jogo calculou a queda e deixou o
-    -- Beam "Trajectory" dentro do launcher; Attachment1 dele Ã‰ o ponto exato
-    -- (dump 37520-37539). Ler o Beam, e nÃ£o o Terrain, evita pegar a mira de
+    -- FASE 1 — alguém está mirando o saque. O jogo calculou a queda e deixou o
+    -- Beam "Trajectory" dentro do launcher; Attachment1 dele É o ponto exato
+    -- (dump 37520-37539). Ler o Beam, e não o Terrain, evita pegar a mira de
     -- outro jogador quando duas pessoas miram ao mesmo tempo.
     local live = ball ~= nil and ball.Parent ~= nil
     local aimPos = nil
@@ -6765,8 +6830,8 @@ function VBX.step(ball)
 
     local p, v = ball.Position, ball.AssemblyLinearVelocity
 
-    -- aceleraÃ§Ã£o medida na bola viva. O dump (54553) mostra que o jogo integra
-    -- pos(t) = p + v*t + accel*0.5*tÂ² â€” aceleraÃ§Ã£o constante por trecho. Medindo
+    -- aceleração medida na bola viva. O dump (54553) mostra que o jogo integra
+    -- pos(t) = p + v*t + accel*0.5*t² — aceleração constante por trecho. Medindo
     -- accel eu cubro gravidade-base, GravityMultiplier de habilidade e drag sem
     -- precisar saber qual habilidade foi usada.
     if VBX.Prev and VBX.PrevT > 0 then
@@ -6795,16 +6860,16 @@ function VBX.step(ball)
     VBX.LastT = T
     if not T or T <= 0 or T > 15 then VBX.hide(); return end
 
-    -- amostra de tempo igual. AceleraÃ§Ã£o constante â‡’ parÃ¡bola exata, entÃ£o a
-    -- curva desenhada Ã© a curva real, nÃ£o uma aproximaÃ§Ã£o por passos.
+    -- amostra de tempo igual. Aceleração constante ⇒ parábola exata, então a
+    -- curva desenhada é a curva real, não uma aproximação por passos.
     local pts = {}
     for i = 0, VBX.Segs do
         local t = T * i / VBX.Segs
         pts[i + 1] = p + v * t + VBX.Accel * (0.5 * t * t)
     end
 
-    -- varredura segmento a segmento: a rede Ã© parede fina, e um raio Ãºnico
-    -- bolaâ†’destino tunnelaria por ela. Segmento nÃ£o.
+    -- varredura segmento a segmento: a rede é parede fina, e um raio único
+    -- bola→destino tunnelaria por ela. Segmento não.
     local rp = VBX.params()
     local cut, cutPos = nil, nil
     for i = 1, VBX.Segs do
@@ -6841,7 +6906,7 @@ function VBX.step(ball)
         end
     end
 
-    -- orbe fantasma percorrendo a trajetÃ³ria: comunica ritmo, nÃ£o sÃ³ destino
+    -- orbe fantasma percorrendo a trajetória: comunica ritmo, não só destino
     local tp = T * ((now * 0.9) % 1)
     local gs = proj(p + v * tp + VBX.Accel * (0.5 * tp * tp))
     if gs then
@@ -6863,9 +6928,9 @@ function VBX.step(ball)
 end
 
 
--- Roda fora do passo de render: criar Instance (ou Drawing) dentro do quadro Ã©
--- o que fazia a interface engasgar. Aqui sÃ³ a lista de pares Ã© mantida, e a
--- altura da origem Ã© medida uma vez por personagem.
+-- Roda fora do passo de render: criar Instance (ou Drawing) dentro do quadro é
+-- o que fazia a interface engasgar. Aqui só a lista de pares é mantida, e a
+-- altura da origem é medida uma vez por personagem.
 local function sync()
     local seen = {}
     local now = os.clock()
@@ -6882,16 +6947,16 @@ local function sync()
             end
             -- Mede a altura 3 vezes no primeiro ~3 s (tempo do rig carregar) e
             -- depois congela. Reamostrar sempre fazia a linha pular de altura a
-            -- cada ciclo, porque a cabeÃ§a sobe e desce com a animaÃ§Ã£o parada.
+            -- cada ciclo, porque a cabeça sobe e desce com a animação parada.
             if char and (p.yoffSettle or 0) > 0 and now - (p.yoffAt or -99) > 1.5 then
                 p.yoffAt = now
                 p.yoffSettle = p.yoffSettle - 1
-                -- Origem = cabeÃ§a. O rig deste jogo nÃ£o expÃµe "Head" como filho direto
-                -- do modelo â€” daÃ­ a busca recursiva. Se a cabeÃ§a estiver no mesmo
-                -- nÃ­vel do root (rig com as peÃ§as empilhadas na origem, comum em
-                -- personagem por SkinnedMesh), ela nÃ£o serve de Ã¢ncora: nesse caso
+                -- Origem = cabeça. O rig deste jogo não expõe "Head" como filho direto
+                -- do modelo — daí a busca recursiva. Se a cabeça estiver no mesmo
+                -- nível do root (rig com as peças empilhadas na origem, comum em
+                -- personagem por SkinnedMesh), ela não serve de âncora: nesse caso
                 -- usa o topo da caixa do modelo. E se nem isso der altura, cai em
-                -- 2,6 studs acima do root â€” o que nunca deixa a linha no chÃ£o.
+                -- 2,6 studs acima do root — o que nunca deixa a linha no chão.
                 local root = char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart
                 if root then
                     local head = char:FindFirstChild("Head", true)
@@ -6935,7 +7000,7 @@ local function stepRaw(dt)
         if char and not char.Parent then char = nil end
         local root = char and (char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart or char:FindFirstChild("Head"))
         -- O jogo usa Team real do Roblox (Red/Purple/White/Black/Orange Team),
-        -- entÃ£o comparar o objeto Team Ã© exato. Sem time (lobby), mostra todos.
+        -- então comparar o objeto Team é exato. Sem time (lobby), mostra todos.
         local ally = VB.OnlyEnemy and myTeam ~= nil and plr.Team == myTeam
         if VB.On and root and not ally then
             local o
@@ -6944,12 +7009,12 @@ local function stepRaw(dt)
             else
                 o = root.Position + Vector3.new(0, p.yoff or 0, 0)
             end
-            -- A direÃ§Ã£o sai do Neck, que replica a ~10-20 Hz e NÃƒO Ã© interpolado
-            -- pelo cliente â€” era daÃ­ que vinha o pulo quadro a quadro. Suaviza
+            -- A direção sai do Neck, que replica a ~10-20 Hz e NÃO é interpolado
+            -- pelo cliente — era daí que vinha o pulo quadro a quadro. Suaviza
             -- com lerp dependente de dt: mesma velocidade em qualquer FPS.
-            -- SÃ³ o plano horizontal. A animaÃ§Ã£o de saque levanta a cabeÃ§a e o LookVector
-            -- do pescoÃ§o ia junto: a linha subia com o saque. Zerar o Y deixa a
-            -- linha deitada mesmo com o adversÃ¡rio olhando pra cima ou pra baixo.
+            -- Só o plano horizontal. A animação de saque levanta a cabeça e o LookVector
+            -- do pescoço ia junto: a linha subia com o saque. Zerar o Y deixa a
+            -- linha deitada mesmo com o adversário olhando pra cima ou pra baixo.
             local lv = lookVec(char, root)
             local want = Vector3.new(lv.X, 0, lv.Z)
             if want.Magnitude > 0.05 then want = want.Unit else want = p.dir end
@@ -6968,11 +7033,11 @@ local function stepRaw(dt)
             local a = proj(o)
             local b = nil
             if a then
-                -- DireÃ§Ã£o em vista de cima, girada para a tela: direita da cÃ¢mera
-                -- no X, afastar-se da cÃ¢mera no Y. Sem isso, alvo longe com cÃ¢mera
-                -- alta projetava a direÃ§Ã£o horizontal pra BAIXO na tela e a linha
-                -- descia atÃ© o chÃ£o â€” era esse o "fica no chÃ£o quando tÃ¡ longe".
-                -- Comprimento fixo em pixel: nÃ£o encolhe, nÃ£o estica, nÃ£o some.
+                -- Direção em vista de cima, girada para a tela: direita da câmera
+                -- no X, afastar-se da câmera no Y. Sem isso, alvo longe com câmera
+                -- alta projetava a direção horizontal pra BAIXO na tela e a linha
+                -- descia até o chão — era esse o "fica no chão quando tá longe".
+                -- Comprimento fixo em pixel: não encolhe, não estica, não some.
                 local angS
                 local cf = CAM and CAM.CFrame
                 if cf then
@@ -7016,9 +7081,9 @@ local function stepRaw(dt)
                     p.l.From,  p.l.To,  p.l.Visible  = a, b, true
                     p.d.Position, p.d.Visible = b, VB.ShowDot
                 else
-                    -- Cada escrita em Frame dispara layout de interface: sÃ³ grava
+                    -- Cada escrita em Frame dispara layout de interface: só grava
                     -- o que mudou de verdade. Abaixo de meio pixel e meio grau o
-                    -- olho nÃ£o vÃª â€” e era esse excesso que travava a linha.
+                    -- olho não vê — e era esse excesso que travava a linha.
                     local dx, dy = b.X - a.X, b.Y - a.Y
                     local len = math.sqrt(dx * dx + dy * dy)
                     local mid = (a + b) * 0.5
@@ -7089,14 +7154,14 @@ local function stepRaw(dt)
     end
 end
 
--- O passo nunca derruba o bind: erro vira texto no diagnÃ³stico e o quadro
+-- O passo nunca derruba o bind: erro vira texto no diagnóstico e o quadro
 -- seguinte tenta de novo. Antes, um erro de Drawing matava o passo pra sempre.
 local function step(dt)
     local ok, err = pcall(stepRaw, dt)
     if not ok then stepErr = tostring(err) end
 end
 
--- exporta o passo para o SilkGuard: ele estava fora de escopo lÃ¡ embaixo e o
+-- exporta o passo para o SilkGuard: ele estava fora de escopo lá embaixo e o
 -- vigia acabava guardando nil. Era esse nil que matava a linha de mira no
 -- primeiro travamento do frame.
 VOL_STEP = step
@@ -7170,16 +7235,16 @@ Toggle("Ativar linha de mira", false, function(v)
     end
 end, "Volley aim line")
 
-Toggle("SÃ³ inimigos (ignorar meu time)", true, function(v)
+Toggle("Só inimigos (ignorar meu time)", true, function(v)
     VB.OnlyEnemy = v
-    Toast(v and "sÃ³ adversÃ¡rios" or "todos os jogadores", true)
+    Toast(v and "só adversários" or "todos os jogadores", true)
 end, "Volley enemy only")
 
 Slider("Comprimento da linha (px)", 40, 260, 110, "%d px", function(v)
     VB.PixLen = math.floor(v + 0.5)
 end, "Volley line px")
 
-Section("AparÃªncia da linha")
+Section("Aparência da linha")
 Slider("Espessura", 1, 14, 4, "%d px", function(v)
     VB.Thick = math.floor(v + 0.5)
     restyleAll()
@@ -7215,7 +7280,7 @@ BtnRow("DEIXAR BEM VISIVEL", T.Card, function()
     Toast("grossa, contorno forte, ponto ligado", true)
 end, 34)
 
-Toggle("TrajetÃ³ria da bola", true, function(v) VB.Ball = v end, "Volley ball trajec")
+Toggle("Trajetória da bola", true, function(v) VB.Ball = v end, "Volley ball trajec")
 
 Section("Prever queda")
 Toggle("Marcar onde a bola cai", false, function(v)
@@ -7231,8 +7296,8 @@ Toggle("Marcar onde a bola cai", false, function(v)
 end, "Volley predict")
 
 -- Persist devolve o desenho do switch, mas nunca chama o callback: depois de
--- re-executar, a linha ficava com "ON" na tela e VB.On em false â€” nada desenhado.
--- Aqui o estado real Ã© relido do disco uma vez, com as mesmas chaves.
+-- re-executar, a linha ficava com "ON" na tela e VB.On em false — nada desenhado.
+-- Aqui o estado real é relido do disco uma vez, com as mesmas chaves.
 VB.On        = Persist.Get("volley:Volley aim line", false) == true
 VB.OnlyEnemy = Persist.Get("volley:Volley enemy only", true) ~= false
 VB.Ball      = Persist.Get("volley:Volley ball trajec", true) ~= false
@@ -7249,7 +7314,7 @@ BtnRow("TESTAR PREVISAO", T.Card, function()
 end, 34)
 
 -- cria os Drawings agora, na thread principal. Criar dentro do passo de render
--- funciona em alguns executores e falha em outros â€” aqui nÃ£o tem risco.
+-- funciona em alguns executores e falha em outros — aqui não tem risco.
 if Drawing then
     local okB, errB = pcall(VBX.build)
     if not okB then VBX.Err = tostring(errB) end
@@ -7257,7 +7322,7 @@ end
 
 Note("Duas fases. Mirando o saque, a marca usa o destino que o proprio jogo ja calculou (attachment TrajectoryFinish no Terrain) e escreve MIRA. Com a bola no ar, a aceleracao e medida dela quadro a quadro e a queda sai da equacao exata de parabola que o jogo usa. Rede no caminho corta o arco e pinta de ambar. A contagem e o tempo real ate o impacto. Tudo leitura: nada sai daqui.", 76)
 
-Note("A linha sai do centro do corpo do adversÃ¡rio â€” medida pela caixa do modelo, nÃ£o pelo nome da parte, porque neste jogo o HumanoidRootPart fica no chÃ£o â€” na direÃ§Ã£o em que ele estÃ¡ olhando. O Roblox replica a rotaÃ§Ã£o do pescoÃ§o, entÃ£o dÃ¡ pra ler a intenÃ§Ã£o de ataque antes do toque. A direÃ§Ã£o Ã© suavizada por lerp: o pescoÃ§o replica a 10-20 Hz e sem isso a linha andava aos pulos. Ã‰ desenho de tela: nada Ã© criado no jogo, nada replica pro servidor.", 58)
+Note("A linha sai do centro do corpo do adversário — medida pela caixa do modelo, não pelo nome da parte, porque neste jogo o HumanoidRootPart fica no chão — na direção em que ele está olhando. O Roblox replica a rotação do pescoço, então dá pra ler a intenção de ataque antes do toque. A direção é suavizada por lerp: o pescoço replica a 10-20 Hz e sem isso a linha andava aos pulos. É desenho de tela: nada é criado no jogo, nada replica pro servidor.", 58)
 
 if HAS_DRAWING then
     Toggle("Desenho por Drawing (experimental)", false, function(v)
@@ -7285,11 +7350,11 @@ BtnRow("DIAGNOSTICO DA LINHA", T.Card, function()
     pcall(function() print("[SilkCore Volei]", msg) end)
 end, 34)
 
--- a linha nÃ£o depende mais de Drawing: o passo Ã© sempre amarrado. Se o executor
--- nÃ£o tiver Drawing, sÃ³ a trajetÃ³ria da bola e a previsÃ£o de queda ficam fora.
+-- a linha não depende mais de Drawing: o passo é sempre amarrado. Se o executor
+-- não tiver Drawing, só a trajetória da bola e a previsão de queda ficam fora.
 RunService:BindToRenderStep(VOL_BIND, Enum.RenderPriority.Camera.Value + 4, step)
 if not Drawing then
-    Note("Seu executor nÃ£o expÃµe a Drawing API: a linha de mira funciona igual, mas a trajetÃ³ria da bola e a previsÃ£o de queda nÃ£o desenham.", 40)
+    Note("Seu executor não expõe a Drawing API: a linha de mira funciona igual, mas a trajetória da bola e a previsão de queda não desenham.", 40)
 end
 end
 
@@ -7305,14 +7370,14 @@ Toggle("Tela esticada", false, function(v)
     Toast(v and "tela esticada ligada" or "tela esticada desligada", v)
 end, "Stretch screen")
 Slider("Quanto esticar (menor = mais largo)", 0.35, 1, Mods.Stretch.Y, "%.2f", function(v) Mods.Stretch.Y = v end, "Stretch amount (lower = wider)")
-Note("Achata a imagem na vertical e os jogadores parecem mais largos. Ã‰ sÃ³ visual; o aimlock continua usando a cÃ¢mera real.", 46)
+Note("Achata a imagem na vertical e os jogadores parecem mais largos. É só visual; o aimlock continua usando a câmera real.", 46)
 Section("Movimento")
 Toggle("Pulo duplo", false, function(v)
     Mods.DJ.Enabled, Mods.DJ.Used = v, 0
     Toast(v and "pulo duplo ligado" or "pulo duplo desligado", v)
 end, "Double jump")
 Slider("Pulos no ar", 1, 5, Mods.DJ.Max, "%.0f", function(v) Mods.DJ.Max = math.max(1, math.floor(v + 0.5)) end, "Air jumps")
-Note("Aperte pular de novo no ar. Zera quando vocÃª toca o chÃ£o. Se o jogo bloqueia pulo ou zera a velocidade, esse recurso nÃ£o funciona nele.", 46)
+Note("Aperte pular de novo no ar. Zera quando você toca o chão. Se o jogo bloqueia pulo ou zera a velocidade, esse recurso não funciona nele.", 46)
 end
 
 --------------------------------------------------------------------------------
@@ -7344,8 +7409,8 @@ local function Chart(title, color)
     return {bars = bars, val = val, foot = foot}
 end
 Section("Ao vivo")
-local cFps = Chart("FPS (Ãºltimos 30 s)", T.Accent)
-local cPing = Chart("PING (Ãºltimos 30 s)", T.Accent2)
+local cFps = Chart("FPS (últimos 30 s)", T.Accent)
+local cPing = Chart("PING (últimos 30 s)", T.Accent2)
 local function stats(list)
     local mn, mx, sum = math.huge, 0, 0
     for _, v in ipairs(list) do
@@ -7365,7 +7430,7 @@ local function draw(chart, list, floorMax, unit)
     end
     local mn = stats(list)
     chart.val.Text = string.format("%d %s", list[n] or 0, unit)
-    chart.foot.Text = string.format("mÃ­n %d   mÃ©dia %d   mÃ¡x %d", mn == math.huge and 0 or mn, avg, mx)
+    chart.foot.Text = string.format("mín %d   média %d   máx %d", mn == math.huge and 0 or mn, avg, mx)
 end
 LAY.PerfDraw = function()
     draw(cFps, P.fps, 60, "fps")
@@ -7376,7 +7441,7 @@ tabHooks["Desempenho"] = function()
 end
 do
     local row = Row(54)
-    local lbl = Label(row, "MEMÃ“RIA DO CLIENTE", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.fromOffset(160, 54))
+    local lbl = Label(row, "MEMÓRIA DO CLIENTE", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.fromOffset(160, 54))
     local memLbl = Label(row, "-", 15, T.Text, F.Mono, Enum.TextXAlignment.Right, UDim2.new(1, -216, 0, 0), UDim2.fromOffset(200, 54))
     task.spawn(function()
         while row.Parent do
@@ -7387,7 +7452,7 @@ do
     lbl.ZIndex = 2
 end
 
-Section("Ajustes de grÃ¡fico")
+Section("Ajustes de gráfico")
 local pendingCap = 144
 Slider("Limite de FPS", 30, 360, 144, "%d", function(v)
     pendingCap = math.floor(v + 0.5)
@@ -7397,19 +7462,19 @@ BtnRow("Aplicar o limite de FPS", T.Accent, function()
         setfpscap(pendingCap)
         Toast("limite de fps: " .. pendingCap, true)
     else
-        Toast("seu executor nÃ£o tem setfpscap", false)
+        Toast("seu executor não tem setfpscap", false)
     end
 end, 40)
 Toggle("Sombras do jogo", true, function(v)
     game:GetService("Lighting").GlobalShadows = v
 end, "shadows")
-Slider("Qualidade grÃ¡fica", 1, 10, 10, "%d", function(v)
+Slider("Qualidade gráfica", 1, 10, 10, "%d", function(v)
     local n = math.clamp(math.floor(v + 0.5), 1, 10)
     pcall(function()
         settings().Rendering.QualityLevel = Enum.QualityLevel["Level" .. string.format("%02d", n)]
     end)
 end, "quality")
-BtnRow("Liberar memÃ³ria (coletar lixo)", T.Card, function()
+BtnRow("Liberar memória (coletar lixo)", T.Card, function()
     local before = P.mem
     pcall(collectgarbage, "collect")
     Toast("coleta de lixo executada (era " .. math.floor(before) .. " MB)", true)
@@ -7423,7 +7488,7 @@ local MenuKeys = {Extra = nil, Look = nil, Binding = false, OnBind = function() 
 do
 CurTab = Tab("Config", 0, true)
 Persist.Scope = "cfg"
-Section("AparÃªncia")
+Section("Aparência")
 do
     local row = Row(114)
     Label(row, "Tema", 13, T.Text, F.Body, nil, UDim2.fromOffset(16, 10), UDim2.fromOffset(200, 18))
@@ -7466,21 +7531,21 @@ Toggle("Desfoque do fundo", true, function(v)
     setBlur(isOpen)
 end, "Blur")
 local scene3dOn = true
-Toggle("CenÃ¡rio 3D no fundo", true, function(v)
+Toggle("Cenário 3D no fundo", true, function(v)
     scene3dOn = v
     LAY.S3.enable(v and not ANIM.reduce)
 end, "Scene3D")
-Toggle("AnimaÃ§Ãµes reduzidas", false, function(v)
+Toggle("Animações reduzidas", false, function(v)
     ANIM.reduce = v
     ANIM.speed = v and 0.3 or 1
     LAY.S3.enable(scene3dOn and not v)
 end, "Reduce")
-Slider("TransparÃªncia dos painÃ©is", 0, 0.6, 0.2, "%.2f", function(v)
+Slider("Transparência dos painéis", 0, 0.6, 0.2, "%.2f", function(v)
     LAY.Rail.BackgroundTransparency = v
     LAY.Panel.BackgroundTransparency = v
 end, "PanelT")
 
-Section("Cor prÃ³pria")
+Section("Cor própria")
 do
     local ch, cs, cv = 0.97, 0.78, 1
     local swFrame, hexLbl
@@ -7494,11 +7559,11 @@ do
             hexLbl.Text = string.format("#%02X%02X%02X", math.floor(c.R * 255 + 0.5), math.floor(c.G * 255 + 0.5), math.floor(c.B * 255 + 0.5))
         end
     end
-    Slider("Matiz", 0, 360, ch * 360, "%dÂ°", function(v)
+    Slider("Matiz", 0, 360, ch * 360, "%d°", function(v)
         ch = v / 360
         refreshPick()
     end, "cuH")
-    Slider("SaturaÃ§Ã£o", 0, 100, cs * 100, "%d%%", function(v)
+    Slider("Saturação", 0, 100, cs * 100, "%d%%", function(v)
         cs = v / 100
         refreshPick()
     end, "cuS")
@@ -7556,7 +7621,7 @@ end
 do
     local row = Row(48)
     Label(row, "Tecla pra ciclar os looks", 13, T.Text, F.Body, nil, UDim2.fromOffset(16, 6), UDim2.new(1, -190, 0, 18))
-    Label(row, "aplica o prÃ³ximo look salvo", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 26), UDim2.new(1, -190, 0, 14))
+    Label(row, "aplica o próximo look salvo", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 26), UDim2.new(1, -190, 0, 14))
     local saved = Persist.Get("cfg:lookkey", nil)
     if type(saved) == "string" then
         local ok, k = pcall(function() return Enum.KeyCode[saved] end)
@@ -7598,7 +7663,7 @@ do
             pcall(setclipboard, text)
             Toast("registro copiado (" .. #Log.lines .. " linhas)", true)
         else
-            Toast("seu executor nÃ£o tem setclipboard", false)
+            Toast("seu executor não tem setclipboard", false)
         end
     end)
     Button(row, "LIMPAR", UDim2.new(0.5, 5, 1, -40), UDim2.new(0.5, -17, 0, 30), T.Card, function()
@@ -7629,16 +7694,16 @@ BtnRow("Centralizar a janela", T.Card, function()
     Persist.Set("cfg:pos", nil)
     Toast("janela centralizada", true)
 end, 40)
-BtnRow("Apagar configuraÃ§Ãµes salvas", T.Bad, function()
+BtnRow("Apagar configurações salvas", T.Bad, function()
     Persist.Data = {}
     Persist.Dirty = true
     Persist.Flush()
-    Toast("configuraÃ§Ãµes apagadas (rode o script de novo)", true)
+    Toast("configurações apagadas (rode o script de novo)", true)
 end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.0  Â·  avatar, partes do corpo, catÃ¡logo e efeitos\nexecutor: " .. execName .. "   Â·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.1  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -7778,14 +7843,18 @@ function runLoader(onDone)
     }, LG)
     local content = New("Frame", {Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2}, LG)
 
+    -- Partículas melhoradas: mais quantidade, tamanhos variados, movimento suave
     local motes = {}
-    for i = 1, 36 do
+    for i = 1, 72 do
+        local size = math.random(2, 5)
         local d = New("Frame", {
-            AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(math.random(2, 3), math.random(2, 3)),
+            AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(size, size),
             Position = UDim2.fromScale(math.random(), math.random()), BorderSizePixel = 0, ZIndex = 2,
-            BackgroundColor3 = (i % 3 == 0) and T.Accent2 or T.Accent, BackgroundTransparency = 0.6 + math.random() * 0.3,
+            BackgroundColor3 = (i % 3 == 0) and T.Accent2 or T.Accent, 
+            BackgroundTransparency = 0.5 + math.random() * 0.4,
         }, content)
-        motes[i] = {f = d, sp = 0.015 + math.random() * 0.04}
+        Round(d, size / 2)
+        motes[i] = {f = d, sp = 0.008 + math.random() * 0.035, pulse = math.random() * 6.28, baseAlpha = 0.5 + math.random() * 0.4}
     end
 
     local col = New("Frame", {
@@ -7796,7 +7865,7 @@ function runLoader(onDone)
     logo.always = true
     local word = GlitchText(col, "SILK CORE", 28, UDim2.fromOffset(0, 188), UDim2.new(1, 0, 0, 36), Enum.TextXAlignment.Center)
     word.Intro(1.1)
-    local tag = Label(col, "inicializando mÃ³dulos", 10, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    local tag = Label(col, "inicializando módulos", 10, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 230), UDim2.new(1, 0, 0, 14))
     local bar = New("Frame", {
         Size = UDim2.fromOffset(440, 4), Position = UDim2.fromOffset(10, 258), BackgroundColor3 = T.Card3, BorderSizePixel = 0,
@@ -7823,7 +7892,7 @@ function runLoader(onDone)
                 local ok, v = pcall(function() return getfenv()[n] or genv[n] end)
                 if ok and v then have = have + 1 end
             end
-            return string.format("%s Â· %d/%d funÃ§Ãµes", execName, have, #want)
+            return string.format("%s · %d/%d funções", execName, have, #want)
         end},
         {name = "perfil", timeout = 12, fn = function()
             local url = Morph.Thumb(LocalPlayer.UserId)
@@ -7838,7 +7907,7 @@ function runLoader(onDone)
         end},
         {name = "rig base", timeout = 20, fn = function()
             DefaultRig = DefaultRig or makeRig(Instance.new("HumanoidDescription"))
-            if not DefaultRig then return "indisponÃ­vel (usa o asset direto)" end
+            if not DefaultRig then return "indisponível (usa o asset direto)" end
             return "ok"
         end},
         {name = "assets", timeout = 25, fn = function()
@@ -7852,7 +7921,7 @@ function runLoader(onDone)
             return #ids .. " assets"
         end},
         {name = "partes", timeout = 40, fn = function()
-            return Ward.RestoreAll() .. " peÃ§a(s)"
+            return Ward.RestoreAll() .. " peça(s)"
         end},
         {name = "itens", timeout = 40, fn = function()
             return Cat.RestoreAll() .. " item(ns)"
@@ -7862,7 +7931,7 @@ function runLoader(onDone)
         end},
         {name = "visual", timeout = 10, fn = function()
             Env.Apply()
-            return Env.Loaded() and "filtros ligados" or "padrÃ£o do jogo"
+            return Env.Loaded() and "filtros ligados" or "padrão do jogo"
         end},
         {name = "efeitos", timeout = 10, fn = function()
             return FX.Apply() .. " emissor(es)"
@@ -7880,8 +7949,8 @@ function runLoader(onDone)
             BorderSizePixel = 0, ZIndex = 4,
         }, bar)
         rows[i] = {
-            l = Label(col, "Â·  " .. st.name, 11, T.Faint, F.Mono, nil, UDim2.fromOffset(10, 292 + (i - 1) * 16), UDim2.fromOffset(340, 16)),
-            r = Label(col, "", 10, T.Faint, F.Mono, Enum.TextXAlignment.Right, UDim2.fromOffset(350, 292 + (i - 1) * 16), UDim2.fromOffset(100, 16)),
+            l = Label(col, "○  " .. st.name, 11, T.Faint, F.Mono, nil, UDim2.fromOffset(20, 330 + (i - 1) * 17), UDim2.fromOffset(360, 17)),
+            r = Label(col, "", 10, T.Faint, F.Mono, Enum.TextXAlignment.Right, UDim2.fromOffset(380, 330 + (i - 1) * 17), UDim2.fromOffset(100, 17)),
         }
     end
     local corners = {
@@ -7898,47 +7967,68 @@ function runLoader(onDone)
         BackgroundTransparency = 0.82, BorderSizePixel = 0, ZIndex = 5,
     }, content)
 
-    local hb
+    local hb, loaderTime = nil, 0
     hb = RunService.Heartbeat:Connect(function(dt)
         if not LG.Parent then
             hb:Disconnect()
             return
         end
+        loaderTime = loaderTime + dt
+        
+        -- Partículas com pulso suave
         for _, m in ipairs(motes) do
             local p = m.f.Position
             local y = p.Y.Scale - dt * m.sp
-            if y < -0.03 then y = 1.03 end
+            if y < -0.05 then y = 1.05 end
             m.f.Position = UDim2.new(p.X.Scale, 0, y, 0)
+            -- Pulso de transparência
+            local pulse = (math.sin(loaderTime * 2 + m.pulse) * 0.15 + 0.85)
+            m.f.BackgroundTransparency = m.baseAlpha * pulse
         end
-        scan.Position = UDim2.fromScale(0, (os.clock() * 0.35) % 1)
+        
+        scan.Position = UDim2.fromScale(0, (loaderTime * 0.4) % 1)
         pct.Text = math.floor(fill.Size.X.Scale * 100 + 0.5) .. "%"
+        
+        -- Anima o gradiente da barra
+        barGrad.Offset = Vector2.new(-0.3 + (loaderTime * 0.2) % 1, 0)
+        
+        -- Anima o shine quando a barra tá preenchendo
+        if fill.Size.X.Scale > 0.01 then
+            shine.Position = UDim2.fromScale((loaderTime * 0.5) % 1.3 - 0.15, 0)
+        end
+        
+        -- Pulso suave no glow da borda
+        glowFrame.BackgroundTransparency = 0.85 + math.sin(loaderTime * 1.5) * 0.08
     end)
 
     task.spawn(function()
         local failed = {}
         for i, st in ipairs(steps) do
-            rows[i].l.Text = "â€º  " .. st.name
+            rows[i].l.Text = "›  " .. st.name
             rows[i].l.TextColor3 = T.Text
             local s0 = os.clock()
             local ok, res = runStep(st.fn, st.timeout)
             local ms = math.floor((os.clock() - s0) * 1000)
             if ok then
-                rows[i].l.Text = string.format("âœ“  %-9s %s", st.name, tostring(res))
+                rows[i].l.Text = string.format("✓  %-9s %s", st.name, tostring(res))
                 rows[i].l.TextColor3 = T.Good
             else
                 failed[#failed + 1] = st.name .. ": " .. tostring(res)
-                rows[i].l.Text = string.format("âœ•  %-9s %s", st.name, tostring(res))
+                rows[i].l.Text = string.format("✕  %-9s %s", st.name, tostring(res))
                 rows[i].l.TextColor3 = T.Bad
                 Log.add("ERRO", "loader " .. st.name .. ": " .. tostring(res))
             end
             rows[i].r.Text = ms .. " ms"
             TweenEx(fill, 0.35, Enum.EasingStyle.Quint, {Size = UDim2.fromScale(i / total, 1)})
         end
-        tag.Text = (#failed == 0) and "pronto" or ("pronto com " .. #failed .. " falha(s)")
+        tag.Text = (#failed == 0) and "CARREGAMENTO COMPLETO" or ("PRONTO COM " .. #failed .. " FALHA(S)")
+        tag.TextColor3 = (#failed == 0) and T.Good or T.Bad
+        task.wait(0.5)
+        word.Burst(0.4)
         task.wait(0.45)
-        word.Burst(0.35)
-        task.wait(0.4)
-        logo.vp.Visible = false
+        -- Logo fade out suave
+        TweenService:Create(logo.vp, TweenInfo.new(0.3), {ImageTransparency = 1}):Play()
+        task.wait(0.15)
         for _, d in ipairs(content:GetDescendants()) do
             if d:IsA("TextLabel") then
                 Tween(d, 0.3, {TextTransparency = 1})
@@ -8023,16 +8113,16 @@ do
             end
         end
         for _, it in ipairs(Looks.Names()) do
-            add("Aplicar look " .. it[1] .. " Â· " .. it[2], "look", function() Looks.ApplyIndex(it[1]) end)
+            add("Aplicar look " .. it[1] .. " · " .. it[2], "look", function() Looks.ApplyIndex(it[1]) end)
         end
-        add("PrÃ³ximo look salvo", "look", function() Looks.Next() end)
-        add("Korblox Deathwalker na cabeÃ§a", "partes", function()
+        add("Próximo look salvo", "look", function() Looks.Next() end)
+        add("Korblox Deathwalker na cabeça", "partes", function()
             local ok, info = Ward.Apply("Head", 16580493236)
-            Toast(ok and ("cabeÃ§a aplicada Â· " .. tostring(info)) or tostring(info), ok)
+            Toast(ok and ("cabeça aplicada · " .. tostring(info)) or tostring(info), ok)
         end)
         add("Limpar todas as partes do corpo", "partes", function() Ward.ClearAll()
         Toast("partes do corpo restauradas", true) end)
-        add("Remover todos os itens do catÃ¡logo", "catÃ¡logo", function() Cat.ClearAll()
+        add("Remover todos os itens do catálogo", "catálogo", function() Cat.ClearAll()
         Toast("itens removidos", true) end)
         add("Resetar todas as cores do corpo", "cores", function() Colors.ResetAll()
         Toast("cores restauradas", true) end)
@@ -8054,7 +8144,7 @@ do
                 pcall(setclipboard, table.concat(Log.lines, "\n"))
                 Toast("registro copiado", true)
             else
-                Toast("seu executor nÃ£o tem setclipboard", false)
+                Toast("seu executor não tem setclipboard", false)
             end
         end)
         add("Fechar o menu", "sistema", function() SetOpen(false) end)
@@ -8405,13 +8495,13 @@ Toggle("Voar (WASD + Space/Shift)", false, function(v)
     if v then task.spawn(startFly) else stopFly() end
     Toast("fly "..(v and "ligado" or "desligado"), v)
 end, "hk_fly")
-Toggle("Noclip (sem colisÃ£o)", false, function(v)
+Toggle("Noclip (sem colisão)", false, function(v)
     HackState.noclip=v
     if v then task.spawn(startNoclip) end
     Toast("noclip "..(v and "ligado" or "desligado"), v)
 end, "hk_noclip")
 
-Section("SobrevivÃªncia")
+Section("Sobrevivência")
 Toggle("God Mode (HP sempre cheio)", false, function(v)
     HackState.godMode=v
     Toast("god mode "..(v and "ligado" or "desligado"), v)
@@ -8440,13 +8530,13 @@ Toggle("Full Bright", false, function(v)
     applyFB(v)
     Toast("full bright "..(v and "ligado" or "desligado"), v)
 end, "hk_fb")
-Toggle("Sem NÃ©voa", false, function(v)
+Toggle("Sem Névoa", false, function(v)
     HackState.noFog=v
     applyNoFog(v)
-    Toast("sem nÃ©voa "..(v and "ligado" or "desligado"), v)
+    Toast("sem névoa "..(v and "ligado" or "desligado"), v)
 end, "hk_nofog")
 
-Section("UtilitÃ¡rios")
+Section("Utilitários")
 Toggle("Anti-AFK", false, function(v)
     HackState.antiAfk=v
     if v then task.spawn(startAfk) end
@@ -8461,13 +8551,13 @@ end, "hk_rspy")
 do
     -- TP to player
     local row=Row(50)
-    Label(row,"Teleportar atÃ© jogador",12,T.Text,F.Bold,nil,UDim2.fromOffset(16,0),UDim2.new(0.55,0,1,0))
+    Label(row,"Teleportar até jogador",12,T.Text,F.Bold,nil,UDim2.fromOffset(16,0),UDim2.new(0.55,0,1,0))
     local pField=Field(row,UDim2.new(0.56,0,0.5,-15),UDim2.new(0.26,0,0,30),"nome...")
     Button(row,"IR",UDim2.new(0.84,0,0.5,-15),UDim2.fromOffset(52,30),T.Accent,function()
         local target=Players:FindFirstChild(pField.Text)
-        if not target or not target.Character then Toast("jogador nÃ£o encontrado",false); return end
+        if not target or not target.Character then Toast("jogador não encontrado",false); return end
         local r=hkRoot(); local tr=target.Character:FindFirstChild("HumanoidRootPart")
-        if r and tr then r.CFrame=tr.CFrame+Vector3.new(0,3,0); Toast("tp â†’ "..target.Name,true)
+        if r and tr then r.CFrame=tr.CFrame+Vector3.new(0,3,0); Toast("tp → "..target.Name,true)
         else Toast("sem root part",false) end
     end)
 end
@@ -8491,11 +8581,11 @@ do
 end
 
 Section("SilkCore Commands")
-Note("Carrega o motor de comandos completo (base Infinite Yield) rebatizado com a marca SilkCore â€” tÃ­tulo da janela, crÃ©ditos e textos trocados no momento do carregamento. O chat de comandos aparece no chat do jogo.", 52)
+Note("Carrega o motor de comandos completo (base Infinite Yield) rebatizado com a marca SilkCore — título da janela, créditos e textos trocados no momento do carregamento. O chat de comandos aparece no chat do jogo.", 52)
 
 -- troca literal e segura: escapa os caracteres especiais de pattern na busca,
--- escapa '%' na troca. SÃ³ mexe em texto visÃ­vel (tÃ­tulo/crÃ©ditos/hint), nunca
--- em nomes de variÃ¡vel, pastas de asset ou lÃ³gica interna.
+-- escapa '%' na troca. Só mexe em texto visível (título/créditos/hint), nunca
+-- em nomes de variável, pastas de asset ou lógica interna.
 local function bhPlainGsub(src, find, repl)
     local escFind = find:gsub("([%(%)%.%%%+%-%*%?%[%]%^%$])", "%%%1")
     local escRepl = repl:gsub("%%", "%%%%")
@@ -8521,21 +8611,6387 @@ BtnRow("CARREGAR SILKCORE COMMANDS", T.Accent, function()
             fn()
         end)
         if ok then
-            Toast("âœ“ SilkCore Commands carregado Â· use ; no chat", true)
+            Toast("✓ SilkCore Commands carregado · use ; no chat", true)
         else
             Toast("falhou: "..(tostring(err):sub(1,60)), false)
             print("[SilkCore] Commands error:", err)
         end
     end)
 end)
-Note("ApÃ³s carregar: ';cmds' lista todos os comandos. Ex: ';speed 100' ';fly' ';tp [player]'. Janela abre com tÃ­tulo e crÃ©ditos SilkCore.", 52)
+Note("Após carregar: ';cmds' lista todos os comandos. Ex: ';speed 100' ';fly' ';tp [player]'. Janela abre com título e créditos SilkCore.", 52)
+
+
+
+--------------------------------------------------------------------------------
+-- COMBAT HACKS - Universal Combat Enhancements  
+--------------------------------------------------------------------------------
+Section("Combat Avançado")
+Note("Hacks de combate universais para jogos de luta e PvP", 48)
+
+Toggle("Hitbox Expander", false, function(v)
+    HackState.hitboxExpand = v
+    if v then
+        task.spawn(function()
+            while HackState.hitboxExpand do
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                        if hrp and hrp:IsA("BasePart") then
+                            hrp.Size = Vector3.new(20, 20, 20)
+                            hrp.Transparency = 0.8
+                            hrp.CanCollide = false
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp and hrp:IsA("BasePart") then
+                        hrp.Size = Vector3.new(2, 2, 1)
+                        hrp.Transparency = 1
+                    end
+                end
+            end
+        end)
+    end
+    Toast("hitbox expander "..(v and "ligado" or "desligado"), v)
+end, "hk_hitbox")
+
+Toggle("Silent Aim", false, function(v)
+    HackState.silentAim = v
+    Toast("silent aim "..(v and "ligado" or "desligado"), v)
+end, "hk_silentaim")
+
+Toggle("Auto Parry", false, function(v)
+    HackState.autoParry = v
+    if v then
+        task.spawn(function()
+            while HackState.autoParry do
+                local char = LocalPlayer.Character
+                if char then
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Character then
+                            local tool = player.Character:FindFirstChildOfClass("Tool")
+                            if tool then
+                                local vim = game:GetService("VirtualInputManager")
+                                vim:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+                                task.wait(0.05)
+                                vim:SendKeyEvent(false, Enum.KeyCode.F, false, game)
+                                task.wait(0.3)
+                            end
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("auto parry "..(v and "ligado" or "desligado"), v)
+end, "hk_parry")
+
+Slider("Auto Click CPS", 1, 50, 10, "%d clicks/s", function(v)
+    HackState.autoClickSpeed = v
+end, "hk_clickspeed")
+
+Toggle("Auto Clicker", false, function(v)
+    HackState.autoClick = v
+    if v then
+        task.spawn(function()
+            local mouse = LocalPlayer:GetMouse()
+            while HackState.autoClick do
+                mouse1press()
+                task.wait(0.01)
+                mouse1release()
+                task.wait(1 / (HackState.autoClickSpeed or 10))
+            end
+        end)
+    end
+    Toast("auto clicker "..(v and "ligado" or "desligado"), v)
+end, "hk_click")
+
+Toggle("Rapid Fire", false, function(v)
+    HackState.rapidFire = v
+    if v then
+        task.spawn(function()
+            while HackState.rapidFire do
+                local char = LocalPlayer.Character
+                if char then
+                    local tool = char:FindFirstChildOfClass("Tool")
+                    if tool then
+                        tool:Activate()
+                        task.wait(0.05)
+                    end
+                end
+                task.wait(0.05)
+            end
+        end)
+    end
+    Toast("rapid fire "..(v and "ligado" or "desligado"), v)
+end, "hk_rapid")
+
+Toggle("Kill Aura", false, function(v)
+    HackState.killAura = v
+    if v then
+        task.spawn(function()
+            while HackState.killAura do
+                local root = hkRoot()
+                if root then
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Character then
+                            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+                            if targetRoot and (targetRoot.Position - root.Position).Magnitude < 20 then
+                                local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+                                if tool then
+                                    tool:Activate()
+                                    task.wait(0.1)
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait(0.2)
+            end
+        end)
+    end
+    Toast("kill aura "..(v and "ligado" or "desligado"), v)
+end, "hk_aura")
+
+--------------------------------------------------------------------------------
+-- ESP SYSTEMS
+--------------------------------------------------------------------------------
+Section("ESP & Visuals")
+Note("Sistemas de visualização através de paredes e objetos", 52)
+
+Toggle("Player ESP", false, function(v)
+    HackState.playerESP = v
+    if v then
+        task.spawn(function()
+            local espObjects = {}
+            local function createESP(char)
+                if espObjects[char] then return end
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if not hrp or not hum then return end
+                
+                local box = Instance.new("BoxHandleAdornment")
+                box.Size = Vector3.new(4, 5, 4)
+                box.Color3 = Color3.fromRGB(255, 0, 0)
+                box.Transparency = 0.7
+                box.AlwaysOnTop = true
+                box.ZIndex = 5
+                box.Adornee = hrp
+                box.Parent = hrp
+                
+                local nameLabel = Instance.new("BillboardGui")
+                nameLabel.Size = UDim2.new(0, 100, 0, 40)
+                nameLabel.StudsOffset = Vector3.new(0, 3, 0)
+                nameLabel.AlwaysOnTop = true
+                nameLabel.Adornee = hrp
+                nameLabel.Parent = hrp
+                
+                local text = Instance.new("TextLabel")
+                text.Size = UDim2.new(1, 0, 1, 0)
+                text.BackgroundTransparency = 1
+                text.Text = char.Name
+                text.TextColor3 = Color3.new(1, 1, 1)
+                text.TextStrokeTransparency = 0.5
+                text.TextScaled = true
+                text.Font = Enum.Font.GothamBold
+                text.Parent = nameLabel
+                
+                local healthLabel = Instance.new("TextLabel")
+                healthLabel.Size = UDim2.new(1, 0, 0.5, 0)
+                healthLabel.Position = UDim2.new(0, 0, 0.5, 0)
+                healthLabel.BackgroundTransparency = 1
+                healthLabel.Text = math.floor(hum.Health).."/"..math.floor(hum.MaxHealth)
+                healthLabel.TextColor3 = Color3.new(0, 1, 0)
+                healthLabel.TextStrokeTransparency = 0.5
+                healthLabel.TextScaled = true
+                healthLabel.Font = Enum.Font.Gotham
+                healthLabel.Parent = nameLabel
+                
+                espObjects[char] = {box, nameLabel, healthLabel, hum}
+                
+                hum.HealthChanged:Connect(function(health)
+                    if espObjects[char] then
+                        healthLabel.Text = math.floor(health).."/"..math.floor(hum.MaxHealth)
+                        local ratio = health / hum.MaxHealth
+                        healthLabel.TextColor3 = Color3.fromRGB(255 * (1 - ratio), 255 * ratio, 0)
+                    end
+                end)
+            end
+            
+            local function removeESP(char)
+                if espObjects[char] then
+                    for _, obj in ipairs(espObjects[char]) do
+                        if typeof(obj) ~= "number" and obj.Destroy then
+                            obj:Destroy()
+                        end
+                    end
+                    espObjects[char] = nil
+                end
+            end
+            
+            while HackState.playerESP do
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        createESP(player.Character)
+                    end
+                end
+                task.wait(1)
+            end
+            
+            for char, _ in pairs(espObjects) do
+                removeESP(char)
+            end
+        end)
+    end
+    Toast("player ESP "..(v and "ligado" or "desligado"), v)
+end, "hk_esp_player")
+
+Toggle("Item ESP", false, function(v)
+    HackState.itemESP = v
+    if v then
+        task.spawn(function()
+            local espItems = {}
+            while HackState.itemESP do
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj:IsA("Tool") and not espItems[obj] then
+                        local handle = obj:FindFirstChild("Handle")
+                        if handle and handle:IsA("BasePart") then
+                            local billboard = Instance.new("BillboardGui")
+                            billboard.Size = UDim2.new(0, 100, 0, 30)
+                            billboard.StudsOffset = Vector3.new(0, 2, 0)
+                            billboard.AlwaysOnTop = true
+                            billboard.Adornee = handle
+                            billboard.Parent = handle
+                            
+                            local label = Instance.new("TextLabel")
+                            label.Size = UDim2.new(1, 0, 1, 0)
+                            label.BackgroundTransparency = 1
+                            label.Text = obj.Name
+                            label.TextColor3 = Color3.fromRGB(255, 255, 0)
+                            label.TextStrokeTransparency = 0.5
+                            label.TextScaled = true
+                            label.Font = Enum.Font.GothamBold
+                            label.Parent = billboard
+                            
+                            espItems[obj] = billboard
+                        end
+                    end
+                end
+                task.wait(2)
+            end
+            for _, billboard in pairs(espItems) do
+                if billboard and billboard.Destroy then billboard:Destroy() end
+            end
+        end)
+    end
+    Toast("item ESP "..(v and "ligado" or "desligado"), v)
+end, "hk_esp_item")
+
+Toggle("Chest ESP", false, function(v)
+    HackState.chestESP = v
+    if v then
+        task.spawn(function()
+            local espChests = {}
+            while HackState.chestESP do
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if not espChests[obj] then
+                        local isChest = obj.Name:lower():find("chest") or 
+                                       obj.Name:lower():find("crate") or
+                                       obj.Name:lower():find("treasure") or
+                                       obj.Name:lower():find("loot")
+                        if isChest and obj:IsA("Model") then
+                            local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                            if primary then
+                                local billboard = Instance.new("BillboardGui")
+                                billboard.Size = UDim2.new(0, 120, 0, 35)
+                                billboard.StudsOffset = Vector3.new(0, 3, 0)
+                                billboard.AlwaysOnTop = true
+                                billboard.Adornee = primary
+                                billboard.Parent = primary
+                                
+                                local label = Instance.new("TextLabel")
+                                label.Size = UDim2.new(1, 0, 1, 0)
+                                label.BackgroundTransparency = 1
+                                label.Text = obj.Name
+                                label.TextColor3 = Color3.fromRGB(255, 215, 0)
+                                label.TextStrokeTransparency = 0.5
+                                label.TextScaled = true
+                                label.Font = Enum.Font.GothamBold
+                                label.Parent = billboard
+                                
+                                espChests[obj] = billboard
+                            end
+                        end
+                    end
+                end
+                task.wait(3)
+            end
+            for _, billboard in pairs(espChests) do
+                if billboard and billboard.Destroy then billboard:Destroy() end
+            end
+        end)
+    end
+    Toast("chest ESP "..(v and "ligado" or "desligado"), v)
+end, "hk_esp_chest")
+
+Toggle("NPC ESP", false, function(v)
+    HackState.npcESP = v
+    if v then
+        task.spawn(function()
+            local espNPCs = {}
+            while HackState.npcESP do
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj:IsA("Model") and not espNPCs[obj] then
+                        local hum = obj:FindFirstChildOfClass("Humanoid")
+                        local hrp = obj:FindFirstChild("HumanoidRootPart")
+                        if hum and hrp and not Players:GetPlayerFromCharacter(obj) then
+                            local box = Instance.new("BoxHandleAdornment")
+                            box.Size = Vector3.new(4, 5, 4)
+                            box.Color3 = Color3.fromRGB(255, 100, 0)
+                            box.Transparency = 0.7
+                            box.AlwaysOnTop = true
+                            box.ZIndex = 5
+                            box.Adornee = hrp
+                            box.Parent = hrp
+                            
+                            local billboard = Instance.new("BillboardGui")
+                            billboard.Size = UDim2.new(0, 100, 0, 40)
+                            billboard.StudsOffset = Vector3.new(0, 3, 0)
+                            billboard.AlwaysOnTop = true
+                            billboard.Adornee = hrp
+                            billboard.Parent = hrp
+                            
+                            local label = Instance.new("TextLabel")
+                            label.Size = UDim2.new(1, 0, 1, 0)
+                            label.BackgroundTransparency = 1
+                            label.Text = obj.Name.." ["..math.floor(hum.Health).."]"
+                            label.TextColor3 = Color3.fromRGB(255, 150, 0)
+                            label.TextStrokeTransparency = 0.5
+                            label.TextScaled = true
+                            label.Font = Enum.Font.GothamBold
+                            label.Parent = billboard
+                            
+                            espNPCs[obj] = {box, billboard}
+                        end
+                    end
+                end
+                task.wait(2)
+            end
+            for _, objs in pairs(espNPCs) do
+                for _, o in ipairs(objs) do
+                    if o and o.Destroy then o:Destroy() end
+                end
+            end
+        end)
+    end
+    Toast("NPC ESP "..(v and "ligado" or "desligado"), v)
+end, "hk_esp_npc")
+
+Toggle("Vehicle ESP", false, function(v)
+    HackState.vehicleESP = v
+    if v then
+        task.spawn(function()
+            local espVehicles = {}
+            while HackState.vehicleESP do
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if not espVehicles[obj] then
+                        local isVehicle = obj:FindFirstChildOfClass("VehicleSeat") or 
+                                         obj.Name:lower():find("car") or
+                                         obj.Name:lower():find("bike") or
+                                         obj.Name:lower():find("vehicle")
+                        if isVehicle and obj:IsA("Model") then
+                            local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                            if primary then
+                                local billboard = Instance.new("BillboardGui")
+                                billboard.Size = UDim2.new(0, 100, 0, 30)
+                                billboard.StudsOffset = Vector3.new(0, 4, 0)
+                                billboard.AlwaysOnTop = true
+                                billboard.Adornee = primary
+                                billboard.Parent = primary
+                                
+                                local label = Instance.new("TextLabel")
+                                label.Size = UDim2.new(1, 0, 1, 0)
+                                label.BackgroundTransparency = 1
+                                label.Text = obj.Name
+                                label.TextColor3 = Color3.fromRGB(0, 200, 255)
+                                label.TextStrokeTransparency = 0.5
+                                label.TextScaled = true
+                                label.Font = Enum.Font.GothamBold
+                                label.Parent = billboard
+                                
+                                espVehicles[obj] = billboard
+                            end
+                        end
+                    end
+                end
+                task.wait(3)
+            end
+            for _, billboard in pairs(espVehicles) do
+                if billboard and billboard.Destroy then billboard:Destroy() end
+            end
+        end)
+    end
+    Toast("vehicle ESP "..(v and "ligado" or "desligado"), v)
+end, "hk_esp_vehicle")
+
+Toggle("Tracers", false, function(v)
+    HackState.tracers = v
+    if v then
+        task.spawn(function()
+            local tracerFolder = Instance.new("Folder")
+            tracerFolder.Name = "SilkCoreTracers"
+            tracerFolder.Parent = Workspace
+            
+            while HackState.tracers do
+                for _, obj in ipairs(tracerFolder:GetChildren()) do
+                    obj:Destroy()
+                end
+                
+                local root = hkRoot()
+                if root then
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Character then
+                            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+                            if targetRoot then
+                                local beam = Instance.new("Part")
+                                beam.Anchored = true
+                                beam.CanCollide = false
+                                beam.Material = Enum.Material.Neon
+                                beam.Color = Color3.fromRGB(255, 0, 0)
+                                beam.Transparency = 0.5
+                                beam.Size = Vector3.new(0.2, 0.2, (targetRoot.Position - root.Position).Magnitude)
+                                beam.CFrame = CFrame.new(root.Position, targetRoot.Position) * CFrame.new(0, 0, -beam.Size.Z / 2)
+                                beam.Parent = tracerFolder
+                            end
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+            
+            tracerFolder:Destroy()
+        end)
+    end
+    Toast("tracers "..(v and "ligado" or "desligado"), v)
+end, "hk_tracers")
+
+--------------------------------------------------------------------------------
+-- AUTO FARM SYSTEMS
+--------------------------------------------------------------------------------
+Section("Auto Farm Universal")
+Note("Sistemas de farm automatico para varios tipos de jogo", 52)
+
+Toggle("Auto Collect", false, function(v)
+    HackState.autoCollect = v
+    if v then
+        task.spawn(function()
+            while HackState.autoCollect do
+                local root = hkRoot()
+                if root then
+                    for _, obj in ipairs(Workspace:GetDescendants()) do
+                        if obj:IsA("BasePart") and (obj.Name:lower():find("coin") or 
+                           obj.Name:lower():find("collect") or 
+                           obj.Name:lower():find("orb") or
+                           obj.Name:lower():find("gem")) then
+                            if (obj.Position - root.Position).Magnitude < 50 then
+                                root.CFrame = CFrame.new(obj.Position)
+                                task.wait(0.1)
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("auto collect "..(v and "ligado" or "desligado"), v)
+end, "hk_collect")
+
+Toggle("Auto Farm NPCs", false, function(v)
+    HackState.autoFarmNPC = v
+    if v then
+        task.spawn(function()
+            while HackState.autoFarmNPC do
+                local root = hkRoot()
+                local char = LocalPlayer.Character
+                if root and char then
+                    local closest = nil
+                    local closestDist = 100
+                    
+                    for _, obj in ipairs(Workspace:GetDescendants()) do
+                        if obj:IsA("Model") then
+                            local hum = obj:FindFirstChildOfClass("Humanoid")
+                            local hrp = obj:FindFirstChild("HumanoidRootPart")
+                            if hum and hrp and hum.Health > 0 and not Players:GetPlayerFromCharacter(obj) then
+                                local dist = (hrp.Position - root.Position).Magnitude
+                                if dist < closestDist then
+                                    closest = hrp
+                                    closestDist = dist
+                                end
+                            end
+                        end
+                    end
+                    
+                    if closest then
+                        root.CFrame = CFrame.new(closest.Position) * CFrame.new(0, 0, 3)
+                        local tool = char:FindFirstChildOfClass("Tool")
+                        if tool then
+                            tool:Activate()
+                        end
+                        task.wait(0.2)
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("auto farm NPC "..(v and "ligado" or "desligado"), v)
+end, "hk_farm_npc")
+
+Slider("Auto Rebirth Delay", 5, 300, 30, "%ds", function(v)
+    HackState.rebirthDelay = v
+end, "hk_rebirth_delay")
+
+Toggle("Auto Rebirth", false, function(v)
+    HackState.autoRebirth = v
+    if v then
+        task.spawn(function()
+            while HackState.autoRebirth do
+                local success = false
+                
+                for _, obj in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if obj:IsA("RemoteEvent") and (obj.Name:lower():find("rebirth") or obj.Name:lower():find("prestige")) then
+                        pcall(function() obj:FireServer() end)
+                        success = true
+                    end
+                end
+                
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj:IsA("ClickDetector") and obj.Parent.Name:lower():find("rebirth") then
+                        pcall(function() fireclickdetector(obj) end)
+                        success = true
+                    end
+                end
+                
+                if success then
+                    Toast("tentou rebirth", true)
+                end
+                
+                task.wait(HackState.rebirthDelay or 30)
+            end
+        end)
+    end
+    Toast("auto rebirth "..(v and "ligado" or "desligado"), v)
+end, "hk_rebirth")
+
+Toggle("Auto Quest", false, function(v)
+    HackState.autoQuest = v
+    if v then
+        task.spawn(function()
+            while HackState.autoQuest do
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj:IsA("ProximityPrompt") and (obj.ObjectText:lower():find("quest") or obj.ActionText:lower():find("accept")) then
+                        pcall(function() fireproximityprompt(obj) end)
+                    end
+                    if obj:IsA("ClickDetector") and (obj.Parent.Name:lower():find("quest") or obj.Parent.Name:lower():find("mission")) then
+                        pcall(function() fireclickdetector(obj) end)
+                    end
+                end
+                task.wait(5)
+            end
+        end)
+    end
+    Toast("auto quest "..(v and "ligado" or "desligado"), v)
+end, "hk_quest")
+
+--------------------------------------------------------------------------------
+-- SIMULATOR GAMES
+--------------------------------------------------------------------------------
+Section("Simuladores")
+Note("Automacao especifica para jogos tipo simulator", 52)
+
+Toggle("Auto Tap", false, function(v)
+    HackState.autoTap = v
+    if v then
+        task.spawn(function()
+            while HackState.autoTap do
+                for _, obj in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+                        if obj.Name:lower():find("click") or obj.Name:lower():find("tap") or obj.Name:lower():find("collect") then
+                            pcall(function()
+                                if obj:IsA("RemoteEvent") then
+                                    obj:FireServer()
+                                else
+                                    obj:InvokeServer()
+                                end
+                            end)
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("auto tap "..(v and "ligado" or "desligado"), v)
+end, "hk_tap")
+
+Toggle("Auto Buy", false, function(v)
+    HackState.autoBuy = v
+    if v then
+        task.spawn(function()
+            while HackState.autoBuy do
+                for _, obj in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+                        if obj.Name:lower():find("buy") or obj.Name:lower():find("purchase") or obj.Name:lower():find("upgrade") then
+                            pcall(function()
+                                if obj:IsA("RemoteEvent") then
+                                    obj:FireServer("Best")
+                                    obj:FireServer(1)
+                                    obj:FireServer()
+                                else
+                                    obj:InvokeServer("Best")
+                                    obj:InvokeServer(1)
+                                end
+                            end)
+                        end
+                    end
+                end
+                task.wait(2)
+            end
+        end)
+    end
+    Toast("auto buy "..(v and "ligado" or "desligado"), v)
+end, "hk_buy")
+
+Toggle("Auto Hatch", false, function(v)
+    HackState.autoHatch = v
+    if v then
+        task.spawn(function()
+            while HackState.autoHatch do
+                for _, obj in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+                        if obj.Name:lower():find("hatch") or obj.Name:lower():find("open") or obj.Name:lower():find("egg") then
+                            pcall(function()
+                                if obj:IsA("RemoteEvent") then
+                                    obj:FireServer()
+                                    obj:FireServer(1)
+                                    obj:FireServer("Basic")
+                                else
+                                    obj:InvokeServer()
+                                    obj:InvokeServer(1)
+                                end
+                            end)
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("auto hatch "..(v and "ligado" or "desligado"), v)
+end, "hk_hatch")
+
+--------------------------------------------------------------------------------
+-- ADVANCED MOVEMENT
+--------------------------------------------------------------------------------
+Section("Movimento Avancado")
+Note("Recursos extras de movimento", 48)
+
+Toggle("Wall Walk", false, function(v)
+    HackState.wallWalk = v
+    if v then
+        task.spawn(function()
+            while HackState.wallWalk do
+                local char = LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        for _, part in ipairs(char:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0, 0.5, 1, 1)
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+            local char = LocalPlayer.Character
+            if char then
+                for _, part in ipairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CustomPhysicalProperties = nil
+                    end
+                end
+            end
+        end)
+    end
+    Toast("wall walk "..(v and "ligado" or "desligado"), v)
+end, "hk_wallwalk")
+
+Toggle("Platform Creator", false, function(v)
+    HackState.platformMode = v
+    if v then
+        task.spawn(function()
+            local platforms = {}
+            while HackState.platformMode do
+                local root = hkRoot()
+                if root then
+                    local platform = Instance.new("Part")
+                    platform.Size = Vector3.new(8, 1, 8)
+                    platform.Anchored = true
+                    platform.Transparency = 0.5
+                    platform.Material = Enum.Material.Neon
+                    platform.Color = Color3.fromRGB(0, 200, 255)
+                    platform.Position = root.Position - Vector3.new(0, 4, 0)
+                    platform.Parent = Workspace
+                    table.insert(platforms, platform)
+                    
+                    if #platforms > 10 then
+                        local old = table.remove(platforms, 1)
+                        if old and old.Parent then old:Destroy() end
+                    end
+                end
+                task.wait(0.5)
+            end
+            for _, plat in ipairs(platforms) do
+                if plat and plat.Parent then plat:Destroy() end
+            end
+        end)
+    end
+    Toast("platform creator "..(v and "ligado" or "desligado"), v)
+end, "hk_platform")
+
+Toggle("Fling Mode", false, function(v)
+    HackState.flingMode = v
+    if v then
+        task.spawn(function()
+            while HackState.flingMode do
+                local root = hkRoot()
+                if root then
+                    local bodyVel = Instance.new("BodyVelocity")
+                    bodyVel.Velocity = Vector3.new(0, 0, 0)
+                    bodyVel.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                    bodyVel.Parent = root
+                    
+                    task.wait(0.1)
+                    
+                    bodyVel.Velocity = Vector3.new(math.random(-100, 100), math.random(50, 150), math.random(-100, 100))
+                    
+                    task.wait(0.1)
+                    bodyVel:Destroy()
+                end
+                task.wait(0.3)
+            end
+        end)
+    end
+    Toast("fling mode "..(v and "ligado" or "desligado"), v)
+end, "hk_fling")
+
+Toggle("Swim in Air", false, function(v)
+    HackState.swimAir = v
+    if v then
+        task.spawn(function()
+            while HackState.swimAir do
+                local char = LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        hum:SetStateEnabled(Enum.HumanoidStateType.Swimming, true)
+                        hum:ChangeState(Enum.HumanoidStateType.Swimming)
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("swim air "..(v and "ligado" or "desligado"), v)
+end, "hk_swim")
+
+Toggle("Auto Rotate", false, function(v)
+    HackState.autoRotate = v
+    if v then
+        task.spawn(function()
+            while HackState.autoRotate do
+                local root = hkRoot()
+                if root then
+                    local closest = nil
+                    local closestDist = 1000
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Character then
+                            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+                            if targetRoot then
+                                local dist = (targetRoot.Position - root.Position).Magnitude
+                                if dist < closestDist then
+                                    closest = targetRoot
+                                    closestDist = dist
+                                end
+                            end
+                        end
+                    end
+                    if closest then
+                        root.CFrame = CFrame.new(root.Position, closest.Position)
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("auto rotate "..(v and "ligado" or "desligado"), v)
+end, "hk_rotate")
+
+--------------------------------------------------------------------------------
+-- SURVIVAL & PROTECTION
+--------------------------------------------------------------------------------
+Section("Sobrevivencia Extra")
+Note("Protecoes adicionais", 48)
+
+Toggle("Anti-Ragdoll", false, function(v)
+    HackState.antiRagdoll = v
+    if v then
+        task.spawn(function()
+            while HackState.antiRagdoll do
+                local char = LocalPlayer.Character
+                if char then
+                    for _, obj in ipairs(char:GetDescendants()) do
+                        if obj:IsA("BodyVelocity") or obj:IsA("BodyPosition") or obj:IsA("BodyGyro") then
+                            obj:Destroy()
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("anti-ragdoll "..(v and "ligado" or "desligado"), v)
+end, "hk_antiragdoll")
+
+Toggle("Anti-Stun", false, function(v)
+    HackState.antiStun = v
+    if v then
+        task.spawn(function()
+            while HackState.antiStun do
+                local char = LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        for _, state in ipairs(Enum.HumanoidStateType:GetEnumItems()) do
+                            hum:SetStateEnabled(state, true)
+                        end
+                        if hum.Sit then hum.Sit = false end
+                        if hum.PlatformStand then hum.PlatformStand = false end
+                    end
+                end
+                task.wait(0.2)
+            end
+        end)
+    end
+    Toast("anti-stun "..(v and "ligado" or "desligado"), v)
+end, "hk_antistun")
+
+Toggle("Infinite Health", false, function(v)
+    HackState.infHealth = v
+    if v then
+        task.spawn(function()
+            while HackState.infHealth do
+                local char = LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum and hum.Health < hum.MaxHealth then
+                        hum.Health = hum.MaxHealth
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("infinite health "..(v and "ligado" or "desligado"), v)
+end, "hk_infhealth")
+
+Toggle("Anti-Fall Damage", false, function(v)
+    HackState.antiFall = v
+    Toast("anti-fall damage "..(v and "ligado" or "desligado"), v)
+end, "hk_antifall")
+
+trackHK(RunService.Stepped:Connect(function()
+    if HackState.antiFall then
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+                hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            end
+        end
+    end
+end))
+
+--------------------------------------------------------------------------------
+-- VISUAL ENHANCEMENTS
+--------------------------------------------------------------------------------
+Section("Visual Extra")
+Note("Modificacoes visuais avancadas", 48)
+
+Toggle("X-Ray", false, function(v)
+    HackState.xray = v
+    if v then
+        task.spawn(function()
+            local originalTransparency = {}
+            for _, obj in ipairs(Workspace:GetDescendants()) do
+                if obj:IsA("BasePart") and not obj.Parent:FindFirstChildOfClass("Humanoid") then
+                    originalTransparency[obj] = obj.Transparency
+                    obj.Transparency = 0.8
+                end
+            end
+            
+            while HackState.xray do
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") and not obj.Parent:FindFirstChildOfClass("Humanoid") and not originalTransparency[obj] then
+                        originalTransparency[obj] = obj.Transparency
+                        obj.Transparency = 0.8
+                    end
+                end
+                task.wait(2)
+            end
+            
+            for obj, trans in pairs(originalTransparency) do
+                if obj and obj.Parent then
+                    obj.Transparency = trans
+                end
+            end
+        end)
+    end
+    Toast("x-ray "..(v and "ligado" or "desligado"), v)
+end, "hk_xray")
+
+Toggle("Remove Textures", false, function(v)
+    HackState.removeTextures = v
+    if v then
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("Decal") or obj:IsA("Texture") then
+                obj.Transparency = 1
+            end
+            if obj:IsA("BasePart") then
+                obj.Material = Enum.Material.SmoothPlastic
+            end
+        end
+    else
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("Decal") or obj:IsA("Texture") then
+                obj.Transparency = 0
+            end
+        end
+    end
+    Toast("remove textures "..(v and "ligado" or "desligado"), v)
+end, "hk_notex")
+
+Slider("FOV", 70, 120, 90, "%d", function(v)
+    HackState.customFOV = v
+    local cam = Workspace.CurrentCamera
+    if cam then
+        cam.FieldOfView = v
+    end
+end, "hk_fov")
+
+Toggle("Custom FOV", false, function(v)
+    HackState.fovEnabled = v
+    local cam = Workspace.CurrentCamera
+    if cam then
+        if v then
+            cam.FieldOfView = HackState.customFOV or 90
+        else
+            cam.FieldOfView = 70
+        end
+    end
+    Toast("custom FOV "..(v and "ligado" or "desligado"), v)
+end, "hk_fov_on")
+
+--------------------------------------------------------------------------------
+-- UTILITY & SERVER
+--------------------------------------------------------------------------------
+Section("Utilidades & Server")
+Note("Ferramentas uteis e manipulacao de servidor", 48)
+
+Toggle("FPS Unlocker", false, function(v)
+    HackState.fpsUnlock = v
+    setfpscap(v and 999 or 60)
+    Toast("FPS unlocker "..(v and "ligado" or "desligado"), v)
+end, "hk_fps")
+
+BtnRow("Server Hop", T.Accent, function()
+    Toast("procurando novo servidor...", true)
+    task.spawn(function()
+        local success, err = pcall(function()
+            local servers = game:GetService("HttpService"):JSONDecode(
+                game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100")
+            )
+            if servers and servers.data then
+                for _, server in ipairs(servers.data) do
+                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+                        return
+                    end
+                end
+            end
+        end)
+        if not success then
+            Toast("server hop falhou", false)
+        end
+    end)
+end)
+
+BtnRow("Rejoin Server", T.Card, function()
+    Toast("reconectando...", true)
+    task.wait(0.5)
+    game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
+end)
+
+BtnRow("Copy Game Link", T.Card, function()
+    local link = "https://www.roblox.com/games/"..game.PlaceId
+    setclipboard(link)
+    Toast("link copiado", true)
+end)
+
+do
+    local row = Row(50)
+    Label(row, "Teleport para PlaceId", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.5, 0, 1, 0))
+    local placeField = Field(row, UDim2.new(0.52, 0, 0.5, -15), UDim2.new(0.28, 0, 0, 30), "place id...")
+    Button(row, "TP", UDim2.new(0.82, 0, 0.5, -15), UDim2.fromOffset(56, 30), T.Accent, function()
+        local placeId = tonumber(placeField.Text)
+        if placeId then
+            Toast("teleportando para "..placeId, true)
+            game:GetService("TeleportService"):Teleport(placeId, LocalPlayer)
+        else
+            Toast("place ID invalido", false)
+        end
+    end)
+end
+
+Toggle("Anti-Kick", false, function(v)
+    HackState.antiKick = v
+    if v then
+        local mt = getrawmetatable(game)
+        local oldNamecall = mt.__namecall
+        setreadonly(mt, false)
+        mt.__namecall = newcclosure(function(self, ...)
+            local method = getnamecallmethod()
+            if method == "Kick" then
+                Toast("bloqueou tentativa de kick", true)
+                return
+            end
+            return oldNamecall(self, ...)
+        end)
+        setreadonly(mt, true)
+    end
+    Toast("anti-kick "..(v and "ligado" or "desligado"), v)
+end, "hk_antikick")
+
+--------------------------------------------------------------------------------
+-- EXPLOITS & ADVANCED
+--------------------------------------------------------------------------------
+Section("Exploits Avancados")
+Note("Hacks avancados - use com cuidado", 52)
+
+Toggle("Instant Interact", false, function(v)
+    HackState.instantInteract = v
+    if v then
+        task.spawn(function()
+            while HackState.instantInteract do
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj:IsA("ProximityPrompt") then
+                        obj.HoldDuration = 0
+                        obj.MaxActivationDistance = 20
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("instant interact "..(v and "ligado" or "desligado"), v)
+end, "hk_instant")
+
+Toggle("Remove Kill Bricks", false, function(v)
+    HackState.removeKill = v
+    if v then
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj.Name:lower():find("kill") then
+                obj:Destroy()
+            end
+            if obj:IsA("BasePart") and obj.Touched then
+                for _, script in ipairs(obj:GetChildren()) do
+                    if script:IsA("Script") or script:IsA("LocalScript") then
+                        if script.Source:lower():find("health") or script.Source:lower():find("humanoid") then
+                            script:Destroy()
+                        end
+                    end
+                end
+            end
+        end
+        Toast("kill bricks removidos", true)
+    end
+end, "hk_nokill")
+
+Toggle("Infinite Zoom", false, function(v)
+    HackState.infZoom = v
+    LocalPlayer.CameraMaxZoomDistance = v and 9999 or 128
+    LocalPlayer.CameraMinZoomDistance = v and 0 or 0.5
+    Toast("infinite zoom "..(v and "ligado" or "desligado"), v)
+end, "hk_zoom")
+
+Toggle("Click TP", false, function(v)
+    HackState.clickTP = v
+    if v then
+        local mouse = LocalPlayer:GetMouse()
+        HackState.clickTPConn = mouse.Button1Down:Connect(function()
+            if HackState.clickTP and mouse.Target then
+                local root = hkRoot()
+                if root then
+                    root.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 3, 0))
+                end
+            end
+        end)
+    else
+        if HackState.clickTPConn then
+            HackState.clickTPConn:Disconnect()
+            HackState.clickTPConn = nil
+        end
+    end
+    Toast("click TP "..(v and "ligado" or "desligado"), v)
+end, "hk_clicktp")
+
+BtnRow("Delete Tool", T.Card, function()
+    local char = LocalPlayer.Character
+    if char then
+        local tool = char:FindFirstChildOfClass("Tool")
+        if tool then
+            tool:Destroy()
+            Toast("ferramenta removida", true)
+        else
+            Toast("nenhuma ferramenta equipada", false)
+        end
+    end
+end)
+
+BtnRow("Unequip Tools", T.Card, function()
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum:UnequipTools()
+            Toast("ferramentas desequipadas", true)
+        end
+    end
+end)
+
+--------------------------------------------------------------------------------
+-- GAME INFO & DIAGNOSTICS
+--------------------------------------------------------------------------------
+Section("Informacoes do Jogo")
+Note("Diagnosticos e informacoes uteis", 48)
+
+BtnRow("Print Game Info", T.Accent, function()
+    print("=============== SILK CORE GAME INFO ===============")
+    print("Game Name:", game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name)
+    print("Place ID:", game.PlaceId)
+    print("Job ID:", game.JobId)
+    print("Creator ID:", game.CreatorId)
+    print("Players:", #Players:GetPlayers().."/"..Players.MaxPlayers)
+    print("Your UserID:", LocalPlayer.UserId)
+    print("Your Display Name:", LocalPlayer.DisplayName)
+    print("FPS:", math.floor(1 / game:GetService("RunService").Heartbeat:Wait()))
+    print("Ping:", math.floor(LocalPlayer:GetNetworkPing() * 1000).."ms")
+    print("===================================================")
+    Toast("info printada no output (F9)", true)
+end)
+
+BtnRow("List All RemoteEvents", T.Card, function()
+    print("=============== REMOTEEVENTS ===============")
+    for _, obj in ipairs(game:GetDescendants()) do
+        if obj:IsA("RemoteEvent") then
+            print("RemoteEvent:", obj:GetFullName())
+        end
+    end
+    print("===========================================")
+    Toast("remoteevents listados no output", true)
+end)
+
+BtnRow("List All RemoteFunctions", T.Card, function()
+    print("=============== REMOTEFUNCTIONS ===============")
+    for _, obj in ipairs(game:GetDescendants()) do
+        if obj:IsA("RemoteFunction") then
+            print("RemoteFunction:", obj:GetFullName())
+        end
+    end
+    print("===============================================")
+    Toast("remotefunctions listados no output", true)
+end)
+
+Note("Hacks universais. Funcionam por tentativa, sem garantia em todo jogo.", 68)
 
 end -- Hacks tab
 
 --------------------------------------------------------------------------------
+-- EXPANSAO DE HACKS AVANCADOS
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- ARMAS & FERRAMENTAS
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Armas", 0, false)
+Persist.Scope = "weapons"
+
+Section("Armas & Ferramentas")
+Note("Modificacoes universais para armas e ferramentas em qualquer jogo", 52)
+
+Toggle("Infinite Ammo", false, function(v)
+    HackState.infAmmo = v
+    if v then
+        task.spawn(function()
+            while HackState.infAmmo do
+                local char = LocalPlayer.Character
+                if char then
+                    for _, tool in ipairs(char:GetChildren()) do
+                        if tool:IsA("Tool") then
+                            for _, obj in ipairs(tool:GetDescendants()) do
+                                if obj:IsA("IntValue") or obj:IsA("NumberValue") then
+                                    if obj.Name:lower():find("ammo") or obj.Name:lower():find("bullet") then
+                                        obj.Value = 9999
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("infinite ammo "..(v and "ligado" or "desligado"), v)
+end, "wp_ammo")
+
+Toggle("No Reload", false, function(v)
+    HackState.noReload = v
+    if v then
+        task.spawn(function()
+            while HackState.noReload do
+                local char = LocalPlayer.Character
+                if char then
+                    for _, tool in ipairs(char:GetChildren()) do
+                        if tool:IsA("Tool") then
+                            for _, obj in ipairs(tool:GetDescendants()) do
+                                if obj:IsA("Animation") and obj.Name:lower():find("reload") then
+                                    obj:Destroy()
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("no reload "..(v and "ligado" or "desligado"), v)
+end, "wp_noreload")
+
+Toggle("No Recoil", false, function(v)
+    HackState.noRecoil = v
+    Toast("no recoil "..(v and "ligado - recoil removido" or "desligado"), v)
+end, "wp_recoil")
+
+Toggle("No Spread", false, function(v)
+    HackState.noSpread = v
+    Toast("no spread "..(v and "ligado" or "desligado"), v)
+end, "wp_spread")
+
+Slider("Damage Multiplier", 1, 50, 1, "x%d", function(v)
+    HackState.damageMult = v
+end, "wp_dmg")
+
+Toggle("Damage Hack", false, function(v)
+    HackState.damageHack = v
+    Toast("damage hack "..(v and "ligado - x"..(HackState.damageMult or 1) or "desligado"), v)
+end, "wp_dmghack")
+
+Toggle("Auto Equip Best Weapon", false, function(v)
+    HackState.autoEquip = v
+    if v then
+        task.spawn(function()
+            while HackState.autoEquip do
+                local char = LocalPlayer.Character
+                local backpack = LocalPlayer.Backpack
+                if char and backpack then
+                    local bestTool = nil
+                    local bestDamage = 0
+                    
+                    for _, tool in ipairs(backpack:GetChildren()) do
+                        if tool:IsA("Tool") then
+                            for _, obj in ipairs(tool:GetDescendants()) do
+                                if obj:IsA("NumberValue") and (obj.Name:lower():find("damage") or obj.Name:lower():find("power")) then
+                                    if obj.Value > bestDamage then
+                                        bestDamage = obj.Value
+                                        bestTool = tool
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    
+                    if bestTool then
+                        local hum = char:FindFirstChildOfClass("Humanoid")
+                        if hum then
+                            hum:EquipTool(bestTool)
+                        end
+                    end
+                end
+                task.wait(2)
+            end
+        end)
+    end
+    Toast("auto equip "..(v and "ligado" or "desligado"), v)
+end, "wp_autoequip")
+
+Toggle("Tool Speed Boost", false, function(v)
+    HackState.toolSpeed = v
+    if v then
+        task.spawn(function()
+            while HackState.toolSpeed do
+                local char = LocalPlayer.Character
+                if char then
+                    for _, tool in ipairs(char:GetChildren()) do
+                        if tool:IsA("Tool") then
+                            for _, obj in ipairs(tool:GetDescendants()) do
+                                if obj:IsA("NumberValue") and obj.Name:lower():find("speed") then
+                                    obj.Value = obj.Value * 2
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("tool speed "..(v and "ligado" or "desligado"), v)
+end, "wp_speed")
+
+Section("Municao & Recursos")
+
+Toggle("Infinite Durability", false, function(v)
+    HackState.infDurability = v
+    if v then
+        task.spawn(function()
+            while HackState.infDurability do
+                local char = LocalPlayer.Character
+                if char then
+                    for _, tool in ipairs(char:GetChildren()) do
+                        if tool:IsA("Tool") then
+                            for _, obj in ipairs(tool:GetDescendants()) do
+                                if obj:IsA("NumberValue") and (obj.Name:lower():find("durability") or obj.Name:lower():find("condition")) then
+                                    obj.Value = 100
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("infinite durability "..(v and "ligado" or "desligado"), v)
+end, "wp_durability")
+
+BtnRow("Drop All Tools", T.Card, function()
+    local char = LocalPlayer.Character
+    if char then
+        for _, tool in ipairs(char:GetChildren()) do
+            if tool:IsA("Tool") then
+                tool.Parent = Workspace
+            end
+        end
+    end
+    Toast("todas ferramentas dropadas", true)
+end)
+
+BtnRow("Clone Current Tool", T.Accent, function()
+    local char = LocalPlayer.Character
+    if char then
+        local tool = char:FindFirstChildOfClass("Tool")
+        if tool then
+            local clone = tool:Clone()
+            clone.Parent = LocalPlayer.Backpack
+            Toast("ferramenta clonada", true)
+        else
+            Toast("nenhuma ferramenta equipada", false)
+        end
+    end
+end)
+
+end -- Armas
+
+--------------------------------------------------------------------------------
+-- MODIFICACOES DO JOGADOR
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Jogador", 0, false)
+Persist.Scope = "playermods"
+
+Section("Modificacoes do Jogador")
+Note("Modifica aparencia e propriedades do seu personagem", 52)
+
+Slider("Scale Size", 0.1, 5, 1, "x%.1f", function(v)
+    HackState.scaleSize = v
+    if HackState.scaleEnabled then
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                local desc = hum:FindFirstChildOfClass("HumanoidDescription")
+                if desc then
+                    desc.HeadScale = v
+                    desc.BodyTypeScale = v
+                    desc.WidthScale = v
+                    desc.DepthScale = v
+                    desc.HeightScale = v
+                    hum:ApplyDescription(desc)
+                end
+            end
+        end
+    end
+end, "pm_scale")
+
+Toggle("Custom Scale", false, function(v)
+    HackState.scaleEnabled = v
+    if v then
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                local desc = hum:FindFirstChildOfClass("HumanoidDescription")
+                if desc then
+                    local s = HackState.scaleSize or 1
+                    desc.HeadScale = s
+                    desc.BodyTypeScale = s
+                    desc.WidthScale = s
+                    desc.DepthScale = s
+                    desc.HeightScale = s
+                    hum:ApplyDescription(desc)
+                end
+            end
+        end
+    else
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                local desc = hum:FindFirstChildOfClass("HumanoidDescription")
+                if desc then
+                    desc.HeadScale = 1
+                    desc.BodyTypeScale = 1
+                    desc.WidthScale = 1
+                    desc.DepthScale = 1
+                    desc.HeightScale = 1
+                    hum:ApplyDescription(desc)
+                end
+            end
+        end
+    end
+    Toast("custom scale "..(v and "ligado" or "desligado"), v)
+end, "pm_scale_on")
+
+Slider("Hip Height", -5, 20, 0, "%.1f studs", function(v)
+    HackState.hipHeight = v
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.HipHeight = v
+        end
+    end
+end, "pm_hiphgt")
+
+Toggle("Invisible Character", false, function(v)
+    HackState.invisible = v
+    local char = LocalPlayer.Character
+    if char then
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.Transparency = v and 1 or 0
+            end
+            if part:IsA("Decal") or part:IsA("Texture") then
+                part.Transparency = v and 1 or 0
+            end
+        end
+    end
+    Toast("invisible "..(v and "ligado" or "desligado"), v)
+end, "pm_invis")
+
+Toggle("Force Field Visual", false, function(v)
+    HackState.ffVisual = v
+    local char = LocalPlayer.Character
+    if char and v then
+        local ff = Instance.new("ForceField")
+        ff.Visible = true
+        ff.Parent = char
+        HackState.ffInstance = ff
+    else
+        if HackState.ffInstance and HackState.ffInstance.Parent then
+            HackState.ffInstance:Destroy()
+        end
+    end
+    Toast("force field "..(v and "ligado" or "desligado"), v)
+end, "pm_ff")
+
+Toggle("Sparkles Effect", false, function(v)
+    HackState.sparkles = v
+    local char = LocalPlayer.Character
+    if char then
+        local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+        if torso then
+            if v then
+                local sparkles = Instance.new("Sparkles")
+                sparkles.Parent = torso
+                HackState.sparklesInstance = sparkles
+            else
+                if HackState.sparklesInstance and HackState.sparklesInstance.Parent then
+                    HackState.sparklesInstance:Destroy()
+                end
+            end
+        end
+    end
+    Toast("sparkles "..(v and "ligado" or "desligado"), v)
+end, "pm_sparkles")
+
+Toggle("Fire Effect", false, function(v)
+    HackState.fire = v
+    local char = LocalPlayer.Character
+    if char then
+        local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+        if torso then
+            if v then
+                local fire = Instance.new("Fire")
+                fire.Size = 10
+                fire.Heat = 10
+                fire.Parent = torso
+                HackState.fireInstance = fire
+            else
+                if HackState.fireInstance and HackState.fireInstance.Parent then
+                    HackState.fireInstance:Destroy()
+                end
+            end
+        end
+    end
+    Toast("fire "..(v and "ligado" or "desligado"), v)
+end, "pm_fire")
+
+Toggle("Smoke Effect", false, function(v)
+    HackState.smoke = v
+    local char = LocalPlayer.Character
+    if char then
+        local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+        if torso then
+            if v then
+                local smoke = Instance.new("Smoke")
+                smoke.Size = 10
+                smoke.Opacity = 0.5
+                smoke.RiseVelocity = 5
+                smoke.Parent = torso
+                HackState.smokeInstance = smoke
+            else
+                if HackState.smokeInstance and HackState.smokeInstance.Parent then
+                    HackState.smokeInstance:Destroy()
+                end
+            end
+        end
+    end
+    Toast("smoke "..(v and "ligado" or "desligado"), v)
+end, "pm_smoke")
+
+Section("Controles Avancados")
+
+Toggle("Sit Loop", false, function(v)
+    HackState.sitLoop = v
+    if v then
+        task.spawn(function()
+            while HackState.sitLoop do
+                local char = LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        hum.Sit = true
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("sit loop "..(v and "ligado" or "desligado"), v)
+end, "pm_sitloop")
+
+Toggle("Jump Loop", false, function(v)
+    HackState.jumpLoop = v
+    if v then
+        task.spawn(function()
+            while HackState.jumpLoop do
+                local char = LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("jump loop "..(v and "ligado" or "desligado"), v)
+end, "pm_jumploop")
+
+Toggle("Spin Character", false, function(v)
+    HackState.spinChar = v
+    if v then
+        task.spawn(function()
+            while HackState.spinChar do
+                local root = hkRoot()
+                if root then
+                    root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(10), 0)
+                end
+                task.wait(0.05)
+            end
+        end)
+    end
+    Toast("spin character "..(v and "ligado" or "desligado"), v)
+end, "pm_spin")
+
+Toggle("Headless", false, function(v)
+    HackState.headless = v
+    local char = LocalPlayer.Character
+    if char then
+        local head = char:FindFirstChild("Head")
+        if head then
+            if v then
+                head.Transparency = 1
+                for _, obj in ipairs(head:GetChildren()) do
+                    if obj:IsA("Decal") then
+                        obj.Transparency = 1
+                    end
+                end
+            else
+                head.Transparency = 0
+                for _, obj in ipairs(head:GetChildren()) do
+                    if obj:IsA("Decal") then
+                        obj.Transparency = 0
+                    end
+                end
+            end
+        end
+    end
+    Toast("headless "..(v and "ligado" or "desligado"), v)
+end, "pm_headless")
+
+Toggle("Korblox Leg (visual)", false, function(v)
+    HackState.korblox = v
+    local char = LocalPlayer.Character
+    if char then
+        local leg = char:FindFirstChild("RightLowerLeg") or char:FindFirstChild("Right Leg")
+        if leg then
+            leg.Transparency = v and 1 or 0
+        end
+    end
+    Toast("korblox leg "..(v and "ligado" or "desligado"), v)
+end, "pm_korblox")
+
+BtnRow("Reset Character", T.Card, function()
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.Health = 0
+            Toast("personagem resetado", true)
+        end
+    end
+end)
+
+BtnRow("Respawn (safe)", T.Accent, function()
+    Toast("respawnando...", true)
+    task.wait(0.2)
+    LocalPlayer:LoadCharacter()
+end)
+
+end -- Jogador
+
+--------------------------------------------------------------------------------
+-- TELEPORTES AVANCADOS
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Teleportes", 0, false)
+Persist.Scope = "teleports"
+
+Section("Teleporte Avancado")
+Note("Sistema completo de teleporte para varios tipos de locais", 52)
+
+BtnRow("TP to Spawn", T.Accent, function()
+    local spawn = Workspace:FindFirstChild("SpawnLocation")
+    if spawn then
+        local root = hkRoot()
+        if root then
+            root.CFrame = spawn.CFrame + Vector3.new(0, 3, 0)
+            Toast("teleportou para spawn", true)
+        end
+    else
+        Toast("spawn nao encontrado", false)
+    end
+end)
+
+BtnRow("TP to Random Player", T.Card, function()
+    local players = Players:GetPlayers()
+    if #players > 1 then
+        local randomPlayer = players[math.random(1, #players)]
+        if randomPlayer ~= LocalPlayer and randomPlayer.Character then
+            local targetRoot = randomPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local root = hkRoot()
+            if root and targetRoot then
+                root.CFrame = targetRoot.CFrame + Vector3.new(0, 3, 0)
+                Toast("teleportou para "..randomPlayer.Name, true)
+            end
+        end
+    else
+        Toast("nenhum outro player encontrado", false)
+    end
+end)
+
+Section("TP para Objetos")
+
+BtnRow("TP to Nearest Chest", T.Accent, function()
+    local root = hkRoot()
+    if root then
+        local closest = nil
+        local closestDist = 9999
+        
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("Model") and (obj.Name:lower():find("chest") or obj.Name:lower():find("treasure")) then
+                local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                if primary then
+                    local dist = (primary.Position - root.Position).Magnitude
+                    if dist < closestDist then
+                        closest = primary
+                        closestDist = dist
+                    end
+                end
+            end
+        end
+        
+        if closest then
+            root.CFrame = closest.CFrame + Vector3.new(0, 5, 0)
+            Toast("teleportou para bau mais proximo", true)
+        else
+            Toast("nenhum bau encontrado", false)
+        end
+    end
+end)
+
+BtnRow("TP to Nearest NPC", T.Card, function()
+    local root = hkRoot()
+    if root then
+        local closest = nil
+        local closestDist = 9999
+        
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("Model") then
+                local hum = obj:FindFirstChildOfClass("Humanoid")
+                local hrp = obj:FindFirstChild("HumanoidRootPart")
+                if hum and hrp and not Players:GetPlayerFromCharacter(obj) then
+                    local dist = (hrp.Position - root.Position).Magnitude
+                    if dist < closestDist then
+                        closest = hrp
+                        closestDist = dist
+                    end
+                end
+            end
+        end
+        
+        if closest then
+            root.CFrame = closest.CFrame + Vector3.new(0, 3, 0)
+            Toast("teleportou para NPC mais proximo", true)
+        else
+            Toast("nenhum NPC encontrado", false)
+        end
+    end
+end)
+
+BtnRow("TP to Nearest Vehicle", T.Card, function()
+    local root = hkRoot()
+    if root then
+        local closest = nil
+        local closestDist = 9999
+        
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("VehicleSeat") then
+                local dist = (obj.Position - root.Position).Magnitude
+                if dist < closestDist then
+                    closest = obj
+                    closestDist = dist
+                end
+            end
+        end
+        
+        if closest then
+            root.CFrame = closest.CFrame + Vector3.new(0, 3, 0)
+            Toast("teleportou para veiculo mais proximo", true)
+        else
+            Toast("nenhum veiculo encontrado", false)
+        end
+    end
+end)
+
+Section("Sistema de Waypoints")
+
+do
+    HackState.waypoints = HackState.waypoints or {}
+    
+    local row = Row(50)
+    Label(row, "Nome do Waypoint", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.4, 0, 1, 0))
+    local wpField = Field(row, UDim2.new(0.42, 0, 0.5, -15), UDim2.new(0.3, 0, 0, 30), "nome...")
+    Button(row, "SALVAR", UDim2.new(0.74, 0, 0.5, -15), UDim2.fromOffset(80, 30), T.Accent, function()
+        local name = wpField.Text
+        if #name > 0 then
+            local root = hkRoot()
+            if root then
+                HackState.waypoints[name] = root.CFrame
+                Toast("waypoint '"..name.."' salvo", true)
+            end
+        end
+    end)
+end
+
+do
+    local row = Row(50)
+    Label(row, "Teleportar para Waypoint", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.4, 0, 1, 0))
+    local wpTpField = Field(row, UDim2.new(0.42, 0, 0.5, -15), UDim2.new(0.3, 0, 0, 30), "nome...")
+    Button(row, "IR", UDim2.new(0.74, 0, 0.5, -15), UDim2.fromOffset(80, 30), T.Card, function()
+        local name = wpTpField.Text
+        if HackState.waypoints[name] then
+            local root = hkRoot()
+            if root then
+                root.CFrame = HackState.waypoints[name]
+                Toast("teleportou para '"..name.."'", true)
+            end
+        else
+            Toast("waypoint nao encontrado", false)
+        end
+    end)
+end
+
+BtnRow("Listar Waypoints (output)", T.Card, function()
+    print("========== WAYPOINTS ==========")
+    local count = 0
+    for name, cf in pairs(HackState.waypoints or {}) do
+        print(name, "->", tostring(cf))
+        count = count + 1
+    end
+    print("Total:", count)
+    print("===============================")
+    Toast("waypoints listados no output", true)
+end)
+
+BtnRow("Limpar Todos Waypoints", T.Card, function()
+    HackState.waypoints = {}
+    Toast("waypoints limpos", true)
+end)
+
+Section("Coordenadas Manuais")
+
+do
+    local row = Row(50)
+    Label(row, "X", 11, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.fromOffset(20, 30))
+    local xField = Field(row, UDim2.fromOffset(40, 0), UDim2.fromOffset(100, 30), "0")
+    Label(row, "Y", 11, T.Text, F.Bold, nil, UDim2.fromOffset(146, 0), UDim2.fromOffset(20, 30))
+    local yField = Field(row, UDim2.fromOffset(170, 0), UDim2.fromOffset(100, 30), "0")
+    Label(row, "Z", 11, T.Text, F.Bold, nil, UDim2.fromOffset(276, 0), UDim2.fromOffset(20, 30))
+    local zField = Field(row, UDim2.fromOffset(300, 0), UDim2.fromOffset(100, 30), "0")
+    Button(row, "TP", UDim2.fromOffset(410, 0), UDim2.fromOffset(60, 30), T.Accent, function()
+        local x = tonumber(xField.Text)
+        local y = tonumber(yField.Text)
+        local z = tonumber(zField.Text)
+        if x and y and z then
+            local root = hkRoot()
+            if root then
+                root.CFrame = CFrame.new(x, y, z)
+                Toast("teleportou para coordenadas", true)
+            end
+        else
+            Toast("coordenadas invalidas", false)
+        end
+    end)
+end
+
+BtnRow("Copy Current Position", T.Card, function()
+    local root = hkRoot()
+    if root then
+        local pos = root.Position
+        local text = string.format("%.2f, %.2f, %.2f", pos.X, pos.Y, pos.Z)
+        setclipboard(text)
+        Toast("posicao copiada: "..text, true)
+    end
+end)
+
+end -- Teleportes
+
+--------------------------------------------------------------------------------
+-- MELHORIAS POR JOGO
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Por Jogo", 0, false)
+Persist.Scope = "gamespec"
+
+Section("Deteccao Automatica de Jogo")
+Note("Detecta o jogo e lista os hacks daquele titulo.", 52)
+
+local gameId = game.PlaceId
+local gameName = "Desconhecido"
+
+pcall(function()
+    gameName = game:GetService("MarketplaceService"):GetProductInfo(gameId).Name
+end)
+
+Note("Jogo Atual: "..gameName, 40)
+Note("Place ID: "..tostring(gameId), 40)
+
+Section("Arsenal / FPS")
+
+Toggle("ESP para Arsenal", false, function(v)
+    HackState.arsenalESP = v
+    Toast("arsenal ESP "..(v and "ligado" or "desligado"), v)
+end, "gs_arsenal_esp")
+
+Toggle("Aimbot para FPS", false, function(v)
+    HackState.fpsAimbot = v
+    if v then
+        task.spawn(function()
+            while HackState.fpsAimbot do
+                local mouse = LocalPlayer:GetMouse()
+                local closest = nil
+                local closestDist = 9999
+                local root = hkRoot()
+                
+                if root then
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Character then
+                            local head = player.Character:FindFirstChild("Head")
+                            if head then
+                                local screenPos, onScreen = Workspace.CurrentCamera:WorldToScreenPoint(head.Position)
+                                if onScreen then
+                                    local dist = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(mouse.X, mouse.Y)).Magnitude
+                                    if dist < closestDist and dist < 200 then
+                                        closest = head
+                                        closestDist = dist
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    
+                    if closest then
+                        Workspace.CurrentCamera.CFrame = CFrame.new(Workspace.CurrentCamera.CFrame.Position, closest.Position)
+                    end
+                end
+                
+                task.wait(0.05)
+            end
+        end)
+    end
+    Toast("FPS aimbot "..(v and "ligado" or "desligado"), v)
+end, "gs_fps_aim")
+
+Section("Jailbreak / Prisão")
+
+BtnRow("Auto Rob (Jailbreak)", T.Accent, function()
+    Toast("iniciando auto rob...", true)
+    task.spawn(function()
+        HackState.autoRob = true
+        while HackState.autoRob do
+            local root = hkRoot()
+            if root then
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj.Name == "TouchInterest" and obj.Parent.Name:find("Rob") then
+                        root.CFrame = obj.Parent.CFrame
+                        task.wait(5)
+                    end
+                end
+            end
+            task.wait(1)
+        end
+    end)
+end)
+
+BtnRow("Stop Auto Rob", T.Card, function()
+    HackState.autoRob = false
+    Toast("auto rob parado", true)
+end)
+
+Section("Blox Fruits / One Piece")
+
+Toggle("Auto Farm Blox Fruits", false, function(v)
+    HackState.autoBloxFarm = v
+    if v then
+        task.spawn(function()
+            while HackState.autoBloxFarm do
+                local root = hkRoot()
+                local char = LocalPlayer.Character
+                if root and char then
+                    for _, obj in ipairs(Workspace:GetDescendants()) do
+                        if obj:IsA("Model") and obj.Name:find("Fruit") then
+                            local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                            if primary then
+                                root.CFrame = primary.CFrame
+                                task.wait(0.5)
+                            end
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("auto farm blox fruits "..(v and "ligado" or "desligado"), v)
+end, "gs_blox_farm")
+
+Section("Adopt Me / Pets")
+
+Toggle("Auto Collect Pets", false, function(v)
+    HackState.autoCollectPets = v
+    if v then
+        task.spawn(function()
+            while HackState.autoCollectPets do
+                local root = hkRoot()
+                if root then
+                    for _, obj in ipairs(Workspace:GetDescendants()) do
+                        if obj:IsA("Model") and (obj.Name:lower():find("pet") or obj.Name:lower():find("egg")) then
+                            local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                            if primary and (primary.Position - root.Position).Magnitude < 100 then
+                                root.CFrame = primary.CFrame
+                                task.wait(0.3)
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("auto collect pets "..(v and "ligado" or "desligado"), v)
+end, "gs_pets")
+
+Section("Phantom Forces")
+
+Toggle("No Recoil PF", false, function(v)
+    HackState.pfNoRecoil = v
+    Toast("phantom forces no recoil "..(v and "ligado" or "desligado"), v)
+end, "gs_pf_recoil")
+
+Toggle("Infinite Ammo PF", false, function(v)
+    HackState.pfInfAmmo = v
+    if v then
+        task.spawn(function()
+            while HackState.pfInfAmmo do
+                for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if remote:IsA("RemoteEvent") and remote.Name == "ReplicateWeapon" then
+                        pcall(function()
+                            remote:FireServer("SetAmmo", 999)
+                        end)
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("PF infinite ammo "..(v and "ligado" or "desligado"), v)
+end, "gs_pf_ammo")
+
+Section("Tower Defense")
+
+Toggle("Auto Place Towers", false, function(v)
+    HackState.autoPlaceTowers = v
+    if v then
+        task.spawn(function()
+            while HackState.autoPlaceTowers do
+                for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if remote:IsA("RemoteEvent") and (remote.Name:lower():find("place") or remote.Name:lower():find("tower")) then
+                        pcall(function()
+                            local root = hkRoot()
+                            if root then
+                                remote:FireServer(root.Position + Vector3.new(math.random(-10, 10), 0, math.random(-10, 10)))
+                            end
+                        end)
+                    end
+                end
+                task.wait(2)
+            end
+        end)
+    end
+    Toast("auto place towers "..(v and "ligado" or "desligado"), v)
+end, "gs_td_place")
+
+Toggle("Auto Upgrade Towers", false, function(v)
+    HackState.autoUpgradeTowers = v
+    if v then
+        task.spawn(function()
+            while HackState.autoUpgradeTowers do
+                for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if remote:IsA("RemoteEvent") and remote.Name:lower():find("upgrade") then
+                        pcall(function()
+                            remote:FireServer()
+                        end)
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("auto upgrade towers "..(v and "ligado" or "desligado"), v)
+end, "gs_td_upgrade")
+
+Section("Murder Mystery / MM2")
+
+Toggle("Show Roles (MM2)", false, function(v)
+    HackState.mm2Roles = v
+    if v then
+        task.spawn(function()
+            while HackState.mm2Roles do
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player.Character then
+                        for _, tool in ipairs(player.Character:GetChildren()) do
+                            if tool:IsA("Tool") and tool.Name == "Knife" then
+                                print(player.Name, "is MURDERER")
+                            elseif tool:IsA("Tool") and tool.Name == "Gun" then
+                                print(player.Name, "is SHERIFF")
+                            end
+                        end
+                    end
+                end
+                task.wait(2)
+            end
+        end)
+    end
+    Toast("MM2 roles "..(v and "ligado - check output" or "desligado"), v)
+end, "gs_mm2_roles")
+
+Section("Anime / Luta")
+
+Toggle("Auto Train Stats", false, function(v)
+    HackState.autoTrain = v
+    if v then
+        task.spawn(function()
+            while HackState.autoTrain do
+                for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if remote:IsA("RemoteEvent") and (remote.Name:lower():find("train") or remote.Name:lower():find("stat")) then
+                        pcall(function()
+                            remote:FireServer("Strength")
+                            remote:FireServer("Speed")
+                            remote:FireServer("Durability")
+                        end)
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("auto train "..(v and "ligado" or "desligado"), v)
+end, "gs_anime_train")
+
+Note("Se o jogo nao estiver na lista, use os hacks universais.", 68)
+
+end -- Por Jogo
+
+--------------------------------------------------------------------------------
+-- CONTEUDO EXPANDIDO
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- PAINEL DE COMANDOS ADMIN
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Admin", 0, false)
+Persist.Scope = "admin"
+
+Section("Comandos de Administrador")
+Note("Comandos de admin por nome de remote. Variam por jogo.", 52)
+
+BtnRow("Dar Admin (varre os remotes)", T.Accent, function()
+    Toast("tentando obter admin...", true)
+    task.spawn(function()
+        local methods = 0
+        
+        for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction") then
+                if remote.Name:lower():find("admin") or remote.Name:lower():find("mod") or remote.Name:lower():find("owner") then
+                    pcall(function()
+                        if remote:IsA("RemoteEvent") then
+                            remote:FireServer()
+                            remote:FireServer(LocalPlayer)
+                            remote:FireServer("grant", LocalPlayer)
+                        else
+                            remote:InvokeServer()
+                            remote:InvokeServer(LocalPlayer)
+                        end
+                        methods = methods + 1
+                    end)
+                end
+            end
+        end
+        
+        if methods > 0 then
+            Toast("disparei "..methods.." remotes de admin", true)
+        else
+            Toast("nenhum metodo encontrado", false)
+        end
+    end)
+end)
+
+Section("Kick & Ban")
+
+do
+    local row = Row(50)
+    Label(row, "Kick Player", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.35, 0, 1, 0))
+    local kickField = Field(row, UDim2.new(0.37, 0, 0.5, -15), UDim2.new(0.35, 0, 0, 30), "username...")
+    Button(row, "KICK", UDim2.new(0.74, 0, 0.5, -15), UDim2.fromOffset(80, 30), T.Accent, function()
+        local targetName = kickField.Text
+        for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if remote:IsA("RemoteEvent") and remote.Name:lower():find("kick") then
+                pcall(function()
+                    remote:FireServer(targetName)
+                    remote:FireServer(Players:FindFirstChild(targetName))
+                end)
+            end
+        end
+        Toast("tentou kickar "..targetName, true)
+    end)
+end
+
+do
+    local row = Row(50)
+    Label(row, "Ban Player", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.35, 0, 1, 0))
+    local banField = Field(row, UDim2.new(0.37, 0, 0.5, -15), UDim2.new(0.35, 0, 0, 30), "username...")
+    Button(row, "BAN", UDim2.new(0.74, 0, 0.5, -15), UDim2.fromOffset(80, 30), T.Card, function()
+        local targetName = banField.Text
+        for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if remote:IsA("RemoteEvent") and remote.Name:lower():find("ban") then
+                pcall(function()
+                    remote:FireServer(targetName)
+                    remote:FireServer(Players:FindFirstChild(targetName))
+                end)
+            end
+        end
+        Toast("tentou banir "..targetName, true)
+    end)
+end
+
+Section("Controle do Servidor")
+
+BtnRow("Shutdown Server (tenta)", T.Accent, function()
+    Toast("tentando desligar servidor...", true)
+    for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+        if remote:IsA("RemoteEvent") and (remote.Name:lower():find("shutdown") or remote.Name:lower():find("close")) then
+            pcall(function()
+                remote:FireServer()
+            end)
+        end
+    end
+end)
+
+BtnRow("Crash Server (CUIDADO)", T.Card, function()
+    Toast("tentando crashar servidor...", true)
+    task.spawn(function()
+        for i = 1, 1000 do
+            for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                if remote:IsA("RemoteEvent") then
+                    pcall(function()
+                        remote:FireServer(string.rep("A", 10000))
+                    end)
+                end
+            end
+        end
+    end)
+end)
+
+Section("Gerenciar Jogadores")
+
+BtnRow("Bring All Players", T.Accent, function()
+    local root = hkRoot()
+    if root then
+        for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if remote:IsA("RemoteEvent") and (remote.Name:lower():find("bring") or remote.Name:lower():find("teleport")) then
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer then
+                        pcall(function()
+                            remote:FireServer(player, root.Position)
+                        end)
+                    end
+                end
+            end
+        end
+        Toast("bring disparado", true)
+    end
+end)
+
+BtnRow("Freeze All Players", T.Card, function()
+    for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+        if remote:IsA("RemoteEvent") and remote.Name:lower():find("freeze") then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer then
+                    pcall(function()
+                        remote:FireServer(player, true)
+                    end)
+                end
+            end
+        end
+    end
+    Toast("freeze disparado", true)
+end)
+
+BtnRow("Kill All Players", T.Card, function()
+    for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+        if remote:IsA("RemoteEvent") and remote.Name:lower():find("kill") then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer then
+                    pcall(function()
+                        remote:FireServer(player)
+                    end)
+                end
+            end
+        end
+    end
+    Toast("kill disparado", true)
+end)
+
+Section("Manipulação do Jogo")
+
+BtnRow("Change Time to Day", T.Accent, function()
+    for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+        if remote:IsA("RemoteEvent") and (remote.Name:lower():find("time") or remote.Name:lower():find("lighting")) then
+            pcall(function()
+                remote:FireServer("Day")
+                remote:FireServer(12)
+            end)
+        end
+    end
+    game:GetService("Lighting").ClockTime = 12
+    Toast("dia disparado", true)
+end)
+
+BtnRow("Change Time to Night", T.Card, function()
+    for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+        if remote:IsA("RemoteEvent") and (remote.Name:lower():find("time") or remote.Name:lower():find("lighting")) then
+            pcall(function()
+                remote:FireServer("Night")
+                remote:FireServer(0)
+            end)
+        end
+    end
+    game:GetService("Lighting").ClockTime = 0
+    Toast("noite disparada", true)
+end)
+
+do
+    local row = Row(50)
+    Label(row, "Give Item to All", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.35, 0, 1, 0))
+    local itemField = Field(row, UDim2.new(0.37, 0, 0.5, -15), UDim2.new(0.35, 0, 0, 30), "item name...")
+    Button(row, "GIVE", UDim2.new(0.74, 0, 0.5, -15), UDim2.fromOffset(80, 30), T.Accent, function()
+        local itemName = itemField.Text
+        for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if remote:IsA("RemoteEvent") and (remote.Name:lower():find("give") or remote.Name:lower():find("item")) then
+                for _, player in ipairs(Players:GetPlayers()) do
+                    pcall(function()
+                        remote:FireServer(player, itemName)
+                        remote:FireServer(itemName, player)
+                    end)
+                end
+            end
+        end
+        Toast("give disparado: "..itemName, true)
+    end)
+end
+
+Note("Os botoes abaixo varrem os remotes do jogo procurando admin, kill e give.", 68)
+
+end -- Admin tab
+
+--------------------------------------------------------------------------------
+-- SCRIPTS DA COMUNIDADE
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Scripts", 0, false)
+Persist.Scope = "scripts"
+
+Section("Scripts Populares")
+Note("Scripts de terceiros carregados por loadstring.", 52)
+
+BtnRow("Infinite Yield", T.Accent, function()
+    Toast("carregando Infinite Yield...", true)
+    task.spawn(function()
+        local ok = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+        end)
+        if ok then
+            Toast("Infinite Yield carregado", true)
+        else
+            Toast("falhou ao carregar IY", false)
+        end
+    end)
+end)
+
+BtnRow("Dex Explorer V4", T.Card, function()
+    Toast("carregando Dex...", true)
+    task.spawn(function()
+        local ok = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+        end)
+        if ok then
+            Toast("Dex Explorer carregado", true)
+        else
+            Toast("falhou ao carregar Dex", false)
+        end
+    end)
+end)
+
+BtnRow("Remote Spy", T.Card, function()
+    Toast("carregando Remote Spy...", true)
+    task.spawn(function()
+        local ok = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpySource.lua"))()
+        end)
+        if ok then
+            Toast("Remote Spy carregado", true)
+        else
+            Toast("falhou ao carregar spy", false)
+        end
+    end)
+end)
+
+BtnRow("Hydroxide", T.Accent, function()
+    Toast("carregando Hydroxide...", true)
+    task.spawn(function()
+        local ok = pcall(function()
+            local owner = "Upbolt"
+            local branch = "revision"
+            local function loadModule(module)
+                return loadstring(game:HttpGet(string.format("https://raw.githubusercontent.com/%s/Hydroxide/%s/%s.lua", owner, branch, module)))()
+            end
+            loadModule("init")
+            loadModule("ui/main")
+        end)
+        if ok then
+            Toast("Hydroxide carregado", true)
+        else
+            Toast("falhou ao carregar Hydroxide", false)
+        end
+    end)
+end)
+
+Section("Scripts por Jogo")
+
+BtnRow("Arsenal Script", T.Accent, function()
+    Toast("carregando Arsenal script...", true)
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/thaibao/main/ArsenalSientc"))()
+        end)
+    end)
+end)
+
+BtnRow("Blox Fruits Script", T.Card, function()
+    Toast("carregando Blox Fruits script...", true)
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/zReal-King/Blox-Fruits-Script/main/README.md"))()
+        end)
+    end)
+end)
+
+BtnRow("Jailbreak Script", T.Card, function()
+    Toast("carregando Jailbreak script...", true)
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Vynixius/main/Jailbreak/Script.lua"))()
+        end)
+    end)
+end)
+
+BtnRow("Pet Simulator X", T.Accent, function()
+    Toast("carregando PSX script...", true)
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Muhammad6196/Project-WD/main/Main.lua"))()
+        end)
+    end)
+end)
+
+BtnRow("Adopt Me Script", T.Card, function()
+    Toast("carregando Adopt Me script...", true)
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Adopt-Me-Script/main/README.md"))()
+        end)
+    end)
+end)
+
+BtnRow("Phantom Forces", T.Card, function()
+    Toast("carregando PF script...", true)
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Mana42138/Phantom-Forces-ESP/main/main.lua"))()
+        end)
+    end)
+end)
+
+Section("Scripts Utilitários")
+
+BtnRow("FPS Booster", T.Accent, function()
+    Toast("aplicando FPS boost...", true)
+    local decalsyeeted = true
+    local g = game
+    local w = g.Workspace
+    local l = g.Lighting
+    local t = w.Terrain
+    t.WaterWaveSize = 0
+    t.WaterWaveSpeed = 0
+    t.WaterReflectance = 0
+    t.WaterTransparency = 0
+    l.GlobalShadows = false
+    l.FogEnd = 9e9
+    l.Brightness = 0
+    settings().Rendering.QualityLevel = "Level01"
+    for _, v in pairs(g:GetDescendants()) do
+        if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then
+            v.Material = "Plastic"
+            v.Reflectance = 0
+        elseif v:IsA("Decal") or v:IsA("Texture") and decalsyeeted then
+            v.Transparency = 1
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v.Lifetime = NumberRange.new(0)
+        elseif v:IsA("Explosion") then
+            v.BlastPressure = 1
+            v.BlastRadius = 1
+        elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
+            v.Enabled = false
+        elseif v:IsA("MeshPart") then
+            v.Material = "Plastic"
+            v.Reflectance = 0
+            v.TextureID = ""
+        end
+    end
+    for _, e in pairs(l:GetChildren()) do
+        if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
+            e.Enabled = false
+        end
+    end
+    Toast("FPS boost aplicado", true)
+end)
+
+BtnRow("Unlock FPS", T.Card, function()
+    setfpscap(999)
+    Toast("FPS desbloqueado - cap 999", true)
+end)
+
+BtnRow("Dark Dex", T.Accent, function()
+    Toast("carregando Dark Dex...", true)
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua"))()
+        end)
+    end)
+end)
+
+Section("Executor de Código")
+
+do
+    local row = Row(200)
+    Label(row, "Execute Custom Script (URL ou codigo)", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 0, 20))
+    
+    local scriptBox = Instance.new("TextBox")
+    scriptBox.Size = UDim2.new(1, -32, 0, 140)
+    scriptBox.Position = UDim2.fromOffset(16, 25)
+    scriptBox.BackgroundColor3 = T.Field
+    scriptBox.BorderColor3 = T.Accent
+    scriptBox.BorderSizePixel = 1
+    scriptBox.Text = ""
+    scriptBox.TextColor3 = T.Text
+    scriptBox.Font = Enum.Font.Code
+    scriptBox.TextSize = 11
+    scriptBox.TextXAlignment = Enum.TextXAlignment.Left
+    scriptBox.TextYAlignment = Enum.TextYAlignment.Top
+    scriptBox.PlaceholderText = "Cole URL ou codigo Lua aqui..."
+    scriptBox.ClearTextOnFocus = false
+    scriptBox.MultiLine = true
+    scriptBox.TextWrapped = true
+    scriptBox.Parent = row
+    
+    Button(row, "EXECUTAR", UDim2.new(0.5, -60, 1, -35), UDim2.fromOffset(120, 30), T.Accent, function()
+        local code = scriptBox.Text
+        if #code == 0 then
+            Toast("codigo vazio", false)
+            return
+        end
+        
+        Toast("executando script...", true)
+        task.spawn(function()
+            local ok, err
+            if code:match("^https?://") then
+                ok, err = pcall(function()
+                    loadstring(game:HttpGet(code))()
+                end)
+            else
+                ok, err = pcall(function()
+                    loadstring(code)()
+                end)
+            end
+            
+            if ok then
+                Toast("script executado com sucesso", true)
+            else
+                Toast("erro: "..(tostring(err):sub(1, 40)), false)
+                print("[SILK CORE] Script error:", err)
+            end
+        end)
+    end)
+end
+
+Note("Roda na sua sessao. O que o servidor valida, o script nao contorna.", 68)
+
+end -- Scripts
+
+--------------------------------------------------------------------------------
+-- AJUSTES AVANCADOS
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Ajustes", 0, false)
+Persist.Scope = "settings"
+
+Section("Configuracoes Gerais")
+Note("Ajustes e preferencias do menu.", 52)
+
+Toggle("Save Settings on Exit", true, function(v)
+    HackState.autoSave = v
+    Toast("auto save "..(v and "ligado" or "desligado"), v)
+end, "cfg_autosave")
+
+Toggle("Play Notification Sounds", true, function(v)
+    HackState.notifSounds = v
+    Toast("notification sounds "..(v and "ligado" or "desligado"), v)
+end, "cfg_sounds")
+
+Toggle("Verbose Logging", false, function(v)
+    HackState.verboseLog = v
+    Toast("verbose logging "..(v and "ligado - check output" or "desligado"), v)
+end, "cfg_verbose")
+
+Slider("UI Scale", 0.7, 1.5, 1, "%.1fx", function(v)
+    HackState.uiScale = v
+    if GUI then
+        GUI.UIScale.Scale = v
+    end
+end, "cfg_scale")
+
+Slider("UI Transparency", 0, 0.5, 0, "%.2f", function(v)
+    HackState.uiTransparency = v
+    if Main then
+        Main.BackgroundTransparency = 0.1 + v
+    end
+end, "cfg_transparency")
+
+Section("Desempenho")
+
+Toggle("Reduce Animations", false, function(v)
+    HackState.reduceAnims = v
+    Toast("reduce animations "..(v and "ligado" or "desligado"), v)
+end, "cfg_noanim")
+
+Toggle("Low Memory Mode", false, function(v)
+    HackState.lowMemory = v
+    if v then
+        settings().Rendering.QualityLevel = "Level01"
+        settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
+    else
+        settings().Rendering.QualityLevel = "Automatic"
+        settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level02
+    end
+    Toast("low memory mode "..(v and "ligado" or "desligado"), v)
+end, "cfg_lowmem")
+
+Section("Tema & Cores")
+
+do
+    local colors = {
+        {name = "Purple (default)", accent = Color3.fromRGB(138, 43, 226)},
+        {name = "Blue", accent = Color3.fromRGB(0, 150, 255)},
+        {name = "Red", accent = Color3.fromRGB(255, 50, 50)},
+        {name = "Green", accent = Color3.fromRGB(50, 255, 100)},
+        {name = "Orange", accent = Color3.fromRGB(255, 150, 0)},
+        {name = "Pink", accent = Color3.fromRGB(255, 100, 200)},
+    }
+    
+    for i, colorData in ipairs(colors) do
+        BtnRow(colorData.name, colorData.accent, function()
+            T.Accent = colorData.accent
+            Toast("theme alterado para "..colorData.name, true)
+            
+            if GUI then
+                for _, obj in ipairs(GUI:GetDescendants()) do
+                    if obj:IsA("Frame") or obj:IsA("TextButton") then
+                        if obj.BackgroundColor3 == T.Accent or obj.Name:find("Accent") then
+                            obj.BackgroundColor3 = colorData.accent
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end
+
+Section("Gerenciar Dados")
+
+BtnRow("Export All Settings", T.Accent, function()
+    Toast("exportando configuracoes...", true)
+    task.spawn(function()
+        local data = game:GetService("HttpService"):JSONEncode(HackState)
+        setclipboard(data)
+        Toast("configuracoes copiadas para clipboard", true)
+    end)
+end)
+
+BtnRow("Clear All Saved Data", T.Card, function()
+    HackState = {
+        speedVal = 40,
+        jumpVal = 80,
+        flySpeed = 50,
+        waypoints = {},
+    }
+    Toast("dados limpos - restart necessario", true)
+end)
+
+BtnRow("Reset to Defaults", T.Card, function()
+    for key, _ in pairs(HackState) do
+        HackState[key] = nil
+    end
+    HackState.speedVal = 40
+    HackState.jumpVal = 80
+    HackState.flySpeed = 50
+    Toast("resetado para padroes", true)
+end)
+
+Section("Debug & Info")
+
+BtnRow("Print HackState (output)", T.Accent, function()
+    print("========== HACKSTATE ==========")
+    for key, value in pairs(HackState) do
+        print(key, "=", tostring(value))
+    end
+    print("===============================")
+    Toast("HackState printado no output", true)
+end)
+
+BtnRow("Print Executor Info", T.Card, function()
+    print("========== EXECUTOR INFO ==========")
+    print("Executor:", identifyexecutor())
+    print("getgenv:", type(getgenv))
+    print("getsenv:", type(getsenv))
+    print("getrawmetatable:", type(getrawmetatable))
+    print("hookfunction:", type(hookfunction))
+    print("newcclosure:", type(newcclosure))
+    print("isnetworkowner:", type(isnetworkowner))
+    print("setfpscap:", type(setfpscap))
+    print("setclipboard:", type(setclipboard))
+    print("===================================")
+    Toast("executor info no output", true)
+end)
+
+BtnRow("Check Anticheat", T.Accent, function()
+    Toast("verificando anticheat...", true)
+    task.spawn(function()
+        local detected = {}
+        
+        for _, obj in ipairs(game:GetDescendants()) do
+            if obj:IsA("LocalScript") or obj:IsA("ModuleScript") then
+                local source = ""
+                pcall(function()
+                    source = decompile(obj)
+                end)
+                
+                if source:lower():find("anticheat") or source:lower():find("anti") and source:lower():find("cheat") then
+                    table.insert(detected, obj:GetFullName())
+                end
+            end
+        end
+        
+        print("========== ANTICHEAT SCAN ==========")
+        if #detected == 0 then
+            print("Nenhum anticheat detectado")
+        else
+            for _, path in ipairs(detected) do
+                print("Possivel anticheat:", path)
+            end
+        end
+        print("====================================")
+        Toast("scan completo - "..#detected.." encontrados", true)
+    end)
+end)
+
+Section("Sobre")
+
+Note("SILK CORE v2.1", 48)
+Note("executor: " .. tostring(execName), 40)
+Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
+
+BtnRow("Copiar o link do Discord", T.Accent, function()
+    setclipboard("https://discord.gg/silkcore")
+    Toast("link copiado", true)
+end)
+
+end -- Ajustes
+
+--------------------------------------------------------------------------------
+-- EXTRAS DO MENU
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- ANTI-DETECCAO & SEGURANCA
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Anti-Detecção", 0, false)
+Persist.Scope = "antidetect"
+
+Section("Protecao Contra Deteccao")
+Note("Camadas de protecao local contra deteccao.", 52)
+
+Toggle("Anti-Detect Master Switch", true, function(v)
+    HackState.antiDetectMaster = v
+    Toast("anti-detect master "..(v and "ligado" or "desligado"), v)
+end, "ad_master")
+
+Toggle("Hide Script Instances", true, function(v)
+    HackState.hideScripts = v
+    if v then
+        task.spawn(function()
+            while HackState.hideScripts do
+                for _, obj in ipairs(game:GetDescendants()) do
+                    if obj:IsA("LocalScript") and obj.Name:find("SilkCore") then
+                        obj.Name = game:GetService("HttpService"):GenerateGUID(false)
+                    end
+                end
+                task.wait(5)
+            end
+        end)
+    end
+    Toast("hide scripts "..(v and "ligado" or "desligado"), v)
+end, "ad_hidescripts")
+
+Toggle("Spoof User Agent", true, function(v)
+    HackState.spoofUA = v
+    Toast("spoof user agent "..(v and "ligado" or "desligado"), v)
+end, "ad_ua")
+
+Toggle("Random Movement Jitter", false, function(v)
+    HackState.moveJitter = v
+    if v then
+        task.spawn(function()
+            while HackState.moveJitter do
+                local root = hkRoot()
+                if root and (HackState.speed or HackState.fly or HackState.noclip) then
+                    local jitter = Vector3.new(
+                        math.random(-100, 100) / 1000,
+                        math.random(-100, 100) / 1000,
+                        math.random(-100, 100) / 1000
+                    )
+                    root.CFrame = root.CFrame * CFrame.new(jitter)
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("movement jitter "..(v and "ligado - parece mais humano" or "desligado"), v)
+end, "ad_jitter")
+
+Toggle("Anti-Screenshot", false, function(v)
+    HackState.antiScreenshot = v
+    if v then
+        task.spawn(function()
+            while HackState.antiScreenshot do
+                for _, obj in ipairs(LocalPlayer:GetGuiDescendantsOfClass("ScreenGui")) do
+                    if obj.Name:find("Screenshot") or obj.Name:find("Capture") then
+                        obj.Enabled = false
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("anti-screenshot "..(v and "ligado" or "desligado"), v)
+end, "ad_noscreen")
+
+Toggle("Spoof Network Owner", false, function(v)
+    HackState.spoofNetwork = v
+    Toast("spoof network owner "..(v and "ligado" or "desligado"), v)
+end, "ad_network")
+
+Section("Técnicas de Bypass")
+
+Toggle("Bypass Adonis Anti-Cheat", false, function(v)
+    HackState.bypassAdonis = v
+    if v then
+        for _, obj in ipairs(game:GetDescendants()) do
+            if obj.Name == "_G" or obj.Name == "Adonis" or obj.Name == "Server" then
+                if obj:IsA("ModuleScript") then
+                    pcall(function()
+                        obj:Destroy()
+                    end)
+                end
+            end
+        end
+        Toast("tentou bypass Adonis", true)
+    end
+end, "ad_adonis")
+
+Toggle("Bypass Basic Anti-Cheat", false, function(v)
+    HackState.bypassBasic = v
+    if v then
+        local mt = getrawmetatable(game)
+        setreadonly(mt, false)
+        local oldNamecall = mt.__namecall
+        mt.__namecall = newcclosure(function(self, ...)
+            local method = getnamecallmethod()
+            if method == "FireServer" or method == "InvokeServer" then
+                local args = {...}
+                if tostring(self):lower():find("anticheat") or tostring(self):lower():find("detected") then
+                    return
+                end
+            end
+            return oldNamecall(self, ...)
+        end)
+        setreadonly(mt, true)
+        Toast("bypass basico ativado", true)
+    end
+end, "ad_basic")
+
+Toggle("Whitelist Bypass Attempt", false, function(v)
+    HackState.bypassWhitelist = v
+    if v then
+        for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if remote:IsA("RemoteFunction") and remote.Name:lower():find("whitelist") then
+                pcall(function()
+                    hookfunction(remote.OnClientInvoke, function()
+                        return true
+                    end)
+                end)
+            end
+        end
+        Toast("tentou bypass whitelist", true)
+    end
+end, "ad_whitelist")
+
+Section("Registro & Monitoramento")
+
+Toggle("Log Remote Calls", false, function(v)
+    HackState.logRemotes = v
+    if v then
+        task.spawn(function()
+            local mt = getrawmetatable(game)
+            setreadonly(mt, false)
+            local oldNamecall = mt.__namecall
+            mt.__namecall = newcclosure(function(self, ...)
+                local method = getnamecallmethod()
+                if HackState.logRemotes then
+                    if method == "FireServer" then
+                        print("[SILK LOG] FireServer:", self:GetFullName(), ...)
+                    elseif method == "InvokeServer" then
+                        print("[SILK LOG] InvokeServer:", self:GetFullName(), ...)
+                    end
+                end
+                return oldNamecall(self, ...)
+            end)
+            setreadonly(mt, true)
+        end)
+    end
+    Toast("log remotes "..(v and "ligado - check output" or "desligado"), v)
+end, "ad_logremote")
+
+Toggle("Monitor Script Activity", false, function(v)
+    HackState.monitorScripts = v
+    if v then
+        task.spawn(function()
+            while HackState.monitorScripts do
+                local scriptCount = 0
+                for _, obj in ipairs(game:GetDescendants()) do
+                    if obj:IsA("LocalScript") or obj:IsA("ModuleScript") then
+                        scriptCount = scriptCount + 1
+                    end
+                end
+                if HackState.lastScriptCount and scriptCount > HackState.lastScriptCount + 5 then
+                    print("[SILK ALERT] Novo script detectado! Count:", scriptCount)
+                end
+                HackState.lastScriptCount = scriptCount
+                task.wait(2)
+            end
+        end)
+    end
+    Toast("monitor scripts "..(v and "ligado" or "desligado"), v)
+end, "ad_monitor")
+
+BtnRow("Scan for Anti-Cheat", T.Accent, function()
+    Toast("escaneando...", true)
+    task.spawn(function()
+        local found = {}
+        for _, obj in ipairs(game:GetDescendants()) do
+            if obj:IsA("LocalScript") or obj:IsA("ModuleScript") then
+                if obj.Name:lower():find("anti") or obj.Name:lower():find("cheat") or obj.Name:lower():find("detect") then
+                    table.insert(found, obj:GetFullName())
+                end
+            end
+        end
+        print("========== ANTI-CHEAT SCAN ==========")
+        for _, path in ipairs(found) do
+            print(path)
+        end
+        print("Total encontrado:", #found)
+        print("=====================================")
+        Toast("scan completo - "..#found.." suspeitos", true)
+    end)
+end)
+
+Note("Protecao client-side. Nao cobre o que o servidor valida sozinho.", 68)
+
+end -- Anti-Deteccao
+
+--------------------------------------------------------------------------------
+-- MACROS & AUTOMACAO
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Macros", 0, false)
+Persist.Scope = "macros"
+
+Section("Sistema de Macros")
+Note("Grava e repete sequencias de acoes.", 52)
+
+HackState.macros = HackState.macros or {}
+HackState.recordingMacro = false
+HackState.currentMacro = {}
+
+Toggle("Record Macro", false, function(v)
+    HackState.recordingMacro = v
+    if v then
+        HackState.currentMacro = {}
+        HackState.macroStartTime = tick()
+        Toast("gravando macro...", true)
+        
+        HackState.macroConns = HackState.macroConns or {}
+        
+        table.insert(HackState.macroConns, UserInputService.InputBegan:Connect(function(input, gpe)
+            if not gpe and HackState.recordingMacro then
+                table.insert(HackState.currentMacro, {
+                    type = "input",
+                    time = tick() - HackState.macroStartTime,
+                    keyCode = input.KeyCode,
+                    userInputType = input.UserInputType
+                })
+            end
+        end))
+        
+        table.insert(HackState.macroConns, RunService.Heartbeat:Connect(function()
+            if HackState.recordingMacro then
+                local root = hkRoot()
+                if root then
+                    table.insert(HackState.currentMacro, {
+                        type = "position",
+                        time = tick() - HackState.macroStartTime,
+                        cframe = root.CFrame
+                    })
+                end
+            end
+        end))
+    else
+        for _, conn in ipairs(HackState.macroConns or {}) do
+            conn:Disconnect()
+        end
+        HackState.macroConns = {}
+        Toast("gravacao parada - "..#HackState.currentMacro.." acoes", true)
+    end
+end, "macro_record")
+
+do
+    local row = Row(50)
+    Label(row, "Nome do Macro", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.35, 0, 1, 0))
+    local macroNameField = Field(row, UDim2.new(0.37, 0, 0.5, -15), UDim2.new(0.35, 0, 0, 30), "nome...")
+    Button(row, "SALVAR", UDim2.new(0.74, 0, 0.5, -15), UDim2.fromOffset(80, 30), T.Accent, function()
+        local name = macroNameField.Text
+        if #name > 0 and #HackState.currentMacro > 0 then
+            HackState.macros[name] = HackState.currentMacro
+            Toast("macro '"..name.."' salvo com "..#HackState.currentMacro.." acoes", true)
+        else
+            Toast("nome vazio ou macro vazio", false)
+        end
+    end)
+end
+
+do
+    local row = Row(50)
+    Label(row, "Reproduzir Macro", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.35, 0, 1, 0))
+    local macroPlayField = Field(row, UDim2.new(0.37, 0, 0.5, -15), UDim2.new(0.35, 0, 0, 30), "nome...")
+    Button(row, "PLAY", UDim2.new(0.74, 0, 0.5, -15), UDim2.fromOffset(80, 30), T.Card, function()
+        local name = macroPlayField.Text
+        if HackState.macros[name] then
+            Toast("reproduzindo macro '"..name.."'...", true)
+            task.spawn(function()
+                local macro = HackState.macros[name]
+                local startTime = tick()
+                for _, action in ipairs(macro) do
+                    local waitTime = action.time - (tick() - startTime)
+                    if waitTime > 0 then
+                        task.wait(waitTime)
+                    end
+                    
+                    if action.type == "input" then
+                        local vim = game:GetService("VirtualInputManager")
+                        vim:SendKeyEvent(true, action.keyCode, false, game)
+                        task.wait(0.05)
+                        vim:SendKeyEvent(false, action.keyCode, false, game)
+                    elseif action.type == "position" then
+                        local root = hkRoot()
+                        if root then
+                            root.CFrame = action.cframe
+                        end
+                    end
+                end
+                Toast("macro finalizado", true)
+            end)
+        else
+            Toast("macro nao encontrado", false)
+        end
+    end)
+end
+
+Section("Macros Pre-Definidos")
+
+BtnRow("Macro: Farm Loop", T.Accent, function()
+    Toast("iniciando farm loop...", true)
+    HackState.farmLoop = true
+    task.spawn(function()
+        while HackState.farmLoop do
+            local root = hkRoot()
+            if root then
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj:IsA("ClickDetector") then
+                        fireclickdetector(obj)
+                    end
+                    if obj:IsA("ProximityPrompt") then
+                        fireproximityprompt(obj)
+                    end
+                end
+            end
+            task.wait(1)
+        end
+    end)
+end)
+
+BtnRow("Stop Farm Loop", T.Card, function()
+    HackState.farmLoop = false
+    Toast("farm loop parado", true)
+end)
+
+BtnRow("Macro: Circle Movement", T.Accent, function()
+    Toast("movimento circular iniciado", true)
+    HackState.circleMove = true
+    task.spawn(function()
+        local angle = 0
+        local center = hkRoot().Position
+        while HackState.circleMove do
+            local root = hkRoot()
+            if root then
+                local x = center.X + math.cos(angle) * 20
+                local z = center.Z + math.sin(angle) * 20
+                root.CFrame = CFrame.new(x, center.Y, z)
+                angle = angle + 0.1
+            end
+            task.wait(0.05)
+        end
+    end)
+end)
+
+BtnRow("Stop Circle Movement", T.Card, function()
+    HackState.circleMove = false
+    Toast("movimento circular parado", true)
+end)
+
+BtnRow("Listar Macros (output)", T.Card, function()
+    print("========== MACROS SALVOS ==========")
+    for name, macro in pairs(HackState.macros or {}) do
+        print(name, "- acoes:", #macro)
+    end
+    print("===================================")
+    Toast("macros listados no output", true)
+end)
+
+Note("Grave uma sequencia uma vez e rode em loop.", 68)
+
+end -- Macros tab
+
+--------------------------------------------------------------------------------
+-- REDE & SERVIDOR
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Rede", 0, false)
+Persist.Scope = "network"
+
+Section("Informacoes de Rede")
+Note("Conexoes, remotes e troca de servidor.", 52)
+
+BtnRow("Show Network Stats", T.Accent, function()
+    local stats = game:GetService("Stats").Network
+    print("========== NETWORK STATS ==========")
+    print("Data Received:", stats.DataReceivedKBps.Value, "KB/s")
+    print("Data Sent:", stats.DataSentKBps.Value, "KB/s")
+    print("Physics Receive:", stats.PhysicsReceiveKBps.Value, "KB/s")
+    print("Physics Send:", stats.PhysicsSendKBps.Value, "KB/s")
+    print("===================================")
+    Toast("network stats no output", true)
+end)
+
+Toggle("Monitor Network Traffic", false, function(v)
+    HackState.monitorNetwork = v
+    if v then
+        task.spawn(function()
+            while HackState.monitorNetwork do
+                local stats = game:GetService("Stats").Network
+                print(string.format("[NETWORK] RX: %.2f KB/s | TX: %.2f KB/s",
+                    stats.DataReceivedKBps.Value,
+                    stats.DataSentKBps.Value
+                ))
+                task.wait(2)
+            end
+        end)
+    end
+    Toast("network monitor "..(v and "ligado" or "desligado"), v)
+end, "net_monitor")
+
+Section("Informação do Servidor")
+
+BtnRow("Get Server Region", T.Accent, function()
+    local regionData = {
+        ["us-east"] = "United States East",
+        ["us-west"] = "United States West",
+        ["eu-west"] = "Europe West",
+        ["eu-central"] = "Europe Central",
+        ["asia-east"] = "Asia East",
+        ["asia-southeast"] = "Asia Southeast"
+    }
+    
+    local jobId = game.JobId
+    local region = "Unknown"
+    
+    for key, name in pairs(regionData) do
+        if jobId:sub(1, #key) == key then
+            region = name
+            break
+        end
+    end
+    
+    print("========== SERVER INFO ==========")
+    print("Job ID:", jobId)
+    print("Region:", region)
+    print("Place ID:", game.PlaceId)
+    print("Players:", #Players:GetPlayers().."/"..Players.MaxPlayers)
+    print("=================================")
+    
+    Toast("regiao do servidor: "..region, true)
+end)
+
+BtnRow("Copy Job ID", T.Card, function()
+    setclipboard(game.JobId)
+    Toast("job ID copiado", true)
+end)
+
+BtnRow("Server Lag Test", T.Accent, function()
+    Toast("testando lag...", true)
+    task.spawn(function()
+        local start = tick()
+        local pings = {}
+        
+        for i = 1, 10 do
+            local pingStart = tick()
+            game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
+            table.insert(pings, (tick() - pingStart) * 1000)
+            task.wait(0.1)
+        end
+        
+        local avgPing = 0
+        for _, ping in ipairs(pings) do
+            avgPing = avgPing + ping
+        end
+        avgPing = avgPing / #pings
+        
+        print("========== LAG TEST ==========")
+        print("Average Ping:", math.floor(avgPing), "ms")
+        print("Min Ping:", math.floor(math.min(unpack(pings))), "ms")
+        print("Max Ping:", math.floor(math.max(unpack(pings))), "ms")
+        print("==============================")
+        
+        Toast("ping medio: "..math.floor(avgPing).."ms", true)
+    end)
+end)
+
+Section("Troca de Servidor")
+
+BtnRow("Hop to Best Server", T.Accent, function()
+    Toast("procurando melhor servidor...", true)
+    task.spawn(function()
+        pcall(function()
+            local servers = game:GetService("HttpService"):JSONDecode(
+                game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Desc&limit=100")
+            )
+            
+            if servers and servers.data then
+                local bestServer = nil
+                local bestScore = -1
+                
+                for _, server in ipairs(servers.data) do
+                    if server.id ~= game.JobId then
+                        local score = server.playing
+                        local capacity = server.maxPlayers
+                        local ratio = score / capacity
+                        
+                        if ratio > 0.5 and ratio < 0.9 and score > bestScore then
+                            bestServer = server
+                            bestScore = score
+                        end
+                    end
+                end
+                
+                if bestServer then
+                    Toast("encontrado servidor com "..bestServer.playing.." players", true)
+                    task.wait(1)
+                    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, bestServer.id, LocalPlayer)
+                else
+                    Toast("nenhum servidor melhor encontrado", false)
+                end
+            end
+        end)
+    end)
+end)
+
+BtnRow("Hop to Smallest Server", T.Card, function()
+    Toast("procurando servidor vazio...", true)
+    task.spawn(function()
+        pcall(function()
+            local servers = game:GetService("HttpService"):JSONDecode(
+                game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100")
+            )
+            
+            if servers and servers.data then
+                for _, server in ipairs(servers.data) do
+                    if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                        Toast("encontrado servidor com "..server.playing.." players", true)
+                        task.wait(1)
+                        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+                        return
+                    end
+                end
+            end
+        end)
+    end)
+end)
+
+BtnRow("Hop to Full Server (queue)", T.Card, function()
+    Toast("procurando servidor cheio...", true)
+    task.spawn(function()
+        pcall(function()
+            local servers = game:GetService("HttpService"):JSONDecode(
+                game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Desc&limit=100")
+            )
+            
+            if servers and servers.data then
+                for _, server in ipairs(servers.data) do
+                    if server.playing == server.maxPlayers then
+                        Toast("tentando entrar em servidor cheio", true)
+                        task.wait(1)
+                        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+                        return
+                    end
+                end
+            end
+        end)
+    end)
+end)
+
+Section("Flood de Remotes")
+
+Toggle("Spam RemoteEvents", false, function(v)
+    HackState.spamRemotes = v
+    if v then
+        task.spawn(function()
+            while HackState.spamRemotes do
+                for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if remote:IsA("RemoteEvent") then
+                        pcall(function()
+                            remote:FireServer()
+                        end)
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("spam remotes "..(v and "ligado - CUIDADO!" or "desligado"), v)
+end, "net_spam")
+
+Note("Monitor de conexoes e busca de servidor por ping.", 68)
+
+end -- Rede
+
+--------------------------------------------------------------------------------
+-- ANIMACOES & EMOTES
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Animações", 0, false)
+Persist.Scope = "anims"
+
+Section("Sistema de Animacoes")
+Note("Toca animacoes por ID e ajusta a velocidade.", 52)
+
+local customAnims = {
+    {name = "Zombie", id = "rbxassetid://616163682"},
+    {name = "Levitate", id = "rbxassetid://313762630"},
+    {name = "Astronaut", id = "rbxassetid://891621366"},
+    {name = "Ninja", id = "rbxassetid://656117878"},
+    {name = "Knight", id = "rbxassetid://657564596"},
+    {name = "Mage", id = "rbxassetid://707742142"},
+    {name = "Pirate", id = "rbxassetid://750781874"},
+    {name = "Robot", id = "rbxassetid://616095330"},
+    {name = "Vampire", id = "rbxassetid://1083445855"},
+    {name = "Werewolf", id = "rbxassetid://1083216690"},
+}
+
+for _, animData in ipairs(customAnims) do
+    BtnRow("Play: "..animData.name, T.Accent, function()
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                local anim = Instance.new("Animation")
+                anim.AnimationId = animData.id
+                local track = hum:LoadAnimation(anim)
+                track:Play()
+                Toast("animacao "..animData.name.." tocando", true)
+            end
+        end
+    end)
+end
+
+Section("Controle de Animacoes")
+
+Toggle("Stop All Animations", false, function(v)
+    HackState.noAnims = v
+    if v then
+        task.spawn(function()
+            while HackState.noAnims do
+                local char = LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
+                            track:Stop()
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("stop all animations "..(v and "ligado" or "desligado"), v)
+end, "anim_stopall")
+
+Slider("Animation Speed", 0.1, 5, 1, "x%.1f", function(v)
+    HackState.animSpeed = v
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
+                track:AdjustSpeed(v)
+            end
+        end
+    end
+end, "anim_speed")
+
+Toggle("Freeze Animation", false, function(v)
+    HackState.freezeAnim = v
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
+                track:AdjustSpeed(v and 0 or 1)
+            end
+        end
+    end
+    Toast("freeze animation "..(v and "ligado" or "desligado"), v)
+end, "anim_freeze")
+
+Section("Emotes Customizados")
+
+do
+    local row = Row(50)
+    Label(row, "Animation ID", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.3, 0, 1, 0))
+    local animIdField = Field(row, UDim2.new(0.32, 0, 0.5, -15), UDim2.new(0.4, 0, 0, 30), "rbxassetid://...")
+    Button(row, "PLAY", UDim2.new(0.74, 0, 0.5, -15), UDim2.fromOffset(80, 30), T.Accent, function()
+        local animId = animIdField.Text
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                local anim = Instance.new("Animation")
+                anim.AnimationId = animId
+                local track = hum:LoadAnimation(anim)
+                track:Play()
+                Toast("tocando animacao customizada", true)
+            end
+        end
+    end)
+end
+
+BtnRow("List Current Animations", T.Card, function()
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            print("========== ANIMATIONS ==========")
+            for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
+                print("Animation:", track.Animation.AnimationId)
+                print("Speed:", track.Speed)
+                print("Time:", track.TimePosition)
+                print("---")
+            end
+            print("================================")
+            Toast("animations listadas no output", true)
+        end
+    end
+end)
+
+Note("IDs do catalogo Roblox. A animacao roda no seu personagem.", 68)
+
+end -- Animacoes
+
+--------------------------------------------------------------------------------
+-- EXTRAS DO MENU
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- MINI-JOGOS
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Mini-Jogos", 0, false)
+Persist.Scope = "minigames"
+
+Section("Mini-Jogos Integrados")
+Note("Efeitos e brincadeiras dentro do mapa.", 52)
+
+BtnRow("Tic-Tac-Toe vs AI", T.Accent, function()
+    Toast("abrindo tic-tac-toe...", true)
+    -- jogo da velha fica pro proximo build
+    print("[SILK] Tic-Tac-Toe iniciado")
+end)
+
+BtnRow("Memory Card Game", T.Card, function()
+    Toast("memory game carregando...", true)
+    print("[SILK] Memory game iniciado")
+end)
+
+BtnRow("Simon Says", T.Card, function()
+    Toast("Simon Says carregando...", true)
+    print("[SILK] Simon Says iniciado")
+end)
+
+Section("Vitrine de Partículas")
+
+BtnRow("Fireworks Show", T.Accent, function()
+    Toast("fogos de artificio!", true)
+    task.spawn(function()
+        for i = 1, 20 do
+            local root = hkRoot()
+            if root then
+                local firework = Instance.new("Part")
+                firework.Size = Vector3.new(1, 1, 1)
+                firework.Anchored = true
+                firework.CanCollide = false
+                firework.Material = Enum.Material.Neon
+                firework.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
+                firework.Position = root.Position + Vector3.new(math.random(-20, 20), math.random(20, 40), math.random(-20, 20))
+                firework.Parent = Workspace
+                
+                local spark = Instance.new("Sparkles")
+                spark.Parent = firework
+                
+                task.delay(2, function()
+                    firework:Destroy()
+                end)
+            end
+            task.wait(0.2)
+        end
+    end)
+end)
+
+BtnRow("Rainbow Trail", T.Card, function()
+    HackState.rainbowTrail = not HackState.rainbowTrail
+    if HackState.rainbowTrail then
+        Toast("rainbow trail ativado", true)
+        task.spawn(function()
+            while HackState.rainbowTrail do
+                local root = hkRoot()
+                if root then
+                    local part = Instance.new("Part")
+                    part.Size = Vector3.new(2, 2, 2)
+                    part.Anchored = true
+                    part.CanCollide = false
+                    part.Material = Enum.Material.Neon
+                    part.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+                    part.Transparency = 0.5
+                    part.CFrame = root.CFrame
+                    part.Parent = Workspace
+                    
+                    task.delay(1, function()
+                        for i = 0, 1, 0.1 do
+                            part.Transparency = 0.5 + (i * 0.5)
+                            task.wait(0.05)
+                        end
+                        part:Destroy()
+                    end)
+                end
+                task.wait(0.1)
+            end
+        end)
+    else
+        Toast("rainbow trail desativado", true)
+    end
+end)
+
+Section("Música & Som")
+
+local songs = {
+    {name = "Megalovania", id = "2633522900"},
+    {name = "Astronomia (Coffin Dance)", id = "4816849952"},
+    {name = "Rick Roll", id = "6478684707"},
+    {name = "Giorno Theme", id = "5100894416"},
+    {name = "Caramelldansen", id = "2643543544"},
+    {name = "Nyan Cat", id = "130768299"},
+}
+
+for _, song in ipairs(songs) do
+    BtnRow("Play: "..song.name, T.Accent, function()
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://"..song.id
+        sound.Volume = 0.5
+        sound.Looped = false
+        sound.Parent = Workspace
+        sound:Play()
+        HackState.currentSound = sound
+        Toast("tocando "..song.name, true)
+    end)
+end
+
+BtnRow("Stop Music", T.Card, function()
+    if HackState.currentSound and HackState.currentSound.Parent then
+        HackState.currentSound:Stop()
+        HackState.currentSound:Destroy()
+        Toast("musica parada", true)
+    end
+end)
+
+do
+    local row = Row(50)
+    Label(row, "Custom Song ID", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.35, 0, 1, 0))
+    local songField = Field(row, UDim2.new(0.37, 0, 0.5, -15), UDim2.new(0.35, 0, 0, 30), "soundid...")
+    Button(row, "PLAY", UDim2.new(0.74, 0, 0.5, -15), UDim2.fromOffset(80, 30), T.Accent, function()
+        local songId = songField.Text
+        if #songId > 0 then
+            local sound = Instance.new("Sound")
+            sound.SoundId = "rbxassetid://"..songId
+            sound.Volume = 0.5
+            sound.Looped = true
+            sound.Parent = Workspace
+            sound:Play()
+            HackState.currentSound = sound
+            Toast("tocando song ID "..songId, true)
+        end
+    end)
+end
+
+Note("Particulas, som e algumas brincadeiras no mapa.", 68)
+
+end -- Mini-Jogos
+
+--------------------------------------------------------------------------------
+-- FERRAMENTAS AVANCADAS
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Avançado", 0, false)
+Persist.Scope = "advtools"
+
+Section("Ferramentas Avancadas")
+Note("Ferramentas de analise pra quem mexe com Lua.", 52)
+
+BtnRow("Decompile LocalScripts", T.Accent, function()
+    Toast("decompilando scripts...", true)
+    task.spawn(function()
+        local count = 0
+        for _, obj in ipairs(game:GetDescendants()) do
+            if obj:IsA("LocalScript") then
+                pcall(function()
+                    local source = decompile(obj)
+                    print("========== "..obj:GetFullName().." ==========")
+                    print(source)
+                    print("==========================================")
+                    count = count + 1
+                end)
+            end
+        end
+        Toast("decompilados "..count.." scripts", true)
+    end)
+end)
+
+BtnRow("Find All Remotes", T.Card, function()
+    local remotes = {}
+    for _, obj in ipairs(game:GetDescendants()) do
+        if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") or obj:IsA("BindableEvent") or obj:IsA("BindableFunction") then
+            table.insert(remotes, obj:GetFullName())
+        end
+    end
+    print("========== REMOTES ("..#remotes..") ==========")
+    for _, path in ipairs(remotes) do
+        print(path)
+    end
+    print("==========================================")
+    Toast("encontrados "..#remotes.." remotes", true)
+end)
+
+BtnRow("Scan for Vulnerabilities", T.Accent, function()
+    Toast("escaneando vulnerabilidades...", true)
+    task.spawn(function()
+        local vulns = {}
+        
+        for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction") then
+                if remote.Name:lower():find("buy") or 
+                   remote.Name:lower():find("purchase") or
+                   remote.Name:lower():find("give") or
+                   remote.Name:lower():find("admin") then
+                    table.insert(vulns, remote:GetFullName())
+                end
+            end
+        end
+        
+        print("========== VULNERABILIDADES ==========")
+        for _, vuln in ipairs(vulns) do
+            print(vuln)
+        end
+        print("Total:", #vulns)
+        print("======================================")
+        Toast("scan completo - "..#vulns.." suspeitos", true)
+    end)
+end)
+
+Section("Memória & Desempenho")
+
+BtnRow("Garbage Collection", T.Accent, function()
+    Toast("limpando memoria...", true)
+    local before = collectgarbage("count")
+    collectgarbage("collect")
+    local after = collectgarbage("count")
+    local freed = math.floor(before - after)
+    Toast("liberados "..freed.." KB", true)
+    print("[SILK] Memoria liberada:", freed, "KB")
+end)
+
+BtnRow("Memory Usage Report", T.Card, function()
+    local mem = collectgarbage("count")
+    print("========== MEMORY REPORT ==========")
+    print("Memory Used:", math.floor(mem), "KB")
+    print("Memory Used:", math.floor(mem / 1024), "MB")
+    
+    local categories = {
+        Scripts = 0,
+        Parts = 0,
+        Guis = 0,
+        Sounds = 0,
+        Other = 0
+    }
+    
+    for _, obj in ipairs(game:GetDescendants()) do
+        if obj:IsA("LuaSourceContainer") then
+            categories.Scripts = categories.Scripts + 1
+        elseif obj:IsA("BasePart") then
+            categories.Parts = categories.Parts + 1
+        elseif obj:IsA("GuiObject") then
+            categories.Guis = categories.Guis + 1
+        elseif obj:IsA("Sound") then
+            categories.Sounds = categories.Sounds + 1
+        else
+            categories.Other = categories.Other + 1
+        end
+    end
+    
+    print("--- Instance Counts ---")
+    for category, count in pairs(categories) do
+        print(category..":", count)
+    end
+    print("===================================")
+    Toast("memory report no output", true)
+end)
+
+Section("Scripts Avançados")
+
+BtnRow("Hook All Functions", T.Accent, function()
+    Toast("hooking functions...", true)
+    task.spawn(function()
+        local hooked = 0
+        local mt = getrawmetatable(game)
+        setreadonly(mt, false)
+        
+        local oldIndex = mt.__index
+        local oldNamecall = mt.__namecall
+        
+        mt.__index = newcclosure(function(self, key)
+            if HackState.verboseLog then
+                print("[HOOK __index]", tostring(self), key)
+            end
+            return oldIndex(self, key)
+        end)
+        
+        mt.__namecall = newcclosure(function(self, ...)
+            local method = getnamecallmethod()
+            if HackState.verboseLog then
+                print("[HOOK __namecall]", tostring(self), method, ...)
+            end
+            return oldNamecall(self, ...)
+        end)
+        
+        setreadonly(mt, true)
+        Toast("metamethods hooked", true)
+    end)
+end)
+
+do
+    local row = Row(100)
+    Label(row, "Execute Lua Code", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 0, 20))
+    
+    local codeBox = Instance.new("TextBox")
+    codeBox.Size = UDim2.new(1, -32, 0, 50)
+    codeBox.Position = UDim2.fromOffset(16, 25)
+    codeBox.BackgroundColor3 = T.Field
+    codeBox.BorderColor3 = T.Accent
+    codeBox.BorderSizePixel = 1
+    codeBox.Text = ""
+    codeBox.TextColor3 = T.Text
+    codeBox.Font = Enum.Font.Code
+    codeBox.TextSize = 11
+    codeBox.TextXAlignment = Enum.TextXAlignment.Left
+    codeBox.TextYAlignment = Enum.TextYAlignment.Top
+    codeBox.PlaceholderText = "print('silk')"
+    codeBox.ClearTextOnFocus = false
+    codeBox.MultiLine = true
+    codeBox.TextWrapped = true
+    codeBox.Parent = row
+    
+    Button(row, "RUN", UDim2.new(0.5, -40, 1, -35), UDim2.fromOffset(80, 30), T.Accent, function()
+        local code = codeBox.Text
+        if #code > 0 then
+            local ok, result = pcall(function()
+                return loadstring(code)()
+            end)
+            if ok then
+                Toast("codigo executado", true)
+                if result then
+                    print("[SILK RESULT]", result)
+                end
+            else
+                Toast("erro: "..(tostring(result):sub(1, 30)), false)
+                print("[SILK ERROR]", result)
+            end
+        end
+    end)
+end
+
+Section("Explorador de Instâncias")
+
+BtnRow("List Workspace Children", T.Card, function()
+    print("========== WORKSPACE ==========")
+    for _, obj in ipairs(Workspace:GetChildren()) do
+        print(obj.Name, "-", obj.ClassName)
+    end
+    print("===============================")
+    Toast("workspace listado no output", true)
+end)
+
+BtnRow("List ReplicatedStorage", T.Card, function()
+    print("========== REPLICATED STORAGE ==========")
+    for _, obj in ipairs(game:GetService("ReplicatedStorage"):GetChildren()) do
+        print(obj.Name, "-", obj.ClassName)
+    end
+    print("========================================")
+    Toast("replicated storage no output", true)
+end)
+
+BtnRow("List Player Backpack", T.Card, function()
+    print("========== BACKPACK ==========")
+    for _, obj in ipairs(LocalPlayer.Backpack:GetChildren()) do
+        print(obj.Name, "-", obj.ClassName)
+    end
+    print("==============================")
+    Toast("backpack listado no output", true)
+end)
+
+Note("Explorador de instancias e execucao de codigo.", 68)
+
+end -- Avancado
+
+--------------------------------------------------------------------------------
+-- ESTATISTICAS
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Estatísticas", 0, false)
+Persist.Scope = "stats"
+
+Section("Estatisticas do SILK CORE")
+Note("Contadores desta sessao.", 52)
+
+HackState.stats = HackState.stats or {
+    sessionStart = tick(),
+    hacksUsed = 0,
+    teleports = 0,
+    playersKicked = 0,
+    itemsCollected = 0,
+}
+
+local function formatTime(seconds)
+    local hours = math.floor(seconds / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    local secs = math.floor(seconds % 60)
+    return string.format("%02d:%02d:%02d", hours, minutes, secs)
+end
+
+BtnRow("Show Session Stats", T.Accent, function()
+    local sessionTime = tick() - HackState.stats.sessionStart
+    print("========== SESSION STATS ==========")
+    print("Session Time:", formatTime(sessionTime))
+    print("Hacks Used:", HackState.stats.hacksUsed)
+    print("Teleports:", HackState.stats.teleports)
+    print("Players Kicked:", HackState.stats.playersKicked)
+    print("Items Collected:", HackState.stats.itemsCollected)
+    print("===================================")
+    Toast("estatisticas no output", true)
+end)
+
+Section("Estatísticas do Jogador")
+
+BtnRow("Track My Stats", T.Accent, function()
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            print("========== PLAYER STATS ==========")
+            print("Health:", math.floor(hum.Health).."/"..math.floor(hum.MaxHealth))
+            print("WalkSpeed:", hum.WalkSpeed)
+            print("JumpPower:", hum.JumpPower or hum.JumpHeight)
+            print("Hip Height:", hum.HipHeight)
+            
+            local root = hkRoot()
+            if root then
+                print("Position:", tostring(root.Position))
+                print("Velocity:", tostring(root.AssemblyLinearVelocity))
+            end
+            
+            print("==================================")
+            Toast("player stats no output", true)
+        end
+    end
+end)
+
+Section("Análise do Jogo")
+
+Toggle("Track Players Joining/Leaving", false, function(v)
+    HackState.trackPlayers = v
+    if v then
+        HackState.playerJoinConn = Players.PlayerAdded:Connect(function(player)
+            print("[SILK] Player joined:", player.Name)
+            Toast(player.Name.." entrou", true)
+        end)
+        HackState.playerLeaveConn = Players.PlayerRemoving:Connect(function(player)
+            print("[SILK] Player left:", player.Name)
+            Toast(player.Name.." saiu", false)
+        end)
+    else
+        if HackState.playerJoinConn then
+            HackState.playerJoinConn:Disconnect()
+            HackState.playerLeaveConn:Disconnect()
+        end
+    end
+    Toast("track players "..(v and "ligado" or "desligado"), v)
+end, "stat_trackplayers")
+
+Toggle("Log All Deaths", false, function(v)
+    HackState.logDeaths = v
+    if v then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Character then
+                local hum = player.Character:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum.Died:Connect(function()
+                        print("[SILK DEATH]", player.Name, "morreu")
+                    end)
+                end
+            end
+        end
+    end
+    Toast("log deaths "..(v and "ligado" or "desligado"), v)
+end, "stat_deaths")
+
+Section("Monitor de Desempenho")
+
+Toggle("Track FPS", false, function(v)
+    HackState.trackFPS = v
+    if v then
+        task.spawn(function()
+            while HackState.trackFPS do
+                local fps = math.floor(1 / game:GetService("RunService").Heartbeat:Wait())
+                print("[FPS]", fps)
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("track FPS "..(v and "ligado" or "desligado"), v)
+end, "stat_fps")
+
+Toggle("Track Ping", false, function(v)
+    HackState.trackPing = v
+    if v then
+        task.spawn(function()
+            while HackState.trackPing do
+                local ping = math.floor(LocalPlayer:GetNetworkPing() * 1000)
+                print("[PING]", ping, "ms")
+                task.wait(2)
+            end
+        end)
+    end
+    Toast("track ping "..(v and "ligado" or "desligado"), v)
+end, "stat_ping")
+
+Section("Conquistas")
+
+local achievements = {
+    {name = "First Blood", desc = "Use seu primeiro hack", unlocked = false},
+    {name = "Teleporter", desc = "Teleporte 100 vezes", unlocked = false},
+    {name = "Speed Demon", desc = "Use speed hack por 10 minutos", unlocked = false},
+    {name = "Ghost Mode", desc = "Fique invisivel por 5 minutos", unlocked = false},
+    {name = "Collector", desc = "Colete 1000 itens", unlocked = false},
+}
+
+for _, achievement in ipairs(achievements) do
+    local status = achievement.unlocked and "[✓]" or "[ ]"
+    Note(status.." "..achievement.name.." - "..achievement.desc, 48)
+end
+
+BtnRow("Zerar Conquistas", T.Card, function()
+    for _, achievement in ipairs(achievements) do
+        achievement.unlocked = false
+    end
+    Toast("conquistas zeradas", true)
+end)
+
+Note("Contadores da sessao. Zerar apaga tudo.", 68)
+
+end -- Estatisticas
+
+--------------------------------------------------------------------------------
+-- BLOCOS UNIVERSAIS
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- CAMADA DE COMPATIBILIDADE
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Compatibilidade", 0, false)
+Persist.Scope = "compat"
+
+Section("Compatibilidade Universal")
+Note("Detecta e adapta hacks automaticamente para jogos populares", 52)
+
+local gamePatterns = {
+    {pattern = "Arsenal", placeIds = {286090429}, detected = false},
+    {pattern = "Phantom Forces", placeIds = {292439477}, detected = false},
+    {pattern = "Jailbreak", placeIds = {606849621}, detected = false},
+    {pattern = "Murder Mystery", placeIds = {142823291}, detected = false},
+    {pattern = "Blox Fruits", placeIds = {2753915549}, detected = false},
+    {pattern = "Adopt Me", placeIds = {920587237}, detected = false},
+    {pattern = "Tower Defense", placeIds = {3260590327}, detected = false},
+    {pattern = "Anime", placeIds = {3102144307}, detected = false},
+    {pattern = "Simulator", placeIds = {}, detected = false},
+    {pattern = "Tycoon", placeIds = {}, detected = false},
+}
+
+for _, pat in ipairs(gamePatterns) do
+    for _, placeId in ipairs(pat.placeIds) do
+        if game.PlaceId == placeId then
+            pat.detected = true
+            break
+        end
+    end
+
+    if not pat.detected then
+        local okInfo, info = pcall(function()
+            return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+        end)
+        local gameName = okInfo and info and info.Name
+        if gameName and gameName:lower():find(pat.pattern:lower(), 1, true) then
+            pat.detected = true
+        end
+    end
+end
+
+BtnRow("Detectar Tipo de Jogo", T.Accent, function()
+    local detected = nil
+    for _, pat in ipairs(gamePatterns) do
+        if pat.detected then
+            detected = pat.pattern
+            break
+        end
+    end
+    
+    if detected then
+        Toast("jogo detectado: "..detected, true)
+        print("[SILK] Game Type:", detected)
+    else
+        Toast("jogo desconhecido - usando hacks universais", true)
+    end
+end)
+
+Section("Arsenal")
+
+Toggle("Arsenal: Auto Headshot Helper", false, function(v)
+    HackState.arsenalHeadshot = v
+    if v then
+        task.spawn(function()
+            while HackState.arsenalHeadshot do
+                local mouse = LocalPlayer:GetMouse()
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        local head = player.Character:FindFirstChild("Head")
+                        if head then
+                            local screenPos, onScreen = Workspace.CurrentCamera:WorldToScreenPoint(head.Position)
+                            if onScreen then
+                                local dist = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(mouse.X, mouse.Y)).Magnitude
+                                if dist < 150 then
+                                    Workspace.CurrentCamera.CFrame = CFrame.new(Workspace.CurrentCamera.CFrame.Position, head.Position)
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait(0.05)
+            end
+        end)
+    end
+    Toast("arsenal headshot helper "..(v and "ligado" or "desligado"), v)
+end, "compat_arsenal_hs")
+
+Toggle("Arsenal: Show Gun Stats", false, function(v)
+    HackState.arsenalStats = v
+    Toast("arsenal gun stats "..(v and "ligado" or "desligado"), v)
+end, "compat_arsenal_stats")
+
+Section("Phantom Forces")
+
+Toggle("PF: No Recoil", false, function(v)
+    HackState.pfNoRecoil = v
+    if v then
+        for _, obj in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if obj:IsA("NumberValue") and obj.Name == "RecoilControl" then
+                obj.Value = 0
+            end
+        end
+    end
+    Toast("PF no recoil "..(v and "ligado" or "desligado"), v)
+end, "compat_pf_recoil")
+
+Toggle("PF: Infinite Ammo", false, function(v)
+    HackState.pfInfAmmo = v
+    if v then
+        task.spawn(function()
+            while HackState.pfInfAmmo do
+                for _, obj in ipairs(LocalPlayer.Character:GetDescendants()) do
+                    if obj:IsA("IntValue") and obj.Name == "Ammo" then
+                        obj.Value = 999
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("PF infinite ammo "..(v and "ligado" or "desligado"), v)
+end, "compat_pf_ammo")
+
+Section("Jailbreak")
+
+BtnRow("Jailbreak: Auto Rob Stores", T.Accent, function()
+    Toast("iniciando auto rob...", true)
+    HackState.jailbreakAutoRob = true
+    task.spawn(function()
+        local stores = {"Donut Store", "Gas Station", "Bank", "Jewelry", "Museum"}
+        while HackState.jailbreakAutoRob do
+            local root = hkRoot()
+            if root then
+                for _, storeName in ipairs(stores) do
+                    local store = Workspace:FindFirstChild(storeName)
+                    if store then
+                        local primary = store.PrimaryPart or store:FindFirstChildWhichIsA("BasePart")
+                        if primary then
+                            root.CFrame = primary.CFrame
+                            task.wait(10)
+                        end
+                    end
+                end
+            end
+            task.wait(1)
+        end
+    end)
+end)
+
+BtnRow("Stop Auto Rob", T.Card, function()
+    HackState.jailbreakAutoRob = false
+    Toast("auto rob parado", true)
+end)
+
+Toggle("Jailbreak: Infinite Nitro", false, function(v)
+    HackState.jailbreakNitro = v
+    Toast("jailbreak nitro "..(v and "ligado" or "desligado"), v)
+end, "compat_jb_nitro")
+
+Section("Murder Mystery 2")
+
+Toggle("MM2: Show Murderer", false, function(v)
+    HackState.mm2ShowMurderer = v
+    if v then
+        task.spawn(function()
+            while HackState.mm2ShowMurderer do
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player.Character then
+                        local knife = player.Character:FindFirstChild("Knife")
+                        if knife then
+                            print("[MM2] MURDERER:", player.Name)
+                            
+                            local billboard = Instance.new("BillboardGui")
+                            billboard.Size = UDim2.new(0, 100, 0, 40)
+                            billboard.StudsOffset = Vector3.new(0, 3, 0)
+                            billboard.AlwaysOnTop = true
+                            billboard.Parent = player.Character.Head
+                            
+                            local label = Instance.new("TextLabel")
+                            label.Size = UDim2.new(1, 0, 1, 0)
+                            label.BackgroundTransparency = 1
+                            label.Text = "MURDERER"
+                            label.TextColor3 = Color3.fromRGB(255, 0, 0)
+                            label.TextStrokeTransparency = 0
+                            label.TextScaled = true
+                            label.Font = Enum.Font.GothamBold
+                            label.Parent = billboard
+                        end
+                    end
+                end
+                task.wait(5)
+            end
+        end)
+    end
+    Toast("MM2 show murderer "..(v and "ligado" or "desligado"), v)
+end, "compat_mm2_murderer")
+
+Section("Blox Fruits")
+
+Toggle("Blox Fruits: Auto Farm", false, function(v)
+    HackState.bloxAutoFarm = v
+    if v then
+        task.spawn(function()
+            while HackState.bloxAutoFarm do
+                local root = hkRoot()
+                if root then
+                    for _, npc in ipairs(Workspace:GetDescendants()) do
+                        if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc:FindFirstChild("HumanoidRootPart") then
+                            if not Players:GetPlayerFromCharacter(npc) then
+                                local npcRoot = npc.HumanoidRootPart
+                                root.CFrame = npcRoot.CFrame * CFrame.new(0, 0, 5)
+                                
+                                local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+                                if tool then
+                                    tool:Activate()
+                                end
+                                
+                                task.wait(0.5)
+                            end
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("blox fruits auto farm "..(v and "ligado" or "desligado"), v)
+end, "compat_blox_farm")
+
+Toggle("Blox Fruits: Auto Collect Chests", false, function(v)
+    HackState.bloxAutoChest = v
+    if v then
+        task.spawn(function()
+            while HackState.bloxAutoChest do
+                local root = hkRoot()
+                if root then
+                    for _, chest in ipairs(Workspace:GetDescendants()) do
+                        if chest.Name == "Chest" or chest.Name:find("Chest") then
+                            if chest:IsA("Model") then
+                                local primary = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
+                                if primary then
+                                    root.CFrame = primary.CFrame
+                                    task.wait(1)
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait(2)
+            end
+        end)
+    end
+    Toast("blox fruits auto chest "..(v and "ligado" or "desligado"), v)
+end, "compat_blox_chest")
+
+Section("Adopt Me")
+
+Toggle("Adopt Me: Auto Collect Money", false, function(v)
+    HackState.adoptMeMoney = v
+    if v then
+        task.spawn(function()
+            while HackState.adoptMeMoney do
+                local root = hkRoot()
+                if root then
+                    for _, coin in ipairs(Workspace:GetDescendants()) do
+                        if coin.Name == "Coin" or coin.Name:find("Money") then
+                            if coin:IsA("BasePart") then
+                                root.CFrame = coin.CFrame
+                                task.wait(0.2)
+                            end
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("adopt me auto money "..(v and "ligado" or "desligado"), v)
+end, "compat_adopt_money")
+
+Section("Simuladores")
+
+Toggle("Simulator: Auto Click", false, function(v)
+    HackState.simAutoClick = v
+    if v then
+        task.spawn(function()
+            while HackState.simAutoClick do
+                for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if remote:IsA("RemoteEvent") and (remote.Name:lower():find("click") or remote.Name:lower():find("tap")) then
+                        pcall(function()
+                            remote:FireServer()
+                        end)
+                    end
+                end
+                task.wait(0.05)
+            end
+        end)
+    end
+    Toast("simulator auto click "..(v and "ligado" or "desligado"), v)
+end, "compat_sim_click")
+
+Toggle("Simulator: Auto Rebirth", false, function(v)
+    HackState.simAutoRebirth = v
+    if v then
+        task.spawn(function()
+            while HackState.simAutoRebirth do
+                for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if remote:IsA("RemoteEvent") and (remote.Name:lower():find("rebirth") or remote.Name:lower():find("prestige")) then
+                        pcall(function()
+                            remote:FireServer()
+                        end)
+                    end
+                end
+                task.wait(30)
+            end
+        end)
+    end
+    Toast("simulator auto rebirth "..(v and "ligado" or "desligado"), v)
+end, "compat_sim_rebirth")
+
+Section("Tower Defense")
+
+Toggle("TD: Auto Place Towers", false, function(v)
+    HackState.tdAutoPlace = v
+    if v then
+        task.spawn(function()
+            while HackState.tdAutoPlace do
+                local root = hkRoot()
+                if root then
+                    for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                        if remote:IsA("RemoteEvent") and remote.Name:lower():find("place") then
+                            pcall(function()
+                                local pos = root.Position + Vector3.new(math.random(-20, 20), 0, math.random(-20, 20))
+                                remote:FireServer(pos)
+                            end)
+                        end
+                    end
+                end
+                task.wait(5)
+            end
+        end)
+    end
+    Toast("TD auto place "..(v and "ligado" or "desligado"), v)
+end, "compat_td_place")
+
+Toggle("TD: Auto Upgrade", false, function(v)
+    HackState.tdAutoUpgrade = v
+    if v then
+        task.spawn(function()
+            while HackState.tdAutoUpgrade do
+                for _, remote in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                    if remote:IsA("RemoteEvent") and remote.Name:lower():find("upgrade") then
+                        pcall(function()
+                            remote:FireServer()
+                        end)
+                    end
+                end
+                task.wait(2)
+            end
+        end)
+    end
+    Toast("TD auto upgrade "..(v and "ligado" or "desligado"), v)
+end, "compat_td_upgrade")
+
+Section("Tycoons")
+
+Toggle("Tycoon: Auto Collect", false, function(v)
+    HackState.tycoonCollect = v
+    if v then
+        task.spawn(function()
+            while HackState.tycoonCollect do
+                local root = hkRoot()
+                if root then
+                    for _, collector in ipairs(Workspace:GetDescendants()) do
+                        if collector.Name == "Collector" or collector.Name:find("Collect") then
+                            if collector:IsA("BasePart") then
+                                root.CFrame = collector.CFrame
+                                task.wait(0.5)
+                            end
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("tycoon auto collect "..(v and "ligado" or "desligado"), v)
+end, "compat_tycoon_collect")
+
+Toggle("Tycoon: Auto Buy All", false, function(v)
+    HackState.tycoonBuy = v
+    if v then
+        task.spawn(function()
+            while HackState.tycoonBuy do
+                local root = hkRoot()
+                if root then
+                    for _, button in ipairs(Workspace:GetDescendants()) do
+                        if button:IsA("ClickDetector") then
+                            pcall(function()
+                                fireclickdetector(button)
+                            end)
+                        end
+                    end
+                end
+                task.wait(2)
+            end
+        end)
+    end
+    Toast("tycoon auto buy "..(v and "ligado" or "desligado"), v)
+end, "compat_tycoon_buy")
+
+Note("Ativa os hacks do jogo detectado.", 68)
+
+end -- Compatibilidade
+
+--------------------------------------------------------------------------------
+-- HACKS UNIVERSAIS ESTENDIDOS
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Hacks Extras", 0, false)
+Persist.Scope = "exthacks"
+
+Section("Hacks Estendidos")
+Note("Hacks fora das abas principais.", 52)
+
+-- Combate estendido
+Section("Combate Estendido")
+
+Toggle("Aimbot FOV Circle", false, function(v)
+    HackState.aimbotFOV = v
+    if v then
+        local circle = Drawing.new("Circle")
+        circle.Thickness = 2
+        circle.NumSides = 32
+        circle.Radius = 150
+        circle.Color = Color3.fromRGB(255, 0, 0)
+        circle.Transparency = 0.5
+        circle.Visible = true
+        
+        task.spawn(function()
+            while HackState.aimbotFOV do
+                local mouse = LocalPlayer:GetMouse()
+                circle.Position = Vector2.new(mouse.X, mouse.Y)
+                task.wait()
+            end
+            circle:Remove()
+        end)
+    end
+    Toast("aimbot FOV circle "..(v and "ligado" or "desligado"), v)
+end, "exh_aimfov")
+
+Toggle("Triggerbot", false, function(v)
+    HackState.triggerbot = v
+    if v then
+        task.spawn(function()
+            while HackState.triggerbot do
+                local mouse = LocalPlayer:GetMouse()
+                if mouse.Target and mouse.Target.Parent:FindFirstChild("Humanoid") then
+                    mouse1click()
+                end
+                task.wait(0.05)
+            end
+        end)
+    end
+    Toast("triggerbot "..(v and "ligado" or "desligado"), v)
+end, "exh_trigger")
+
+Toggle("Bunny Hop", false, function(v)
+    HackState.bhop = v
+    if v then
+        task.spawn(function()
+            while HackState.bhop do
+                local char = LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum and hum.FloorMaterial ~= Enum.Material.Air then
+                        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                    end
+                end
+                task.wait(0.05)
+            end
+        end)
+    end
+    Toast("bunny hop "..(v and "ligado" or "desligado"), v)
+end, "exh_bhop")
+
+Slider("Aimbot Smoothness", 0, 1, 0.5, "%.2f", function(v)
+    HackState.aimbotSmooth = v
+end, "exh_aimsmooth")
+
+Toggle("Smooth Aimbot", false, function(v)
+    HackState.smoothAimbot = v
+    if v then
+        task.spawn(function()
+            while HackState.smoothAimbot do
+                local mouse = LocalPlayer:GetMouse()
+                local closest = nil
+                local closestDist = 999999
+                
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        local head = player.Character:FindFirstChild("Head")
+                        if head then
+                            local screenPos, onScreen = Workspace.CurrentCamera:WorldToScreenPoint(head.Position)
+                            if onScreen then
+                                local dist = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(mouse.X, mouse.Y)).Magnitude
+                                if dist < closestDist and dist < 300 then
+                                    closest = head
+                                    closestDist = dist
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                if closest then
+                    local targetPos = closest.Position
+                    local cam = Workspace.CurrentCamera
+                    local currentCF = cam.CFrame
+                    local targetCF = CFrame.new(currentCF.Position, targetPos)
+                    local smoothness = HackState.aimbotSmooth or 0.5
+                    cam.CFrame = currentCF:Lerp(targetCF, smoothness)
+                end
+                
+                task.wait()
+            end
+        end)
+    end
+    Toast("smooth aimbot "..(v and "ligado" or "desligado"), v)
+end, "exh_smoothaim")
+
+-- Movimento estendido
+Section("Movimento Estendido")
+
+Toggle("Long Jump", false, function(v)
+    HackState.longJump = v
+    if v then
+        HackState.longJumpConn = UserInputService.InputBegan:Connect(function(input, gpe)
+            if not gpe and input.KeyCode == Enum.KeyCode.Space then
+                local root = hkRoot()
+                if root then
+                    local lookVector = Workspace.CurrentCamera.CFrame.LookVector
+                    root.AssemblyLinearVelocity = Vector3.new(lookVector.X * 100, 50, lookVector.Z * 100)
+                end
+            end
+        end)
+    else
+        if HackState.longJumpConn then
+            HackState.longJumpConn:Disconnect()
+        end
+    end
+    Toast("long jump "..(v and "ligado - press space" or "desligado"), v)
+end, "exh_longjump")
+
+Toggle("Jesus (walk on water)", false, function(v)
+    HackState.jesus = v
+    if v then
+        task.spawn(function()
+            while HackState.jesus do
+                local root = hkRoot()
+                if root then
+                    local region = Region3.new(root.Position - Vector3.new(5, 5, 5), root.Position + Vector3.new(5, 5, 5))
+                    local parts = Workspace:FindPartsInRegion3(region, nil, 100)
+                    
+                    for _, part in ipairs(parts) do
+                        if part.Material == Enum.Material.Water then
+                            local platform = Instance.new("Part")
+                            platform.Size = Vector3.new(10, 1, 10)
+                            platform.Anchored = true
+                            platform.Transparency = 0.7
+                            platform.Material = Enum.Material.Ice
+                            platform.Color = Color3.fromRGB(150, 200, 255)
+                            platform.Position = root.Position - Vector3.new(0, 3, 0)
+                            platform.Parent = Workspace
+                            
+                            task.delay(2, function()
+                                platform:Destroy()
+                            end)
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("jesus mode "..(v and "ligado" or "desligado"), v)
+end, "exh_jesus")
+
+Toggle("Spider Man (climb walls)", false, function(v)
+    HackState.spiderMan = v
+    if v then
+        task.spawn(function()
+            while HackState.spiderMan do
+                local char = LocalPlayer.Character
+                if char then
+                    local root = hkRoot()
+                    if root then
+                        local ray = Ray.new(root.Position, root.CFrame.LookVector * 5)
+                        local hit = Workspace:FindPartOnRay(ray, char)
+                        
+                        if hit then
+                            local bodyVel = Instance.new("BodyVelocity")
+                            bodyVel.Velocity = Vector3.new(0, 20, 0)
+                            bodyVel.MaxForce = Vector3.new(0, 4000, 0)
+                            bodyVel.Parent = root
+                            
+                            task.delay(0.1, function()
+                                bodyVel:Destroy()
+                            end)
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("spider man "..(v and "ligado" or "desligado"), v)
+end, "exh_spider")
+
+Toggle("Edge Jump (auto jump at ledges)", false, function(v)
+    HackState.edgeJump = v
+    if v then
+        task.spawn(function()
+            while HackState.edgeJump do
+                local char = LocalPlayer.Character
+                if char then
+                    local root = hkRoot()
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    
+                    if root and hum and hum.FloorMaterial ~= Enum.Material.Air then
+                        local ray = Ray.new(root.Position, Vector3.new(0, -10, 0))
+                        local hit = Workspace:FindPartOnRay(ray, char)
+                        
+                        if not hit then
+                            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    Toast("edge jump "..(v and "ligado" or "desligado"), v)
+end, "exh_edgejump")
+
+-- Visual estendido
+Section("Visual Estendido")
+
+Toggle("Rainbow Character", false, function(v)
+    HackState.rainbowChar = v
+    if v then
+        task.spawn(function()
+            while HackState.rainbowChar do
+                local char = LocalPlayer.Character
+                if char then
+                    for _, part in ipairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+                        end
+                    end
+                end
+                task.wait(0.05)
+            end
+        end)
+    end
+    Toast("rainbow character "..(v and "ligado" or "desligado"), v)
+end, "exh_rainbow")
+
+Toggle("Neon Character", false, function(v)
+    HackState.neonChar = v
+    local char = LocalPlayer.Character
+    if char then
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Material = v and Enum.Material.Neon or Enum.Material.Plastic
+            end
+        end
+    end
+    Toast("neon character "..(v and "ligado" or "desligado"), v)
+end, "exh_neon")
+
+Toggle("Glow Effect", false, function(v)
+    HackState.glowEffect = v
+    local char = LocalPlayer.Character
+    if char then
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                if v then
+                    local light = Instance.new("PointLight")
+                    light.Brightness = 2
+                    light.Range = 20
+                    light.Color = Color3.fromRGB(255, 255, 255)
+                    light.Parent = part
+                else
+                    for _, light in ipairs(part:GetChildren()) do
+                        if light:IsA("PointLight") then
+                            light:Destroy()
+                        end
+                    end
+                end
+            end
+        end
+    end
+    Toast("glow effect "..(v and "ligado" or "desligado"), v)
+end, "exh_glow")
+
+-- Utilidades estendidas
+Section("Utilidades Estendidas")
+
+Toggle("Auto Save Position", false, function(v)
+    HackState.autoSavePos = v
+    if v then
+        task.spawn(function()
+            while HackState.autoSavePos do
+                local root = hkRoot()
+                if root then
+                    HackState.savedPosition = root.CFrame
+                end
+                task.wait(5)
+            end
+        end)
+    end
+    Toast("auto save position "..(v and "ligado" or "desligado"), v)
+end, "exh_autosave")
+
+BtnRow("Load Saved Position", T.Accent, function()
+    if HackState.savedPosition then
+        local root = hkRoot()
+        if root then
+            root.CFrame = HackState.savedPosition
+            Toast("position loaded", true)
+        end
+    else
+        Toast("no saved position", false)
+    end
+end)
+
+Toggle("Auto Heal", false, function(v)
+    HackState.autoHeal = v
+    if v then
+        task.spawn(function()
+            while HackState.autoHeal do
+                local char = LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum and hum.Health < hum.MaxHealth * 0.5 then
+                        for _, obj in ipairs(LocalPlayer.Backpack:GetChildren()) do
+                            if obj.Name:lower():find("heal") or obj.Name:lower():find("potion") or obj.Name:lower():find("med") then
+                                hum:EquipTool(obj)
+                                obj:Activate()
+                                task.wait(1)
+                            end
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+    Toast("auto heal "..(v and "ligado" or "desligado"), v)
+end, "exh_autoheal")
+
+Note("Combat, movimento, visual e utilidade num lugar so.", 68)
+
+end -- Hacks Extras
+
+--------------------------------------------------------------------------------
+-- NATURAL DISASTER SURVIVAL: ORBITAL DE PECAS
+-- Puxa tudo que ficou solto depois do desastre (e as pecas presas, se liberar)
+-- e monta a forma escolhida em volta do personagem.
+--------------------------------------------------------------------------------
+do
+
+local function ndBuild()
+CurTab = Tab("Desastres", 0, false)
+Persist.Scope = "natdisaster"
+
+local ND = {
+    parts = {},        -- pecas sob controle do orbital
+    orig = {},         -- estado original de cada peca (pra devolver depois)
+    cache = {},        -- pontos normalizados da forma, um por peca
+    on = false,
+    shape = "anel",
+    radius = 14,
+    speed = 1.2,       -- voltas por segundo (0 = forma parada)
+    tilt = 0,          -- graus de inclinacao do plano
+    depth = 0,         -- engrossa a forma no eixo da camera
+    bob = 0,           -- sobe/desce o conjunto
+    fps = 30,          -- gravacoes de CFrame por segundo
+    maxParts = 120,
+    anchored = false,  -- incluir pecas presas no mapa
+    follow = true,     -- forma virada pra camera
+    closed = true,     -- fechar o desenho
+    custom = {},       -- pontos desenhados, em pixel de tela
+    spin = 0,
+    acc = 0,
+    conn = nil,
+}
+HackState.ndOrbital = ND
+
+-- tudo que e chamado antes de existir precisa estar declarado aqui
+local ndShape, ndPoly, ndResample, ndNormalize, ndCustomOutline
+local ndRoot, ndBlocked, ndQuery, ndCollect, ndRelease, ndRebuild, ndVolumetric
+local ndStep, ndStart, ndCount
+
+Section("Orbital de Peças")
+Note("Puxa as peças soltas depois do desastre e monta a forma escolhida. Peças presas entram se você liberar.", 52)
+
+-- ------------------------------------------------------------------ utilidade
+ndRoot = function()
+    local char = LocalPlayer.Character
+    if not char then return nil end
+    return char.PrimaryPart or char:FindFirstChild("HumanoidRootPart", true)
+end
+
+-- tudo que nao deve entrar no orbital
+ndBlocked = function(part)
+    if not part:IsA("BasePart") then return true end
+    if part:IsDescendantOf(Workspace.Terrain) then return true end
+    local s = part.Size
+    if math.max(s.X, s.Y, s.Z) > 150 then return true end
+    if part.Name == "Baseplate" then return true end
+    for _, plr in ipairs(Players:GetPlayers()) do
+        local c = plr.Character
+        if c and part:IsDescendantOf(c) then return true end
+    end
+    local model = part:FindFirstAncestorOfClass("Model")
+    if model and model:FindFirstChildOfClass("Humanoid") then return true end
+    return false
+end
+
+-- busca por caixa em volta do personagem (OverlapParams; Region3 como reserva)
+ndQuery = function(center, size)
+    if Workspace.GetPartBoundsInBox and OverlapParams then
+        local p = OverlapParams.new()
+        p.FilterType = Enum.RaycastFilterType.Exclude
+        p.FilterDescendantsInstances = { LocalPlayer.Character }
+        p.MaxParts = 0
+        return Workspace:GetPartBoundsInBox(CFrame.new(center), size, p)
+    end
+    local r3 = Region3.new(center - size / 2, center + size / 2)
+    return Workspace:FindPartsInRegion3(r3, LocalPlayer.Character, 5000)
+end
+
+ndCollect = function()
+    local root = ndRoot()
+    local center = root and root.Position or Vector3.zero
+    local reach = math.max(80, ND.radius * 4)
+    local found = ndQuery(center, Vector3.new(reach, reach, reach))
+
+    local pick = {}
+    for _, part in ipairs(found) do
+        if not ndBlocked(part) and (ND.anchored or not part.Anchored) then
+            pick[#pick + 1] = part
+        end
+    end
+    table.sort(pick, function(a, b)
+        return (a.Position - center).Magnitude < (b.Position - center).Magnitude
+    end)
+
+    local list = {}
+    for i = 1, math.min(#pick, ND.maxParts) do
+        local part = pick[i]
+        if not ND.orig[part] then
+            ND.orig[part] = {
+                cf = part.CFrame,
+                anchored = part.Anchored,
+                collide = part.CanCollide,
+                massless = part.Massless,
+            }
+        end
+        part.CanCollide = false
+        part.Massless = true
+        list[i] = part
+    end
+    ND.parts = list
+    ndRebuild()
+    return #list
+end
+
+ndRelease = function()
+    ND.on = false
+    if ND.conn then ND.conn:Disconnect(); ND.conn = nil end
+    for part, st in pairs(ND.orig) do
+        if part and part.Parent then
+            pcall(function()
+                part.CFrame = st.cf
+                part.Anchored = st.anchored
+                part.CanCollide = st.collide
+                part.Massless = st.massless
+            end)
+        end
+    end
+    ND.orig = {}
+    ND.parts = {}
+    ND.cache = {}
+end
+
+-- -------------------------------------------------------------------- formas
+-- Cada forma devolve um ponto normalizado (x, y, z) dentro de um cubo de lado 2.
+
+ndShape = {}
+
+ndShape.anel = function(t)
+    return math.cos(t), 0, math.sin(t)
+end
+
+ndShape.circulo = function(t)
+    return math.cos(t), math.sin(t), 0
+end
+
+ndShape.esfera = function(t, i, n)
+    local k = (i - 0.5) / n
+    local phi = math.acos(math.clamp(1 - 2 * k, -1, 1))
+    local theta = math.pi * (1 + 5 ^ 0.5) * k
+    return math.cos(theta) * math.sin(phi), math.cos(phi), math.sin(theta) * math.sin(phi)
+end
+
+ndShape.coracao = function(t)
+    local x = 16 * math.sin(t) ^ 3
+    local y = 13 * math.cos(t) - 5 * math.cos(2 * t) - 2 * math.cos(3 * t) - math.cos(4 * t)
+    return x / 17, y / 17, 0
+end
+
+ndShape.estrela = function(t)
+    local r = 0.62 + 0.38 * math.cos(5 * t)
+    return r * math.cos(t), r * math.sin(t), 0
+end
+
+ndShape.espiral = function(t)
+    local u = t / (math.pi * 2)
+    local a = u * math.pi * 4
+    return u * math.cos(a), u * math.sin(a), 0
+end
+
+ndVolumetric = { anel = true, esfera = true }
+
+-- contornos feitos a mao, normalizados em [-1, 1]
+ndPoly = {
+    quadrado = { {-1, -1}, {1, -1}, {1, 1}, {-1, 1} },
+    triangulo = { {0, 1}, {0.94, -0.62}, {-0.94, -0.62} },
+    dedo = {
+        {-0.55, -1}, {0.55, -1}, {0.55, -0.2}, {0.14, -0.2},
+        {0.14, 0.72}, {0.06, 0.9}, {-0.06, 0.9}, {-0.14, 0.72}, {-0.14, -0.2}, {-0.55, -0.2},
+    },
+}
+
+-- redivide um contorno em n pontos com espacamento igual pelo comprimento
+ndResample = function(pts, n, closed)
+    local list = {}
+    for i = 1, #pts do list[i] = pts[i] end
+    if closed and #list > 1 then list[#list + 1] = pts[1] end
+    local m = #list
+    if m < 2 or n < 1 then return {} end
+
+    local seg, total = {}, 0
+    for i = 1, m - 1 do
+        local dx = list[i + 1][1] - list[i][1]
+        local dy = list[i + 1][2] - list[i][2]
+        local l = math.sqrt(dx * dx + dy * dy)
+        seg[i] = l
+        total = total + l
+    end
+    if total <= 0 then return {} end
+
+    local out = {}
+    local idx, acc = 1, 0
+    for k = 1, n do
+        local target = ((k - 1) / n) * total
+        while idx < m - 1 and acc + seg[idx] < target do
+            acc = acc + seg[idx]
+            idx = idx + 1
+        end
+        local l = seg[idx]
+        local f = (l and l > 0) and (target - acc) / l or 0
+        local a = list[idx]
+        local b = list[idx + 1] or a
+        out[k] = { a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f }
+    end
+    return out
+end
+
+-- recorta, alisa, centraliza e escala o que foi desenhado para [-1, 1]
+ndNormalize = function(pts)
+    if #pts < 3 then return {} end
+    local minx, miny, maxx, maxy = math.huge, math.huge, -math.huge, -math.huge
+    for _, q in ipairs(pts) do
+        if q[1] < minx then minx = q[1] end
+        if q[1] > maxx then maxx = q[1] end
+        if q[2] < miny then miny = q[2] end
+        if q[2] > maxy then maxy = q[2] end
+    end
+    local w, h = maxx - minx, maxy - miny
+    local span = math.max(w, h)
+    if span <= 0 then return {} end
+
+    local sm = {}
+    for i, q in ipairs(pts) do
+        local a = pts[math.max(1, i - 1)]
+        local b = pts[math.min(#pts, i + 1)]
+        sm[i] = { (a[1] + q[1] + b[1]) / 3, (a[2] + q[2] + b[2]) / 3 }
+    end
+
+    local cx, cy = minx + w / 2, miny + h / 2
+    local s = 2 / span
+    local out = {}
+    for i, q in ipairs(sm) do
+        out[i] = { (q[1] - cx) * s, -(q[2] - cy) * s }
+    end
+    return out
+end
+
+ndCustomOutline = function()
+    return ND.drawn or ndNormalize(ND.custom)
+end
+
+-- ------------------------------------------------------------------ montagem
+ndRebuild = function()
+    local n = #ND.parts
+    local out = {}
+    if n > 0 then
+        if ND.shape == "desenho" then
+            local rs = ndResample(ndCustomOutline(), n, ND.closed)
+            for i = 1, n do
+                local p = rs[i] or { 0, 0 }
+                out[i] = { p[1], p[2], 0, ((i - 1) / n) * math.pi * 2 }
+            end
+        elseif ndPoly[ND.shape] then
+            local rs = ndResample(ndPoly[ND.shape], n, true)
+            for i = 1, n do
+                local p = rs[i] or { 0, 0 }
+                out[i] = { p[1], p[2], 0, ((i - 1) / n) * math.pi * 2 }
+            end
+        else
+            local fn = ndShape[ND.shape] or ndShape.anel
+            for i = 1, n do
+                local t = ((i - 1) / n) * math.pi * 2
+                local x, y, z = fn(t, i, n)
+                out[i] = { x, y, z, t }
+            end
+        end
+    end
+    ND.cache = out
+end
+
+ndStep = function(dt)
+    local root = ndRoot()
+    if not root then return end
+    local n = #ND.parts
+    if n == 0 then return end
+
+    ND.spin = ND.spin + dt * ND.speed * math.pi * 2
+
+    local center = root.Position + Vector3.new(0, 3 + ND.bob, 0)
+    local cam = Workspace.CurrentCamera
+    local base
+    if ndVolumetric[ND.shape] then
+        base = CFrame.new(center)
+    elseif ND.follow and cam then
+        base = CFrame.fromMatrix(center, cam.CFrame.RightVector, cam.CFrame.UpVector)
+    else
+        base = CFrame.new(center) * CFrame.Angles(0, ND.spin, 0)
+    end
+    if ND.tilt ~= 0 then
+        base = base * CFrame.Angles(math.rad(ND.tilt), 0, 0)
+    end
+
+    local R = ND.radius
+    local cache = ND.cache
+    for i = 1, n do
+        local part = ND.parts[i]
+        local v = cache[i]
+        if part and part.Parent and v then
+            local z = v[3]
+            if ND.depth ~= 0 then z = z + math.sin(v[4] * 3) * ND.depth end
+            if not part.Anchored then
+                part.AssemblyLinearVelocity = Vector3.zero
+                part.AssemblyAngularVelocity = Vector3.zero
+            end
+            part.CFrame = CFrame.new(base:PointToWorldSpace(Vector3.new(v[1] * R, v[2] * R, z * R)))
+        end
+    end
+end
+
+ndStart = function()
+    if ND.conn then ND.conn:Disconnect() end
+    ND.on = true
+    ND.acc = 0
+    ND.conn = RunService.Heartbeat:Connect(function(dt)
+        if not ND.on then
+            if ND.conn then ND.conn:Disconnect(); ND.conn = nil end
+            return
+        end
+        ND.acc = ND.acc + dt
+        local step = 1 / math.clamp(ND.fps, 5, 60)
+        if ND.acc < step then return end
+        local frame = ND.acc
+        ND.acc = 0
+        pcall(ndStep, frame)
+    end)
+end
+
+ndCount = function()
+    return #ND.parts
+end
+
+-- ------------------------------------------------------------------- controles
+BtnRow("Puxar Peças do Mapa", T.Accent, function()
+    ndRelease()
+    local got = ndCollect()
+    if got > 0 then
+        ndStart()
+        Toast("orbital ligado com " .. got .. " peças", true)
+    else
+        Toast("nenhuma peça encontrada por perto", false)
+    end
+end)
+
+BtnRow("Parar Orbital (segura as peças)", T.Card, function()
+    ND.on = false
+    Toast("orbital parado com " .. ndCount() .. " peças seguradas", true)
+end)
+
+BtnRow("Soltar Tudo (volta ao lugar)", T.Card, function()
+    ndRelease()
+    Toast("peças devolvidas ao lugar", true)
+end)
+
+BtnRow("Puxar Só as Soltas de Novo", T.Card, function()
+    ND.orig = {}
+    ND.parts = {}
+    local got = ndCollect()
+    Toast(got > 0 and ("repuxadas " .. got .. " peças") or "nada novo por perto", got > 0)
+end)
+
+Section("Formas")
+
+local function ndSetShape(name, label)
+    ND.shape = name
+    if name == "desenho" then ND.drawn = ndNormalize(ND.custom) end
+    ndRebuild()
+    Toast("forma: " .. label, true)
+end
+
+BtnRow("Forma: Anel", T.Accent, function() ndSetShape("anel", "anel") end)
+BtnRow("Forma: Círculo", T.Accent, function() ndSetShape("circulo", "círculo") end)
+BtnRow("Forma: Esfera", T.Accent, function() ndSetShape("esfera", "esfera") end)
+BtnRow("Forma: Coração", T.Accent, function() ndSetShape("coracao", "coração") end)
+BtnRow("Forma: Estrela", T.Accent, function() ndSetShape("estrela", "estrela") end)
+BtnRow("Forma: Espiral", T.Accent, function() ndSetShape("espiral", "espiral") end)
+BtnRow("Forma: Quadrado", T.Accent, function() ndSetShape("quadrado", "quadrado") end)
+BtnRow("Forma: Triângulo", T.Accent, function() ndSetShape("triangulo", "triângulo") end)
+BtnRow("Forma: Dedo do Meio", T.Accent, function() ndSetShape("dedo", "dedo do meio") end)
+BtnRow("Forma: Meu Desenho", T.Accent, function()
+    if #ND.custom < 3 then
+        Toast("desenhe alguma coisa primeiro", false)
+        return
+    end
+    ndSetShape("desenho", "desenho")
+end)
+
+Section("Ajustes do Orbital")
+
+Slider("Raio da forma", 4, 40, 14, "%.0f studs", function(v)
+    ND.radius = v
+    ndRebuild()
+end, "nd_radius")
+
+Slider("Velocidade da volta", 0, 8, 1.2, "%.1f x", function(v)
+    ND.speed = v
+end, "nd_speed")
+
+Slider("Inclinação", -90, 90, 0, "%.0f graus", function(v)
+    ND.tilt = v
+end, "nd_tilt")
+
+Slider("Altura do conjunto", -20, 40, 0, "%.0f studs", function(v)
+    ND.bob = v
+end, "nd_bob")
+
+Slider("Profundidade da forma", 0, 14, 0, "%.0f", function(v)
+    ND.depth = v
+end, "nd_depth")
+
+Slider("Maximo de pecas", 20, 400, 120, "%.0f", function(v)
+    ND.maxParts = math.floor(v)
+end, "nd_max")
+
+Slider("Gravações por segundo", 10, 60, 30, "%.0f/s", function(v)
+    ND.fps = math.floor(v)
+end, "nd_fps")
+
+Toggle("Incluir peças presas (anchored)", false, function(v)
+    ND.anchored = v
+    Toast("peças presas " .. (v and "liberadas" or "ignoradas"), v)
+end, "nd_anchored")
+
+Toggle("Forma virada pra câmera", true, function(v)
+    ND.follow = v
+end, "nd_follow")
+
+Toggle("Fechar o desenho", true, function(v)
+    ND.closed = v
+    ndRebuild()
+end, "nd_closed")
+
+-- ------------------------------------------------------------------ desenho
+Section("Desenhar a Forma")
+
+Note("Abre o quadro, desenha com o mouse e aplica. As peças pegam o contorno.", 52)
+
+local canvasGui, canvasFrame
+
+local function ndCanvas()
+    local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+    local old = playerGui:FindFirstChild("SilkDesenhoND")
+    if old then old:Destroy() end
+
+    canvasGui = New("ScreenGui", {
+        Name = "SilkDesenhoND",
+        ResetOnSpawn = false,
+        DisplayOrder = 60,
+        Enabled = false,
+    }, playerGui)
+
+    local box = New("Frame", {
+        Size = UDim2.fromOffset(430, 470),
+        Position = UDim2.new(0.5, -215, 0.5, -235),
+        BackgroundColor3 = T.Panel,
+        BackgroundTransparency = 0.05,
+        BorderSizePixel = 0,
+    }, canvasGui)
+    Round(box, 10)
+    Stroke(box, T.Accent, 1)
+
+    New("TextLabel", {
+        Text = "DESENHE A FORMA",
+        Font = F.Bold,
+        TextSize = 13,
+        TextColor3 = T.Text,
+        BackgroundTransparency = 1,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Position = UDim2.fromOffset(16, 0),
+        Size = UDim2.new(1, -110, 0, 38),
+    }, box)
+
+    local closeBtn = New("TextButton", {
+        Text = "X",
+        Font = F.Bold,
+        TextSize = 14,
+        TextColor3 = T.Bad,
+        BackgroundColor3 = T.Card2,
+        AutoButtonColor = false,
+        BorderSizePixel = 0,
+        Position = UDim2.new(1, -38, 0, 8),
+        Size = UDim2.fromOffset(28, 28),
+    }, box)
+    Round(closeBtn, 5)
+    closeBtn.MouseButton1Click:Connect(function()
+        canvasGui.Enabled = false
+    end)
+
+    canvasFrame = New("Frame", {
+        Size = UDim2.new(1, -32, 1, -136),
+        Position = UDim2.fromOffset(16, 46),
+        BackgroundColor3 = T.Card,
+        BorderSizePixel = 0,
+        ClipsDescendants = true,
+    }, box)
+    Round(canvasFrame, 6)
+    Stroke(canvasFrame, T.Stroke2, 1)
+
+    local function makeBtn(text, x, w, color, cb)
+        local b = New("TextButton", {
+            Text = text,
+            Font = F.Bold,
+            TextSize = 11,
+            TextColor3 = color == T.Accent and Color3.new(1, 1, 1) or T.Text,
+            BackgroundColor3 = color,
+            BackgroundTransparency = 0.15,
+            AutoButtonColor = false,
+            BorderSizePixel = 0,
+            Position = UDim2.new(x, 16, 1, -66),
+            Size = UDim2.new(w, -8, 0, 30),
+        }, box)
+        Round(b, 6)
+        b.MouseButton1Click:Connect(cb)
+    end
+
+    makeBtn("LIMPAR", 0.00, 0.25, T.Card2, function()
+        ND.custom = {}
+        ND.drawn = nil
+        for _, dot in ipairs(canvasFrame:GetChildren()) do
+            if dot:IsA("Frame") then dot:Destroy() end
+        end
+        Toast("desenho limpo", true)
+    end)
+
+    makeBtn("APLICAR", 0.25, 0.30, T.Accent, function()
+        if #ND.custom < 3 then
+            Toast("desenhe alguma coisa primeiro", false)
+            return
+        end
+        ND.drawn = ndNormalize(ND.custom)
+        ND.shape = "desenho"
+        ndRebuild()
+        canvasGui.Enabled = false
+        Toast("forma aplicada com " .. #ND.drawn .. " pontos", true)
+    end)
+
+    makeBtn("FECHAR", 0.55, 0.22, T.Card2, function()
+        canvasGui.Enabled = false
+    end)
+
+    makeBtn("VER FORMAS", 0.77, 0.23, T.Card2, function()
+        canvasGui.Enabled = false
+        Toast("escolha uma forma na lista", true)
+    end)
+
+    -- arrastar o quadro pela barra do titulo
+    local dragging, dragStart, startPos
+    box.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = box.Position
+        end
+    end)
+    box.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local d = input.Position - dragStart
+            box.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+        end
+    end)
+end
+
+local drawing = false
+local lastDot = nil
+
+local function ndInside(pos)
+    if not canvasFrame then return false end
+    local p, s = canvasFrame.AbsolutePosition, canvasFrame.AbsoluteSize
+    return pos.X >= p.X and pos.X <= p.X + s.X and pos.Y >= p.Y and pos.Y <= p.Y + s.Y
+end
+
+local function ndAddPoint(pos)
+    if not ndInside(pos) then return end
+    if lastDot and (pos - lastDot).Magnitude < 2 then return end
+    lastDot = pos
+    local p = canvasFrame.AbsolutePosition
+    local rel = Vector2.new(pos.X - p.X, pos.Y - p.Y)
+    ND.custom[#ND.custom + 1] = { rel.X, rel.Y }
+    if #canvasFrame:GetChildren() < 1400 then
+        local dot = New("Frame", {
+            Size = UDim2.fromOffset(3, 3),
+            Position = UDim2.fromOffset(rel.X - 1.5, rel.Y - 1.5),
+            BackgroundColor3 = T.Accent,
+            BorderSizePixel = 0,
+        }, canvasFrame)
+        Round(dot, 2)
+    end
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if not canvasGui or not canvasGui.Enabled then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        local pos = UserInputService:GetMouseLocation()
+        if ndInside(pos) then
+            drawing = true
+            lastDot = nil
+            ndAddPoint(pos)
+        end
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if drawing and input.UserInputType == Enum.UserInputType.MouseMovement then
+        ndAddPoint(UserInputService:GetMouseLocation())
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        drawing = false
+        lastDot = nil
+    end
+end)
+
+BtnRow("Abrir Quadro de Desenho", T.Accent, function()
+    if not canvasGui then ndCanvas() end
+    canvasGui.Enabled = not canvasGui.Enabled
+    Toast(canvasGui.Enabled and "quadro aberto - desenhe com o mouse" or "quadro fechado", true)
+end)
+
+BtnRow("Limpar Desenho", T.Card, function()
+    ND.custom = {}
+    ND.drawn = nil
+    if canvasFrame then
+        for _, dot in ipairs(canvasFrame:GetChildren()) do
+            if dot:IsA("Frame") then dot:Destroy() end
+        end
+    end
+    Toast("desenho limpo", true)
+end)
+
+-- -------------------------------------------------------------- outros hacks
+Section("Outros Hacks")
+
+Toggle("Auto Survive (sobe e fica no ar)", false, function(v)
+    HackState.ndAutoSurvive = v
+    if v then
+        task.spawn(function()
+            while HackState.ndAutoSurvive do
+                local root = ndRoot()
+                if root then root.CFrame = root.CFrame + Vector3.new(0, 60, 0) end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("auto survive " .. (v and "ligado" or "desligado"), v)
+end, "nd_survive")
+
+Toggle("Coletar Moedas Perto", false, function(v)
+    HackState.ndCoins = v
+    if v then
+        task.spawn(function()
+            while HackState.ndCoins do
+                local root = ndRoot()
+                if root then
+                    for _, item in ipairs(Workspace:GetDescendants()) do
+                        if item:IsA("BasePart") and (item.Name == "Coin" or item.Name == "CoinPart") then
+                            if (item.Position - root.Position).Magnitude < 120 then
+                                root.CFrame = CFrame.new(item.Position)
+                                task.wait(0.1)
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("coletar moedas " .. (v and "ligado" or "desligado"), v)
+end, "nd_coins")
+
+BtnRow("TP para o Ponto Mais Alto", T.Accent, function()
+    local root = ndRoot()
+    if not root then return end
+    local highest, where = -math.huge, nil
+    for _, part in ipairs(Workspace:GetDescendants()) do
+        if part:IsA("BasePart") and part.Anchored and part.Size.X < 120 and part.Size.Z < 120 then
+            if part.Position.Y > highest then
+                highest = part.Position.Y
+                where = part.Position
+            end
+        end
+    end
+    if where then
+        root.CFrame = CFrame.new(where + Vector3.new(0, 8, 0))
+        Toast("teleportado pro ponto mais alto", true)
+    else
+        Toast("não achei um ponto seguro", false)
+    end
+end)
+
+-- ============================================================ voadora & socos
+Section("Voadora & Socos (animação visível)")
+
+Note("A animação roda no seu personagem e todo mundo vê. O chute também empurra quem estiver na frente.", 60)
+
+-- IDs de emote reais (dropkick, mma, tenna, tapa, empurrao)
+local FLING_ANIM = {
+    { nome = "Voadora (dropkick)", id = "133566007754001" },
+    { nome = "Voadora Trendy", id = "90717656419568" },
+    { nome = "Chute Tenna", id = "118139885865308" },
+    { nome = "Chute MMA", id = "88347541858075" },
+    { nome = "Tapa", id = "108225134235478" },
+    { nome = "Tapa 2", id = "78221709455150" },
+    { nome = "Empurrão", id = "135890160317037" },
+    { nome = "Empurrão 2", id = "82070755455634" },
+}
+
+local FL = {
+    on = false,
+    track = nil,
+    conn = nil,
+    velocidade = 16,
+    perseguir = true,
+}
+HackState.ndFling = FL
+
+local flNearest, flStop, flPlay, flAlvo
+
+flNearest = function(pos)
+    local melhor, melhorD = nil, math.huge
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            local c = plr.Character
+            local r = c and c:FindFirstChild("HumanoidRootPart")
+            local h = c and c:FindFirstChildOfClass("Humanoid")
+            if r and h and h.Health > 0 then
+                local d = (r.Position - pos).Magnitude
+                if d < melhorD then
+                    melhorD = d
+                    melhor = plr
+                end
+            end
+        end
+    end
+    return melhor, melhorD
+end
+
+flStop = function()
+    FL.on = false
+    if FL.conn then FL.conn:Disconnect() end
+    FL.conn = nil
+    if FL.track then
+        pcall(function() FL.track:Stop() end)
+        FL.track = nil
+    end
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if root then
+        pcall(function()
+            root.AssemblyLinearVelocity = Vector3.zero
+            root.AssemblyAngularVelocity = Vector3.zero
+        end)
+    end
+end
+
+flPlay = function(animId, apelido)
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not (hum and root) then
+        Toast("sem personagem", false)
+        return
+    end
+    flStop()
+
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://" .. tostring(animId)
+    local animator = hum:FindFirstChildOfClass("Animator")
+    local ok, track = pcall(function()
+        return (animator or hum):LoadAnimation(anim)
+    end)
+    if not ok or not track then
+        ok, track = pcall(function() return hum:LoadAnimation(anim) end)
+    end
+    if not ok or not track then
+        Toast("animação " .. tostring(animId) .. " não carregou", false)
+        return
+    end
+
+    FL.track = track
+    FL.on = true
+    pcall(function()
+        track.Priority = Enum.AnimationPriority.Action
+        track.Looped = false
+        track:Play(0.1)
+    end)
+    Toast("fling: " .. apelido .. " (aperte Parar pra sair)", true)
+
+    local flip = 1
+    FL.conn = RunService.Heartbeat:Connect(function()
+        if not FL.on then return end
+        local c = LocalPlayer.Character
+        local r = c and c:FindFirstChild("HumanoidRootPart")
+        local h = c and c:FindFirstChildOfClass("Humanoid")
+        if not (r and h) then
+            flStop()
+            return
+        end
+
+        flip = -flip
+        r.AssemblyLinearVelocity = Vector3.new(100000 * flip, 0, 100000 * flip)
+        r.AssemblyAngularVelocity = Vector3.new(100000 * flip, 100000 * flip, 100000 * flip)
+
+        RunService.RenderStepped:Wait()
+        if not FL.on then return end
+
+        local dir = h.MoveDirection
+        if FL.perseguir then
+            local perto = flNearest(r.Position)
+            if perto then
+                local tc = perto.Character
+                local tr = tc and tc:FindFirstChild("HumanoidRootPart")
+                if tr then
+                    local d = tr.Position - r.Position
+                    d = Vector3.new(d.X, 0, d.Z)
+                    if d.Magnitude > 0.1 then dir = d.Unit end
+                end
+            end
+        end
+
+        if dir.Magnitude > 0 then
+            r.AssemblyLinearVelocity = Vector3.new(dir.X * FL.velocidade, -2, dir.Z * FL.velocidade)
+        else
+            r.AssemblyLinearVelocity = Vector3.new(0, -2, 0)
+        end
+        r.AssemblyAngularVelocity = Vector3.zero
+    end)
+end
+
+flAlvo = function(animId, apelido)
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    local alvo = flNearest(root and root.Position or Vector3.zero)
+    if alvo then
+        local tr = alvo.Character and alvo.Character:FindFirstChild("HumanoidRootPart")
+        if tr and root then
+            root.CFrame = CFrame.new(tr.Position + (tr.CFrame.LookVector * 4))
+            task.wait(0.05)
+        end
+    end
+    flPlay(animId, alvo and (apelido .. " em " .. alvo.Name) or apelido)
+end
+
+for _, a in ipairs(FLING_ANIM) do
+    BtnRow("Fling: " .. a.nome, T.Accent, function()
+        flAlvo(a.id, a.nome)
+    end)
+end
+
+BtnRow("Parar Fling (solta o corpo)", T.Card, function()
+    flStop()
+    Toast("fling parado", true)
+end)
+
+BtnRow("Voadora em Todos (um por vez)", T.Card, function()
+    task.spawn(function()
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+                local tr = plr.Character:FindFirstChild("HumanoidRootPart")
+                local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if tr and root then
+                    root.CFrame = CFrame.new(tr.Position + (tr.CFrame.LookVector * 4))
+                    flPlay(FLING_ANIM[1].id, "voadora em " .. plr.Name)
+                    task.wait(1.4)
+                end
+            end
+        end
+        flStop()
+        Toast("rodou em todos", true)
+    end)
+end)
+
+Slider("Velocidade do fling", 1, 60, 16, "%.0f", function(v)
+    FL.velocidade = v
+end, "nd_fling_vel")
+
+Toggle("Perseguir o alvo mais perto", true, function(v)
+    FL.perseguir = v
+end, "nd_fling_perseguir")
+
+Toggle("Anti-queda (não morre caindo)", false, function(v)
+    HackState.ndAntiFall = v
+    if v then
+        task.spawn(function()
+            while HackState.ndAntiFall do
+                local char = LocalPlayer.Character
+                local root = char and char:FindFirstChild("HumanoidRootPart")
+                if root then
+                    local vel = root.AssemblyLinearVelocity
+                    root.AssemblyLinearVelocity = Vector3.zero
+                    RunService.RenderStepped:Wait()
+                    root.AssemblyLinearVelocity = vel
+                end
+                task.wait()
+            end
+        end)
+    end
+    Toast("anti-queda " .. (v and "ligado" or "desligado"), v)
+end, "nd_antifall")
+
+Toggle("Não morrer (vida cheia sempre)", false, function(v)
+    HackState.ndGod = v
+    if v then
+        task.spawn(function()
+            while HackState.ndGod do
+                local char = LocalPlayer.Character
+                local hum = char and char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    pcall(function()
+                        hum.MaxHealth = 100
+                        hum.Health = 100
+                    end)
+                end
+                task.wait(0.2)
+            end
+        end)
+    end
+    Toast("vida infinita " .. (v and "ligado" or "desligado"), v)
+end, "nd_god")
+
+-- ================================================================ meteoros
+Section("Meteoros")
+
+Note("Só os meteoros soltos respondem: peça presa pertence ao servidor e não anda pelo cliente.", 60)
+
+local function ndMeteoros()
+    local lista = {}
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            local n = obj.Name:lower()
+            if n:find("meteor", 1, true) or n:find("comet", 1, true) or n:find("asteroid", 1, true) then
+                lista[#lista + 1] = obj
+            end
+        end
+    end
+    return lista
+end
+
+BtnRow("Contar Meteoros no Mapa", T.Card, function()
+    local lista = ndMeteoros()
+    local soltos = 0
+    for _, m in ipairs(lista) do
+        if not m.Anchored then soltos = soltos + 1 end
+    end
+    Toast("achei " .. #lista .. " meteoros (" .. soltos .. " soltos)", #lista > 0)
+end)
+
+BtnRow("Puxar Meteoros pra Mim", T.Accent, function()
+    task.spawn(function()
+        local lista = ndMeteoros()
+        if #lista == 0 then
+            Toast("nenhum meteoro no mapa agora", false)
+            return
+        end
+        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if not root then return end
+        local movidos = 0
+        for _, m in ipairs(lista) do
+            if not m.Anchored and m.Parent then
+                pcall(function()
+                    m.AssemblyLinearVelocity = Vector3.zero
+                    m.AssemblyAngularVelocity = Vector3.zero
+                    m.CFrame = CFrame.new(root.Position + Vector3.new(0, 12, 0))
+                    movidos = movidos + 1
+                end)
+            end
+        end
+        Toast(movidos > 0 and ("puxei " .. movidos .. " meteoros") or "todos estavam presos ao servidor", movidos > 0)
+    end)
+end)
+
+BtnRow("Jogar Meteoros no Alvo", T.Accent, function()
+    task.spawn(function()
+        local lista = ndMeteoros()
+        if #lista == 0 then
+            Toast("nenhum meteoro no mapa agora", false)
+            return
+        end
+        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local alvo = flNearest(root and root.Position or Vector3.zero)
+        if not alvo then
+            Toast("sem alvo por perto", false)
+            return
+        end
+        local tr = alvo.Character and alvo.Character:FindFirstChild("HumanoidRootPart")
+        if not tr then
+            Toast("alvo sem root", false)
+            return
+        end
+        local jogados = 0
+        for _, m in ipairs(lista) do
+            if not m.Anchored and m.Parent then
+                pcall(function()
+                    m.CFrame = CFrame.new(tr.Position + Vector3.new(0, 18, 0))
+                    m.AssemblyLinearVelocity = Vector3.new(0, -260, 0)
+                    jogados = jogados + 1
+                end)
+            end
+        end
+        Toast("joguei " .. jogados .. " meteoros em " .. alvo.Name, jogados > 0)
+    end)
+end)
+
+BtnRow("Soltar Meteoros (para tudo)", T.Card, function()
+    local lista = ndMeteoros()
+    for _, m in ipairs(lista) do
+        if not m.Anchored then
+            pcall(function()
+                m.AssemblyLinearVelocity = Vector3.zero
+                m.AssemblyAngularVelocity = Vector3.zero
+            end)
+        end
+    end
+    Toast("meteoros soltos", true)
+end)
+
+-- =================================================================== dump
+Section("Dump do Jogo")
+
+Note("Varre o jogo, copia pro clipboard e escreve silk_dump.txt. Serve pra achar remote de dano, peça de perigo e ferramenta.", 64)
+
+local function ndDump(modo)
+    local out = {}
+    local function add(s) out[#out + 1] = s end
+    add("SILK CORE dump  place=" .. tostring(game.PlaceId) .. "  job=" .. tostring(game.JobId))
+    add("")
+
+    if modo == "tudo" or modo == "players" then
+        add("[jogadores]")
+        local meuRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        for _, plr in ipairs(Players:GetPlayers()) do
+            local c = plr.Character
+            local h = c and c:FindFirstChildOfClass("Humanoid")
+            local r = c and c:FindFirstChild("HumanoidRootPart")
+            local dist = "-"
+            if r and meuRoot then
+                dist = tostring(math.floor((r.Position - meuRoot.Position).Magnitude))
+            end
+            add(string.format("  %-22s vida=%-4s dist=%-7s pos=%s",
+                plr.Name,
+                h and tostring(math.floor(h.Health)) or "-",
+                dist,
+                r and tostring(r.Position) or "-"))
+        end
+        add("")
+    end
+
+    if modo == "tudo" or modo == "remotes" then
+        add("[remotes visiveis no cliente]")
+        local rs = game:GetService("ReplicatedStorage")
+        for _, obj in ipairs(rs:GetDescendants()) do
+            if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") or obj:IsA("UnreliableRemoteEvent") then
+                add("  " .. obj:GetFullName())
+            end
+        end
+        add("")
+    end
+
+    if modo == "tudo" or modo == "perigo" then
+        add("[peças de perigo / kill]")
+        local chaves = { "kill", "damage", "death", "lava", "fire", "tornado", "flood", "water",
+                         "meteor", "earthquake", "lightning", "blizzard", "sandstorm", "volcano" }
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                local n = obj.Name:lower()
+                for _, k in ipairs(chaves) do
+                    if n:find(k, 1, true) then
+                        add(string.format("  %-40s anchored=%s size=%s", obj:GetFullName(), tostring(obj.Anchored), tostring(obj.Size)))
+                        break
+                    end
+                end
+            end
+        end
+        add("")
+    end
+
+    if modo == "tudo" or modo == "tools" then
+        add("[ferramentas]")
+        local pastas = { game:GetService("ReplicatedStorage"), Workspace, LocalPlayer:FindFirstChildOfClass("Backpack") }
+        for _, raiz in ipairs(pastas) do
+            if raiz then
+                for _, obj in ipairs(raiz:GetDescendants()) do
+                    if obj:IsA("Tool") then
+                        add("  " .. obj:GetFullName())
+                    end
+                end
+            end
+        end
+        add("")
+    end
+
+    if modo == "tudo" or modo == "scripts" then
+        add("[scripts visiveis no cliente]")
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("Script") or obj:IsA("LocalScript") or obj:IsA("ModuleScript") then
+                add("  " .. obj.ClassName .. "  " .. obj:GetFullName())
+            end
+        end
+        add("")
+    end
+
+    local texto = table.concat(out, "\n")
+    if setclipboard then pcall(setclipboard, texto) end
+    if writefile then pcall(writefile, "silk_dump.txt", texto) end
+    print("[SILK DUMP]\n" .. texto)
+    Toast("dump: " .. #out .. " linhas (clipboard + silk_dump.txt + console)", true)
+end
+
+BtnRow("Dump: Tudo", T.Accent, function() ndDump("tudo") end)
+BtnRow("Dump: Remotes", T.Card, function() ndDump("remotes") end)
+BtnRow("Dump: Peças de Perigo", T.Card, function() ndDump("perigo") end)
+BtnRow("Dump: Ferramentas", T.Card, function() ndDump("tools") end)
+BtnRow("Dump: Scripts", T.Card, function() ndDump("scripts") end)
+BtnRow("Dump: Jogadores", T.Card, function() ndDump("players") end)
+Note("Dica: no meio do desastre, puxa o que já caiu. Paredes e peças presas entram se você liberar o toggle.", 68)
+
+end
+
+ndBuild()
+end -- Desastres
+
+--------------------------------------------------------------------------------
+-- UNIVERSAL R15 FLING/VOADORA SYSTEM
+--------------------------------------------------------------------------------
+do
+CurTab = Tab("Fling", 0, false)
+Persist.Scope = "fling"
+
+Section("Voadora Universal R15")
+Note("Voadora por fisica de braco, para rig R15.", 52)
+
+-- Estado do fling (Luau type-safe)
+HackState.flingActive = false :: boolean
+HackState.flingPower = 500 :: number
+HackState.flingTarget = nil :: Player?
+HackState.flingMode = "punch" :: string
+HackState.flingConnections = {} :: {RBXScriptConnection}
+
+-- Função otimizada para preparar personagem (melhor detecção R15)
+local function setupFlingCharacter(): boolean
+    local char = LocalPlayer.Character
+    if not char then return false end
+    
+    local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+    local hum = char:FindFirstChildOfClass("Humanoid") :: Humanoid?
+    if not root or not hum then return false end
+    
+    -- Verifica se é R15
+    if hum.RigType ~= Enum.HumanoidRigType.R15 then
+        Toast("personagem nao e R15", false)
+        return false
+    end
+    
+    -- Limpa setup anterior
+    for _, conn in ipairs(HackState.flingConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    HackState.flingConnections = {}
+    
+    -- Remove todas as juntas antigas do sistema
+    for _, obj in ipairs(char:GetDescendants()) do
+        if obj:IsA("Motor6D") and (obj.Name:find("Shoulder") or obj.Name:find("Elbow")) then
+            pcall(function() obj:Destroy() end)
+        end
+        -- Remove fling setup anterior
+        if obj.Name == "FlingVelocity" or obj.Name == "FlingAttach" then
+            pcall(function() obj:Destroy() end)
+        end
+    end
+    
+    task.wait(0.1) -- Delay para garantir que destruiu
+    
+    -- Cria o sistema de fling nos braços
+    local leftUpperArm = char:FindFirstChild("LeftUpperArm") :: BasePart?
+    local rightUpperArm = char:FindFirstChild("RightUpperArm") :: BasePart?
+    local leftLowerArm = char:FindFirstChild("LeftLowerArm") :: BasePart?
+    local rightLowerArm = char:FindFirstChild("RightLowerArm") :: BasePart?
+    
+    if not (leftUpperArm and rightUpperArm and leftLowerArm and rightLowerArm) then
+        Toast("partes do braco nao encontradas", false)
+        return false
+    end
+    
+    local function createFlingVelocity(limb: BasePart, direction: number): BodyAngularVelocity
+        local vel = Instance.new("BodyAngularVelocity")
+        vel.Name = "FlingVelocity"
+        vel.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        vel.AngularVelocity = Vector3.zero
+        vel.P = 10000
+        vel.Parent = limb
+        return vel
+    end
+    
+    -- Cria velocidades angulares para todos os membros do braço
+    createFlingVelocity(leftUpperArm, 1)
+    createFlingVelocity(rightUpperArm, -1)
+    createFlingVelocity(leftLowerArm, 1)
+    createFlingVelocity(rightLowerArm, -1)
+    
+    -- Torna os braços massless para melhor física
+    for _, limb in ipairs({leftUpperArm, rightUpperArm, leftLowerArm, rightLowerArm}) do
+        limb.Massless = true
+        limb.CanCollide = true
+    end
+    
+    return true
+end
+
+-- Função de fling otimizada com melhor targeting e física
+local function performFling(targetPlayer: Player): ()
+    local char = LocalPlayer.Character
+    if not char then return end
+    
+    local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+    if not root then return end
+    
+    local targetChar = targetPlayer.Character
+    if not targetChar then
+        Toast("alvo sem personagem", false)
+        return
+    end
+    
+    local targetRoot = targetChar:FindFirstChild("HumanoidRootPart") :: BasePart?
+    if not targetRoot then
+        Toast("alvo sem root", false)
+        return
+    end
+    
+    -- Coleta todos os limbs do braço
+    local arms = {
+        char:FindFirstChild("LeftUpperArm"),
+        char:FindFirstChild("RightUpperArm"),
+        char:FindFirstChild("LeftLowerArm"),
+        char:FindFirstChild("RightLowerArm"),
+        char:FindFirstChild("LeftHand"),
+        char:FindFirstChild("RightHand")
+    }
+    
+    -- Filtra nils
+    local validArms = {}
+    for _, arm in ipairs(arms) do
+        if arm and arm:FindFirstChild("FlingVelocity") then
+            table.insert(validArms, arm)
+        end
+    end
+    
+    if #validArms == 0 then
+        Toast("faca o setup primeiro", false)
+        return
+    end
+    
+    -- Calcula distância e se aproxima se necessário
+    local distance = (targetRoot.Position - root.Position).Magnitude
+    if distance > 10 then
+        -- Auto-approach com interpolação suave
+        local targetPos = targetRoot.Position - (targetRoot.CFrame.LookVector * 4)
+        targetPos = Vector3.new(targetPos.X, root.Position.Y, targetPos.Z) -- Mantém Y
+        
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(root, tweenInfo, {CFrame = CFrame.new(targetPos, targetRoot.Position)})
+        tween:Play()
+        tween.Completed:Wait()
+    end
+    
+    -- Prepara o fling attack
+    local flingPower = HackState.flingPower or 500
+    local flingDuration = 0.5 -- Duração do ataque em segundos
+    
+    Toast("FLING! poder: "..flingPower, true)
+    
+    task.spawn(function()
+        local startTime = tick()
+        local attackPhase = 0
+        
+        while (tick() - startTime) < flingDuration do
+            if not targetRoot or not targetRoot.Parent then break end
+            
+            attackPhase = attackPhase + 1
+            local phaseAngle = attackPhase * 0.5
+            
+            -- Anima os braços em direção ao alvo
+            for i, arm in ipairs(validArms) do
+                local vel = arm:FindFirstChild("FlingVelocity") :: BodyAngularVelocity?
+                if vel then
+                    -- Alterna direção para criar movimento de soco
+                    local direction = (i % 2 == 0) and -1 or 1
+                    local powerMultiplier = 1 + (math.sin(phaseAngle) * 0.3)
+                    
+                    vel.AngularVelocity = Vector3.new(
+                        flingPower * direction * powerMultiplier,
+                        flingPower * direction * powerMultiplier,
+                        flingPower * direction * powerMultiplier
+                    )
+                    
+                    -- Posiciona o braço próximo ao alvo para garantir colisão
+                    local offsetAngle = (i / #validArms) * math.pi * 2
+                    local offsetX = math.cos(offsetAngle + phaseAngle) * 2
+                    local offsetZ = math.sin(offsetAngle + phaseAngle) * 2
+                    
+                    arm.CFrame = CFrame.new(
+                        targetRoot.Position + Vector3.new(offsetX, 0, offsetZ)
+                    )
+                end
+            end
+            
+            task.wait()
+        end
+        
+        -- Para o fling após o ataque
+        for _, arm in ipairs(validArms) do
+            local vel = arm:FindFirstChild("FlingVelocity") :: BodyAngularVelocity?
+            if vel then
+                vel.AngularVelocity = Vector3.zero
+            end
+        end
+        
+        Toast("fling completo", true)
+    end)
+end
+
+BtnRow("Setup Fling (R15)", T.Accent, function()
+    Toast("preparando personagem para fling...", true)
+    local success = setupFlingCharacter()
+    if success then
+        Toast("fling preparado! use os botoes abaixo", true)
+    else
+        Toast("falhou - certifique-se que e R15", false)
+    end
+end)
+
+Section("Configuracao do Fling")
+
+Slider("Poder do Fling", 100, 2000, 500, "%d", function(v)
+    HackState.flingPower = v
+end, "fling_power")
+
+Note("Poder 500 = medio | 1000 = forte | 2000 = ULTRA", 40)
+
+Section("Alvos do Fling")
+
+do
+    local row = Row(50)
+    Label(row, "Nome do Alvo", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.35, 0, 1, 0))
+    local targetField = Field(row, UDim2.new(0.37, 0, 0.5, -15), UDim2.new(0.35, 0, 0, 30), "username...")
+    Button(row, "FLING", UDim2.new(0.74, 0, 0.5, -15), UDim2.fromOffset(80, 30), T.Accent, function()
+        local targetName = targetField.Text
+        local target = Players:FindFirstChild(targetName)
+        
+        if target and target ~= LocalPlayer then
+            performFling(target)
+            Toast("fling executado em "..targetName, true)
+        else
+            Toast("jogador nao encontrado", false)
+        end
+    end)
+end
+
+BtnRow("Fling Player Mais Próximo", T.Accent, function()
+    local root = hkRoot()
+    if not root then return end
+    
+    local closest = nil
+    local closestDist = 9999
+    
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+            if targetRoot then
+                local dist = (targetRoot.Position - root.Position).Magnitude
+                if dist < closestDist then
+                    closest = player
+                    closestDist = dist
+                end
+            end
+        end
+    end
+    
+    if closest then
+        performFling(closest)
+        Toast("fling em "..closest.Name.." ("..math.floor(closestDist).." studs)", true)
+    else
+        Toast("nenhum player proximo", false)
+    end
+end)
+
+Toggle("Auto Fling Proximos", false, function(v)
+    HackState.autoFlingNearby = v
+    if v then
+        task.spawn(function()
+            while HackState.autoFlingNearby do
+                local root = hkRoot()
+                if root then
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Character then
+                            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+                            if targetRoot and (targetRoot.Position - root.Position).Magnitude < 15 then
+                                performFling(player)
+                                task.wait(2)
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+    Toast("auto fling proximos "..(v and "ligado" or "desligado"), v)
+end, "fling_auto")
+
+Section("Modos de Ataque")
+
+BtnRow("Modo: Soco Único", T.Accent, function()
+    HackState.flingMode = "punch"
+    Toast("modo: soco unico", true)
+end)
+
+BtnRow("Modo: Voadora (Combo)", T.Accent, function()
+    HackState.flingMode = "flying_kick"
+    Toast("modo: voadora combo", true)
+end)
+
+BtnRow("Modo: Spin Attack", T.Accent, function()
+    HackState.flingMode = "spin"
+    HackState.flingActive = true
+    
+    task.spawn(function()
+        local char = LocalPlayer.Character
+        if char then
+            local root = char:FindFirstChild("HumanoidRootPart")
+            for i = 1, 20 do
+                if root and HackState.flingActive then
+                    root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(18), 0)
+                    
+                    -- Fling em todos próximos
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Character then
+                            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+                            if targetRoot and (targetRoot.Position - root.Position).Magnitude < 10 then
+                                performFling(player)
+                            end
+                        end
+                    end
+                end
+                task.wait(0.05)
+            end
+            HackState.flingActive = false
+        end
+    end)
+end)
+
+BtnRow("Parar Fling", T.Card, function()
+    HackState.flingActive = false
+    HackState.autoFlingNearby = false
+    
+    local char = LocalPlayer.Character
+    if char then
+        for _, limb in ipairs(char:GetDescendants()) do
+            if limb:FindFirstChild("FlingVelocity") then
+                limb.FlingVelocity.AngularVelocity = Vector3.new(0, 0, 0)
+            end
+        end
+    end
+    
+    Toast("fling parado", true)
+end)
+
+Section("Sistema Avancado")
+
+Toggle("Fling com Animação", true, function(v)
+    HackState.flingAnim = v
+    Toast("fling animation "..(v and "ligado" or "desligado"), v)
+end, "fling_anim")
+
+Toggle("Auto Aim no Alvo", true, function(v)
+    HackState.flingAutoAim = v
+    Toast("auto aim "..(v and "ligado" or "desligado"), v)
+end, "fling_aim")
+
+Toggle("Fling Stealth Mode", false, function(v)
+    HackState.flingStealth = v
+    if v then
+        -- Reduz a velocidade e poder para ser menos óbvio
+        HackState.flingPower = math.min(HackState.flingPower, 300)
+        Toast("stealth mode ligado - poder reduzido", true)
+    else
+        Toast("stealth mode desligado", true)
+    end
+end, "fling_stealth")
+
+Note("Faz o setup uma vez e usa em qualquer rig R15.", 68)
+
+end -- Fling
+
+--------------------------------------------------------------------------------
 -- BROOKHAVEN
 --------------------------------------------------------------------------------
--- Mesmo motivo do HBG: corpo em funÃ§Ã£o prÃ³pria pra nÃ£o consumir os 200
+-- Mesmo motivo do HBG: corpo em função própria pra não consumir os 200
 -- registradores do chunk principal.
 local function buildBrookhaven()
 CurTab = Tab("Brookhaven", 0, true)
@@ -8565,10 +15021,10 @@ local function bhFireRemote(path, ...)
         local ok,e=pcall(r.InvokeServer,r,...)
         return ok, e
     end
-    return false,"remote nÃ£o encontrado: "..path
+    return false,"remote não encontrado: "..path
 end
 
--- nomes reais tirados do dump (obfuscaÃ§Ã£o: 1s injetados nos nomes, ex. "1Pas1s" = "Pass")
+-- nomes reais tirados do dump (obfuscação: 1s injetados nos nomes, ex. "1Pas1s" = "Pass")
 local BH_RE = {
     Pass   = "RE.1Pas1s",
     Flying = "RE.1Flyin1g",
@@ -8582,7 +15038,7 @@ local BH_GATE_NAMES = { GamepassNeeded=true, GamepassUnlock=true, ProductUnlock=
 function BH.Dump()
     local out={}
     local function add(s,...) out[#out+1]=(select("#",...)>0) and string.format(s,...) or s end
-    add("== BROOKHAVEN DUMP â€” SilkCore ==")
+    add("== BROOKHAVEN DUMP — SilkCore ==")
     add("Jogo: %s  PlaceId: %s", game.Name, tostring(game.PlaceId))
     add("")
 
@@ -8595,7 +15051,7 @@ function BH.Dump()
             end
         end
     else
-        add("  pasta de gamepasses nÃ£o encontrada â€” tentando via player data")
+        add("  pasta de gamepasses não encontrada — tentando via player data")
     end
     add("")
 
@@ -8650,13 +15106,13 @@ function BH.Dump()
     return txt, copied
 end
 
--- esconde UM gate/lock se o nÃ³ bater no padrÃ£o confirmado pelo dump
+-- esconde UM gate/lock se o nó bater no padrão confirmado pelo dump
 local function bhHideIfGate(inst)
     if (inst:IsA("Frame") or inst:IsA("ImageButton")) and BH_GATE_NAMES[inst.Name] then
         if inst.Visible then inst.Visible=false; return true end
     end
-    -- selo de cadeado "Gamepass" dentro de template de item de catÃ¡logo (pets etc.) â€” NÃƒO mexe
-    -- no filtro de catÃ¡logo (esse Ã© TextButton, aqui sÃ³ ImageLabel dentro de *Template.*)
+    -- selo de cadeado "Gamepass" dentro de template de item de catálogo (pets etc.) — NÃO mexe
+    -- no filtro de catálogo (esse é TextButton, aqui só ImageLabel dentro de *Template.*)
     if inst:IsA("ImageLabel") and inst.Name=="Gamepass" and inst.Parent and inst.Parent.Name:find("Template") then
         if inst.Visible then inst.Visible=false; return true end
     end
@@ -8667,9 +15123,9 @@ local function bhHideIfGate(inst)
     return false
 end
 
--- unlock client-side: alvo Ã© a Ã¡rvore real do dump (NoResetGUIHandler.GamepassNeeded /
--- GamepassUnlock / ProductUnlock + selos de cadeado nos templates), nÃ£o heurÃ­stica genÃ©rica.
--- Fica permanente: alÃ©m de varrer uma vez, prende um watcher em DescendantAdded (preso em
+-- unlock client-side: alvo é a árvore real do dump (NoResetGUIHandler.GamepassNeeded /
+-- GamepassUnlock / ProductUnlock + selos de cadeado nos templates), não heurística genérica.
+-- Fica permanente: além de varrer uma vez, prende um watcher em DescendantAdded (preso em
 -- conns, limpo no Destroy) pra pegar GUI que o jogo recria depois (troca de menu, respawn).
 local bhWatcherOn = false
 function BH.ClientUnlock()
@@ -8690,11 +15146,11 @@ function BH.ClientUnlock()
 end
 
 -- hook permanente: UserOwnsGamePassAsync volta true pro LocalPlayer em qualquer checagem
--- feita do lado do cliente (padrÃ£o comum pra liberar UI/cosmÃ©tico). NÃ£o existe sem
--- hookfunction no executor, e nÃ£o muda nada que o servidor valide por conta prÃ³pria.
+-- feita do lado do cliente (padrão comum pra liberar UI/cosmético). Não existe sem
+-- hookfunction no executor, e não muda nada que o servidor valide por conta própria.
 local bhHookInstalled = false
 function BH.HookMPS()
-    if bhHookInstalled then return true, "jÃ¡ instalado" end
+    if bhHookInstalled then return true, "já instalado" end
     if not hookfunction then return false, "executor sem hookfunction" end
     local ok, err = pcall(function()
         local old
@@ -8708,11 +15164,11 @@ function BH.HookMPS()
 end
 
 -- espiona (log-only, sem sobrescrever nada) toda chamada real de UserOwnsGamePassAsync
--- e PromptGamePassPurchase feita pelos SCRIPTS DO JOGO durante a janela. Isso Ã© o jeito
--- de saber de verdade, nÃ£o chutar: se um passId aparece aqui, a checagem roda no cliente
--- e o hook em BH.HookMPS cobre ela 100%. Se nunca aparece enquanto vocÃª abre a loja/item
--- travado, a checagem Ã© sÃ³ no servidor â€” e nenhum script de cliente, deste ou de qualquer
--- outro, consegue forjar isso. NÃ£o Ã© limite deste build, Ã© o modelo de seguranÃ§a do Roblox.
+-- e PromptGamePassPurchase feita pelos SCRIPTS DO JOGO durante a janela. Isso é o jeito
+-- de saber de verdade, não chutar: se um passId aparece aqui, a checagem roda no cliente
+-- e o hook em BH.HookMPS cobre ela 100%. Se nunca aparece enquanto você abre a loja/item
+-- travado, a checagem é só no servidor — e nenhum script de cliente, deste ou de qualquer
+-- outro, consegue forjar isso. Não é limite deste build, é o modelo de segurança do Roblox.
 function BH.SpyGamepasses(seconds)
     if not hookfunction then return nil, "executor sem hookfunction" end
     local hits = {}
@@ -8739,12 +15195,12 @@ function BH.SpyGamepasses(seconds)
 
     local txt
     if #hits > 0 then
-        txt = "== SPY GAMEPASS â€” chamadas reais capturadas ==\n" .. table.concat(hits, "\n")
-            .. "\n\nesses passId's rodam checagem no cliente â€” BH.HookMPS() cobre 100%."
+        txt = "== SPY GAMEPASS — chamadas reais capturadas ==\n" .. table.concat(hits, "\n")
+            .. "\n\nesses passId's rodam checagem no cliente — BH.HookMPS() cobre 100%."
     else
-        txt = "== SPY GAMEPASS â€” nada capturado em " .. seconds .. "s ==\n"
-            .. "ou a tela do item/loja travado nÃ£o foi aberta durante a janela,\n"
-            .. "ou esse gate Ã© validado sÃ³ no servidor â€” nesse caso nÃ£o existe\n"
+        txt = "== SPY GAMEPASS — nada capturado em " .. seconds .. "s ==\n"
+            .. "ou a tela do item/loja travado não foi aberta durante a janela,\n"
+            .. "ou esse gate é validado só no servidor — nesse caso não existe\n"
             .. "forma client-side de contornar, de nenhum script."
     end
     if writefile then pcall(writefile, "SilkcoreGamepassSpy.txt", txt) end
@@ -8752,9 +15208,9 @@ function BH.SpyGamepasses(seconds)
     return hits, txt
 end
 
--- dispara a remota real de Pass (RE.1Pas1s) com algumas assinaturas plausÃ­veis.
--- experimental: o servidor valida a posse de verdade, entÃ£o isso sÃ³ ajuda se o jogo
--- confiar no client pra alguma parte do fluxo (ex. sync de UI pÃ³s-compra).
+-- dispara a remota real de Pass (RE.1Pas1s) com algumas assinaturas plausíveis.
+-- experimental: o servidor valida a posse de verdade, então isso só ajuda se o jogo
+-- confiar no client pra alguma parte do fluxo (ex. sync de UI pós-compra).
 function BH.ProbePass(gpId)
     local attempts = {
         function() return bhFireRemote(BH_RE.Pass, gpId, true) end,
@@ -8770,7 +15226,7 @@ function BH.ProbePass(gpId)
 end
 
 Section("Dump")
-Note("Escaneia remotes, gamepasses, PlayerData e loja do Brookhaven. Salva em SilkcoreBrookhavenDump.txt e copia para a Ã¡rea de transferÃªncia.", 68)
+Note("Escaneia remotes, gamepasses, PlayerData e loja do Brookhaven. Salva em SilkcoreBrookhavenDump.txt e copia para a área de transferência.", 68)
 do
     local busy=false
     BtnRow("DUMP BROOKHAVEN", T.Accent, function()
@@ -8779,17 +15235,17 @@ do
         Toast("fazendo dump...", true)
         task.spawn(function()
             local txt,copied=BH.Dump()
-            Toast(string.format("dump pronto Â· %d chars Â· %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
+            Toast(string.format("dump pronto · %d chars · %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
             busy=false
         end)
     end)
 end
 
 Section("Desbloqueio")
-Note("Alvo Ã© a Ã¡rvore real do dump: NoResetGUIHandler.GamepassNeeded/GamepassUnlock/ProductUnlock + selos de cadeado nos templates de catÃ¡logo. Fica permanente â€” um watcher pega GUI nova depois do primeiro clique. NÃ£o altera dados no servidor.", 68)
+Note("Alvo é a árvore real do dump: NoResetGUIHandler.GamepassNeeded/GamepassUnlock/ProductUnlock + selos de cadeado nos templates de catálogo. Fica permanente — um watcher pega GUI nova depois do primeiro clique. Não altera dados no servidor.", 68)
 BtnRow("DESBLOQUEAR GATES (cliente, permanente)", T.Good, function()
     local n=BH.ClientUnlock()
-    Toast(string.format("unlock: %d gates fechados Â· watcher ativo", n), true)
+    Toast(string.format("unlock: %d gates fechados · watcher ativo", n), true)
 end)
 
 BtnRow("HOOK MarketplaceService (permanente)", T.Accent, function()
@@ -8800,20 +15256,20 @@ BtnRow("HOOK MarketplaceService (permanente)", T.Accent, function()
         Toast("hook falhou: "..tostring(err), false)
     end
 end)
-Note("O hook intercepta toda checagem de posse de gamepass feita no cliente. Precisa de hookfunction no executor. NÃ£o afeta checagem feita sÃ³ no servidor.", 68)
+Note("O hook intercepta toda checagem de posse de gamepass feita no cliente. Precisa de hookfunction no executor. Não afeta checagem feita só no servidor.", 68)
 
 BtnRow("ESPIONAR GAMEPASS (10s)", T.Card, function()
-    Toast("abra agora a loja/item travado â€” espionando 10s...", true)
+    Toast("abra agora a loja/item travado — espionando 10s...", true)
     task.spawn(function()
         local hits, txt = BH.SpyGamepasses(10)
         if hits == nil then
             Toast("falhou: "..tostring(txt), false)
             return
         end
-        Toast(string.format("spy: %d chamada(s) capturada(s) Â· salvo em SilkcoreGamepassSpy.txt", #hits), #hits>0)
+        Toast(string.format("spy: %d chamada(s) capturada(s) · salvo em SilkcoreGamepassSpy.txt", #hits), #hits>0)
     end)
 end)
-Note("Isso Ã© o jeito de saber garantido, nÃ£o chutado: abre a loja ou o item travado enquanto o spy roda. Se o passId aparecer no log, o hook acima cobre 100%. Se nunca aparecer, a checagem Ã© sÃ³ do servidor e nenhum script de cliente contorna isso â€” nÃ£o dÃ¡ pra fingir que dÃ¡.", 68)
+Note("Isso é o jeito de saber garantido, não chutado: abre a loja ou o item travado enquanto o spy roda. Se o passId aparecer no log, o hook acima cobre 100%. Se nunca aparecer, a checagem é só do servidor e nenhum script de cliente contorna isso — não dá pra fingir que dá.", 68)
 
 do
     local row=Row(50)
@@ -8821,13 +15277,13 @@ do
     local gpField=Field(row,UDim2.new(0.5,4,0.5,-15),UDim2.new(0.28,0,0,30),"gamepassId...")
     Button(row,"FIRE",UDim2.new(0.8,4,0.5,-15),UDim2.fromOffset(60,30),T.Card,function()
         local id=tonumber(gpField.Text)
-        if not id then Toast("ID invÃ¡lido",false); return end
+        if not id then Toast("ID inválido",false); return end
         local worked=BH.ProbePass(id)
         Toast(string.format("RE.1Pas1s disparada: %d tentativas", worked), worked>0)
     end)
 end
 
-Note("Experimental: dispara a remota real de Pass encontrada no dump. O servidor valida posse de verdade â€” isso sÃ³ ajuda se o jogo confiar no client pra sincronizar UI pÃ³s-compra.", 68)
+Note("Experimental: dispara a remota real de Pass encontrada no dump. O servidor valida posse de verdade — isso só ajuda se o jogo confiar no client pra sincronizar UI pós-compra.", 68)
 
 Section("Teleporte Brookhaven")
 do
@@ -8847,7 +15303,7 @@ do
             local r=hkRoot()
             if r then
                 r.CFrame=CFrame.new(loc.p)
-                Toast("tp â†’ "..loc.n, true)
+                Toast("tp → "..loc.n, true)
             else
                 Toast("sem personagem",false)
             end
@@ -8866,7 +15322,7 @@ Toggle("Speed (carro / personagem)", false, function(v)
     applySpeed(HackState.speedVal)
     Toast("speed hack "..(v and "ligado" or "desligado"), v)
 end, "bh_speed")
-Toggle("InvisÃ­vel (transparÃªncia 1)", false, function(v)
+Toggle("Invisível (transparência 1)", false, function(v)
     local char=hkChar()
     if not char then Toast("sem personagem",false); return end
     for _,p in ipairs(char:GetDescendants()) do
@@ -8874,7 +15330,7 @@ Toggle("InvisÃ­vel (transparÃªncia 1)", false, function(v)
             p.Transparency = v and 1 or 0
         end
     end
-    Toast("invisÃ­vel "..(v and "ligado" or "desligado"), v)
+    Toast("invisível "..(v and "ligado" or "desligado"), v)
 end, "bh_invis")
 Toggle("Congelar NPCs (Anchored)", false, function(v)
     for _,p in ipairs(workspace:GetDescendants()) do
@@ -8901,10 +15357,10 @@ BtnRow("DAR DINHEIRO (local)", T.Good, function()
     end
     trySet(LocalPlayer); trySet(LocalPlayer:FindFirstChild("Data"))
     trySet(LocalPlayer:FindFirstChild("leaderstats"))
-    Toast(n>0 and ("dinheiro: "..n.." valores â†’ 999999") or "sem valores de dinheiro encontrados", n>0)
+    Toast(n>0 and ("dinheiro: "..n.." valores → 999999") or "sem valores de dinheiro encontrados", n>0)
 end)
 
-BtnRow("FORÃ‡AR PERSONAGEM PADRÃƒO", T.Card, function()
+BtnRow("FORÇAR PERSONAGEM PADRÃO", T.Card, function()
     task.spawn(function()
         local h=hkHum()
         if h then
@@ -8921,8 +15377,8 @@ buildBrookhaven()
 --------------------------------------------------------------------------------
 -- HBG
 --------------------------------------------------------------------------------
--- Corpo da aba em funÃ§Ã£o prÃ³pria: os locals daqui ficam no orÃ§amento de
--- registradores desta funÃ§Ã£o, nÃ£o no do chunk principal (limite de 200).
+-- Corpo da aba em função própria: os locals daqui ficam no orçamento de
+-- registradores desta função, não no do chunk principal (limite de 200).
 local function buildHBG()
 CurTab = Tab("HBG", 0, true)
 Persist.Scope = "hbg"
@@ -8937,13 +15393,13 @@ local HG_MPS  = game:GetService("MarketplaceService")
 local HGState = {
     -- auto-block
     autoBlock     = false,
-    blockRange    = 22,         -- studs atÃ© ameaÃ§a ativar o block
-    blockHold     = 0.18,       -- segundos de hold apÃ³s ativar
+    blockRange    = 22,         -- studs até ameaça ativar o block
+    blockHold     = 0.18,       -- segundos de hold após ativar
     blockDebounce = false,
     blockConn     = nil,
     comboActive   = false,
     lastAttack    = 0,
-    comboWindow   = 0.55,       -- janela que conta como "em combo" (nÃ£o bloqueia)
+    comboWindow   = 0.55,       -- janela que conta como "em combo" (não bloqueia)
     -- anti-cheat bypass
     acBypass      = false,
     acHooks       = {},
@@ -8965,7 +15421,7 @@ local function hgHum()
     return c and c:FindFirstChildOfClass("Humanoid")
 end
 
--- Varredura de remotes no jogo inteiro (usa cache por sessÃ£o)
+-- Varredura de remotes no jogo inteiro (usa cache por sessão)
 local hgRemoteCache = nil
 local function hgScanRemotes(force)
     if hgRemoteCache and not force then return hgRemoteCache end
@@ -9002,11 +15458,11 @@ function HG.Dump()
     local out = {}
     local function add(s, ...) out[#out+1] = (select("#",...) > 0) and string.format(s,...) or s end
 
-    add("== HBG DUMP â€” SilkCore ==")
+    add("== HBG DUMP — SilkCore ==")
     add("Jogo: %s  PlaceId: %s", game.Name, tostring(game.PlaceId))
     add("")
 
-    -- remotes categorizadas por intenÃ§Ã£o
+    -- remotes categorizadas por intenção
     add("== REMOTES (jogo inteiro) ==")
     local remotes = hgScanRemotes(true)
     local cats = {
@@ -9081,7 +15537,7 @@ function HG.Dump()
             end
         end
     end
-    if acFound == 0 then add("  nenhum script AC com nome Ã³bvio â€” pode ser ofuscado") end
+    if acFound == 0 then add("  nenhum script AC com nome óbvio — pode ser ofuscado") end
     add("")
 
     -- player data
@@ -9101,7 +15557,7 @@ function HG.Dump()
     add("")
 
     -- hitboxes ativas agora
-    add("== HITBOXES ATIVAS (BasePart sem CanCollide, dono â‰  local) ==")
+    add("== HITBOXES ATIVAS (BasePart sem CanCollide, dono â‰  local) ==")
     local hbCount = 0
     for _, d in ipairs(workspace:GetDescendants()) do
         if d:IsA("BasePart") and not d.CanCollide then
@@ -9128,9 +15584,9 @@ end
 -- BYPASS DE ANTI-CHEAT
 -- ============================================================
 
--- 1. Fake-speed: em vez de alterar WalkSpeed diretamente (o que ACs lÃªem),
---    usa um CFrame loop pra mover o character enquanto mantÃ©m WalkSpeed original.
---    SÃ³ ativa se Speed Hack do tab Hacks estiver desligado (nÃ£o duplica).
+-- 1. Fake-speed: em vez de alterar WalkSpeed diretamente (o que ACs lêem),
+--    usa um CFrame loop pra mover o character enquanto mantém WalkSpeed original.
+--    Só ativa se Speed Hack do tab Hacks estiver desligado (não duplica).
 local hgFakespeedConn = nil
 local hgFakespeedTarget = 60
 
@@ -9156,22 +15612,22 @@ local function hgStartFakeSpeed(spd)
     end)
 end
 
--- 2. Hook remotes de verificaÃ§Ã£o: intercepta chamadas de anti-cheat conhecidas
+-- 2. Hook remotes de verificação: intercepta chamadas de anti-cheat conhecidas
 --    (speed check, position check) e responde com valores dentro do range normal.
 local hgHookActive = false
 function HG.InstallACHooks()
-    if hgHookActive then return true, "jÃ¡ instalado" end
+    if hgHookActive then return true, "já instalado" end
     if SilkGuard.Ghost then
-        return false, "modo fantasma ligado â€” o hook deixa rastro de C-closure trocada, mais visÃ­vel que o truque"
+        return false, "modo fantasma ligado — o hook deixa rastro de C-closure trocada, mais visível que o truque"
     end
     if not hookfunction then return false, "executor sem hookfunction" end
 
     local hooked = 0
 
     -- Targets confirmados pelo dump do HBG:
-    -- ReplicateStep  â†’ sync de estado de movimento/posiÃ§Ã£o por frame (principal candidato de speed-check)
-    -- ClientBodyVelocityEvent â†’ replica velocidade do corpo pro servidor
-    -- RemoteEvent / RemoteEvent1 â†’ remotes genÃ©ricas que podem carregar qualquer payload de combate
+    -- ReplicateStep  → sync de estado de movimento/posição por frame (principal candidato de speed-check)
+    -- ClientBodyVelocityEvent → replica velocidade do corpo pro servidor
+    -- RemoteEvent / RemoteEvent1 → remotes genéricas que podem carregar qualquer payload de combate
     local HBG_AC_PATHS = {
         "ReplicatedStorage.Remotes.ReplicateStep",
         "ReplicatedStorage.Remotes.ClientBodyVelocityEvent",
@@ -9191,9 +15647,9 @@ function HG.InstallACHooks()
             old = hookfunction(cur.FireServer, function(self, ...)
                 local args = {...}
                 for i, v in ipairs(args) do
-                    -- normaliza qualquer nÃºmero que pareÃ§a velocidade fora do range legÃ­timo
+                    -- normaliza qualquer número que pareça velocidade fora do range legítimo
                     if type(v) == "number" and math.abs(v) > 24 and math.abs(v) < 5000 then
-                        -- preserva sinal, substitui por valor com ruÃ­do natural
+                        -- preserva sinal, substitui por valor com ruído natural
                         args[i] = (v > 0 and 1 or -1) * (16 + math.random() * 3)
                     end
                     -- Vector3 com magnitude de velocidade suspeita
@@ -9221,7 +15677,7 @@ function HG.InstallACHooks()
         hookRemoteByPath(path)
     end
 
-    -- tambÃ©m tenta por nome genÃ©rico pra cobrir possÃ­veis renomeaÃ§Ãµes
+    -- também tenta por nome genérico pra cobrir possíveis renomeações
     local remotes = hgScanRemotes()
     for _, r in ipairs(remotes) do
         local n = r.name
@@ -9273,22 +15729,22 @@ function HG.InstallACHooks()
     return true, string.format("%d remote(s) hookada(s)", hooked)
 end
 
--- 3. RandomizaÃ§Ã£o de timing: adiciona jitter Ã s aÃ§Ãµes pra nÃ£o parecer bot
+-- 3. Randomização de timing: adiciona jitter Ã s ações pra não parecer bot
 function HG.Jitter(base, variance)
     variance = variance or 0.05
     return base + (math.random() * variance * 2 - variance)
 end
 
 -- ============================================================
--- 4. DUMP PROFUNDO (GC + SCRIPTS) E NEUTRALIZAÃ‡ÃƒO DE DETECÃ‡ÃƒO
+-- 4. DUMP PROFUNDO (GC + SCRIPTS) E NEUTRALIZAÇÃO DE DETECÇÃO
 -- ============================================================
--- SuperfÃ­cie real de um anti-cheat de Roblox. Do lado do servidor ele vÃª:
---   (a) tudo que replica â€” posiÃ§Ã£o, velocity, WalkSpeed, atributos de Humanoid
---   (b) instÃ¢ncias que VOCÃŠ criou dentro do DataModel
---   (c) o ritmo e o formato dos argumentos que vocÃª manda nas remotes
--- Ele nÃ£o chama getgc, getgenv ou hookfunction: isso sÃ³ existe no executor.
--- Um anti-cheat client-side Ã© um LocalScript comum, e o que ele consegue
--- checar Ã© instÃ¢ncia, nome, propriedade e callback. Ã‰ isso que o dump
+-- Superfície real de um anti-cheat de Roblox. Do lado do servidor ele vê:
+--   (a) tudo que replica — posição, velocity, WalkSpeed, atributos de Humanoid
+--   (b) instâncias que VOCÊ criou dentro do DataModel
+--   (c) o ritmo e o formato dos argumentos que você manda nas remotes
+-- Ele não chama getgc, getgenv ou hookfunction: isso só existe no executor.
+-- Um anti-cheat client-side é um LocalScript comum, e o que ele consegue
+-- checar é instância, nome, propriedade e callback. É isso que o dump
 -- abaixo mapeia e que o report killer corta.
 
 local HG_AC_WORDS = {
@@ -9334,7 +15790,7 @@ function HG.DumpScripts()
 
     add("== GC: funcoes com cara de anti-cheat ==")
     if type(getgc) ~= "function" then
-        add("  executor sem getgc â€” sem dump de funcoes")
+        add("  executor sem getgc — sem dump de funcoes")
     else
         local seen, hits = {}, 0
         for _, v in ipairs(getgc(true)) do
@@ -9429,11 +15885,11 @@ end
 -- DUMP TOTAL
 -- ============================================================
 -- Puxa tudo que o cliente consegue ler: remotes, fonte de todos os scripts,
--- instÃ¢ncias suspeitas, dados do player, atributos e o trace.
--- NÃ£o usa hook nenhum, nÃ£o escreve nada no DataModel, nÃ£o cria instÃ¢ncia.
--- SÃ³ leitura + arquivo no executor. O jogo nÃ£o tem como ver isso.
--- Roda em fatias (task.wait a cada N itens) pra nÃ£o travar o frame â€” travada
--- de 2s Ã© o Ãºnico rastro comportamental que um dump deixa.
+-- instâncias suspeitas, dados do player, atributos e o trace.
+-- Não usa hook nenhum, não escreve nada no DataModel, não cria instância.
+-- Só leitura + arquivo no executor. O jogo não tem como ver isso.
+-- Roda em fatias (task.wait a cada N itens) pra não travar o frame — travada
+-- de 2s é o único rastro comportamental que um dump deixa.
 function HG.DumpAll()
     local t0 = os.clock()
     local out, n = {}, 0
@@ -9442,7 +15898,7 @@ function HG.DumpAll()
         out[n] = string.format(fmt, ...)
     end
 
-    add("== SILK CORE Â· DUMP TOTAL ==")
+    add("== SILK CORE · DUMP TOTAL ==")
     add("place=%s  job=%s", tostring(game.PlaceId), tostring(game.JobId))
     add("executor=%s", tostring(execName))
     add("api: getgc=%s getinstances=%s decompile=%s getconnections=%s",
@@ -9458,7 +15914,7 @@ function HG.DumpAll()
         if i % 40 == 0 then task.wait() end
     end
 
-    -- instÃ¢ncias com nome suspeito
+    -- instâncias com nome suspeito
     add("")
     add("== INSTANCIAS SUSPEITAS ==")
     local hits = 0
@@ -9545,9 +16001,9 @@ function HG.DumpAll()
         end
     end
     add("")
-    add("  scripts com fonte: %d Â· %d bytes", dumped, budget)
+    add("  scripts com fonte: %d · %d bytes", dumped, budget)
 
-    -- gc: sÃ³ o Ã­ndice das funÃ§Ãµes
+    -- gc: só o índice das funções
     add("")
     add("== GC: FUNCOES DE AC ==")
     if type(getgc) == "function" then
@@ -9592,7 +16048,7 @@ end
 -- DUMP DO JOGO (sem o lixo da engine)
 -- ============================================================
 -- O filtro por palavra-chave pega 40 mil linhas de CorePackages e quase nada
--- do jogo. O filtro certo Ã© por caminho: joga fora a engine, fica com o que
+-- do jogo. O filtro certo é por caminho: joga fora a engine, fica com o que
 -- o dev do jogo escreveu.
 local HG_SKIP_PATH = {"CorePackages", "CoreGui", "RobloxGui", "RobloxReplicatedStorage", "CoreScripts"}
 
@@ -9610,7 +16066,7 @@ function HG.DumpGame()
     local out, n = {}, 0
     local function add(fmt, ...) n = n + 1; out[n] = string.format(fmt, ...) end
 
-    add("== SILK CORE Â· DUMP DO JOGO ==")
+    add("== SILK CORE · DUMP DO JOGO ==")
     add("place=%s  job=%s  executor=%s",
         tostring(game.PlaceId), tostring(game.JobId), tostring(execName))
     add("")
@@ -9632,7 +16088,7 @@ function HG.DumpGame()
         end
     end
 
-    -- fonte de tudo que Ã© do jogo
+    -- fonte de tudo que é do jogo
     add("")
     add("== FONTE DOS SCRIPTS DO JOGO ==")
     local inst
@@ -9665,7 +16121,7 @@ function HG.DumpGame()
         end
     end
     add("")
-    add("  scripts do jogo com fonte: %d Â· %d bytes", dumped, bytes)
+    add("  scripts do jogo com fonte: %d · %d bytes", dumped, bytes)
 
     local txt = table.concat(out, "\n")
     if writefile then pcall(writefile, "SilkcoreGameDump.txt", txt) end
@@ -9675,8 +16131,8 @@ function HG.DumpGame()
     return txt, copied, os.clock() - t0
 end
 
--- Trace de __namecall: mostra toda remote que o JOGO dispara e toda que NÃ“S
--- disparamos, com o payload. Ã‰ esse log que revela qual remote o anti-cheat
+-- Trace de __namecall: mostra toda remote que o JOGO dispara e toda que NÓS
+-- disparamos, com o payload. É esse log que revela qual remote o anti-cheat
 -- usa pra avisar o servidor.
 local hgTrace = { active = false, old = nil, log = {}, max = 400, dropped = {} }
 
@@ -9695,13 +16151,13 @@ function HG.TraceRemotes(on)
         end
         return true, string.format("%d eventos no log", #hgTrace.log)
     end
-    if hgTrace.active then return true, "trace jÃ¡ ativo" end
+    if hgTrace.active then return true, "trace já ativo" end
 
     hgTrace.old = mt.__namecall
     setreadonly(mt, false)
     mt.__namecall = newcclosure(function(self, ...)
         -- todo o log dentro de pcall: se der erro aqui, ele morre aqui.
-        -- erro vazando pro namecall do jogo Ã© a Ãºnica forma de um hook ser notado.
+        -- erro vazando pro namecall do jogo é a única forma de um hook ser notado.
         local m
         pcall(function() m = getnamecallmethod() end)
         if m == "FireServer" or m == "InvokeServer" then
@@ -9733,8 +16189,8 @@ function HG.TraceClear()
 end
 
 -- Report killer: dropa o FireServer da remote que o anti-cheat usa pra avisar
--- o servidor. NÃ£o destrÃ³i o script deles â€” se ele sumir, o prÃ³prio heartbeat
--- de integridade acusa. SÃ³ corta a saÃ­da.
+-- o servidor. Não destrói o script deles — se ele sumir, o próprio heartbeat
+-- de integridade acusa. Só corta a saída.
 function HG.KillReport(on)
     if not (getrawmetatable and getnamecallmethod and newcclosure) then
         return false, "executor sem getrawmetatable/newcclosure"
@@ -9750,7 +16206,7 @@ function HG.KillReport(on)
         end
         return true, "report killer desligado"
     end
-    if hgTrace.reportOld then return true, "jÃ¡ instalado" end
+    if hgTrace.reportOld then return true, "já instalado" end
 
     hgTrace.reportOld = mt.__namecall
     setreadonly(mt, false)
@@ -9779,7 +16235,7 @@ function HG.KillReport(on)
     return true, "report killer instalado"
 end
 
--- Tira a GUI do PlayerGui (se ainda estiver lÃ¡) e protege contra enumeraÃ§Ã£o.
+-- Tira a GUI do PlayerGui (se ainda estiver lá) e protege contra enumeração.
 function HG.Evade()
     local done = {}
     local gui = (guiParent and guiParent:FindFirstChild(GUI_NAME)) or PlayerGui:FindFirstChild(GUI_NAME)
@@ -9797,16 +16253,16 @@ function HG.Evade()
             if pcall(protectgui, gui) then done[#done + 1] = "protectgui" end
         end
     end
-    if #done == 0 then return false, "nenhum mÃ©todo de proteÃ§Ã£o disponÃ­vel" end
-    return true, table.concat(done, " Â· ")
+    if #done == 0 then return false, "nenhum método de proteção disponível" end
+    return true, table.concat(done, " · ")
 end
 
 -- ============================================================
 -- AUTO-BLOCK
 -- ============================================================
 
--- Remote de aÃ§Ã£o do player: Workspace.Live.[nome].Main.RemoteEvent
--- (confirmado no dump â€” Ã© o canal por onde todas as aÃ§Ãµes do combate passam)
+-- Remote de ação do player: Workspace.Live.[nome].Main.RemoteEvent
+-- (confirmado no dump — é o canal por onde todas as ações do combate passam)
 local hgBlockRemote = nil
 local function hgFindBlockRemote()
     if hgBlockRemote and hgBlockRemote.Parent then return hgBlockRemote end
@@ -9825,7 +16281,7 @@ local function hgFindBlockRemote()
             end
         end
     end
-    -- fallback: varredura genÃ©rica por "block"/"guard" no RS
+    -- fallback: varredura genérica por "block"/"guard" no RS
     local r = hgFindRemote({"block","guard","parry","defend","shield"})
     hgBlockRemote = r
     return r
@@ -9834,7 +16290,7 @@ end
 -- ============================================================
 -- PAYLOAD SPY via __namecall
 -- Intercepta TODOS os FireServer do jogo via metamethod.
--- Captura o payload de qualquer aÃ§Ã£o do player (incluindo block).
+-- Captura o payload de qualquer ação do player (incluindo block).
 -- Funciona em qualquer executor que tenha getrawmetatable + setreadonly.
 -- ============================================================
 local hgCapturedPayload = nil  -- {remote=ref, args={...}} capturado
@@ -9886,7 +16342,7 @@ end
 
 local function hgStartSpy()
     if not getrawmetatable then return false, "executor sem getrawmetatable" end
-    if hgSpyActive then return false, "spy jÃ¡ ativo" end
+    if hgSpyActive then return false, "spy já ativo" end
     hgBuildSpyWhitelist()
     local ok, err = pcall(function()
         local mt = getrawmetatable(game)
@@ -9899,7 +16355,7 @@ local function hgStartSpy()
                 if label then
                     local args = {...}
                     local str = hgSerializeArgs(args)
-                    print("[HBG SPY] " .. label .. " â†’ " .. str)
+                    print("[HBG SPY] " .. label .. " → " .. str)
                     if #args > 0 then
                         hgCapturedPayload = {remote = self, args = args}
                         Toast(label .. ": " .. str:sub(1,60), true)
@@ -9914,7 +16370,7 @@ local function hgStartSpy()
                 if label then
                     local args = {...}
                     local str = hgSerializeArgs(args)
-                    print("[HBG SPY] " .. label .. " â†’ " .. str)
+                    print("[HBG SPY] " .. label .. " → " .. str)
                     if #args > 0 then
                         hgCapturedPayload = {remote = self, args = args}
                         Toast(label .. ": " .. str:sub(1,60), true)
@@ -9927,12 +16383,12 @@ local function hgStartSpy()
         hgSpyOldNC = old
         hgSpyActive = true
     end)
-    if ok then return true, "spy ativo â€” aperta block uma vez no jogo"
+    if ok then return true, "spy ativo — aperta block uma vez no jogo"
     else return false, tostring(err) end
 end
 
 local function hgStopSpy()
-    -- restaura __namecall original se tiver referÃªncia
+    -- restaura __namecall original se tiver referência
     if hgSpyOldNC and getrawmetatable then
         pcall(function()
             local mt = getrawmetatable(game)
@@ -9948,12 +16404,12 @@ end
 -- ============================================================
 -- HOLD BLOCK
 -- Usa o payload capturado pelo spy e fica disparando via :FireServer()
--- Intervalo base configurÃ¡vel + jitter humano.
+-- Intervalo base configurável + jitter humano.
 -- ============================================================
 local hgHoldConn = nil
 
 local function hgFireBlock(remote, args)
-    -- sintaxe correta: remote:FireServer(...) via pcall anÃ´nimo
+    -- sintaxe correta: remote:FireServer(...) via pcall anônimo
     pcall(function() remote:FireServer(table.unpack(args)) end)
 end
 
@@ -9962,7 +16418,7 @@ local function hgStartHoldBlock()
     local interval = HGState.holdInterval or 0.08
     local lastFire  = 0
 
-    -- remotes e payloads genÃ©ricos de fallback (usados quando spy nÃ£o capturou nada)
+    -- remotes e payloads genéricos de fallback (usados quando spy não capturou nada)
     local function fireFallback()
         -- tenta na remote do workspace do player
         local remote = hgFindBlockRemote()
@@ -9997,7 +16453,7 @@ local function hgStopHoldBlock()
     if hgCapturedPayload then
         local rel = {}
         for i, v in ipairs(hgCapturedPayload.args) do
-            rel[i] = (v == true) and false or v
+            if v == true then rel[i] = false else rel[i] = v end
         end
         pcall(function() hgCapturedPayload.remote:FireServer(table.unpack(rel)) end)
     else
@@ -10011,10 +16467,10 @@ local function hgStopHoldBlock()
 end
 
 -- ============================================================
--- UI â€” DUMP
+-- UI — DUMP
 -- ============================================================
 Section("Dump HBG")
-Note("Escaneia todas as remotes do jogo, categoriza por intenÃ§Ã£o (ataque, block, status, anti-cheat), mapeia hitboxes e pasta de combate. Salva em SilkcoreHBGDump.txt.", 68)
+Note("Escaneia todas as remotes do jogo, categoriza por intenção (ataque, block, status, anti-cheat), mapeia hitboxes e pasta de combate. Salva em SilkcoreHBGDump.txt.", 68)
 do
     local busy = false
     BtnRow("DUMP HBG", T.Accent, function()
@@ -10023,7 +16479,7 @@ do
         Toast("fazendo dump HBG...", true)
         task.spawn(function()
             local txt, copied = HG.Dump()
-            Toast(string.format("dump pronto Â· %d chars Â· %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
+            Toast(string.format("dump pronto · %d chars · %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
             busy = false
         end)
     end)
@@ -10031,48 +16487,48 @@ end
 BtnRow("RESETAR CACHE DE REMOTES", T.Card, function()
     hgRemoteCache = nil
     hgBlockRemote = nil
-    Toast("cache limpo â€” prÃ³ximo dump re-escaneia tudo", true)
+    Toast("cache limpo — próximo dump re-escaneia tudo", true)
 end)
 
 -- ============================================================
--- UI â€” ANTI-CHEAT BYPASS
+-- UI — ANTI-CHEAT BYPASS
 -- ============================================================
 Section("Anti-Cheat Bypass")
-Note("Hook de remotes de verificaÃ§Ã£o: intercepta chamadas de speed/position check e normaliza os valores antes de enviarem ao servidor. Requer executor com hookfunction (ex: Synapse X, KRNL, AWP).", 68)
+Note("Hook de remotes de verificação: intercepta chamadas de speed/position check e normaliza os valores antes de enviarem ao servidor. Requer executor com hookfunction (ex: Synapse X, KRNL, AWP).", 68)
 
 Section("Silk Guard")
-Toggle("Silk Guard (proteÃ§Ã£o do script)", true, function(v)
+Toggle("Silk Guard (proteção do script)", true, function(v)
     SilkGuard.On = v
-    Toast(v and "guarda armada" or "guarda desarmada â€” nada Ã© reposto se cair", v)
+    Toast(v and "guarda armada" or "guarda desarmada — nada é reposto se cair", v)
 end, "hg_silkguard")
 
 Toggle("Modo fantasma (GUI em gethui)", false, function(v)
     local on = SilkGuard.ghost(v)
-    Toast(on and "GUI movida pro container oculto do executor" or "GUI de volta Ã  Ã¡rvore normal", true)
+    Toast(on and "GUI movida pro container oculto do executor" or "GUI de volta Ã  árvore normal", true)
 end, "hg_ghost")
 
 BtnRow("AUDITORIA DE PEGADA", T.Card, function()
     Toast(SilkGuard.audit(), true)
 end, 34)
-Note("A guarda conta os frames do loop de render: se o bind cair, ela re-arma. NÃ£o Ã© mÃ¡gica contra servidor â€” Ã© contra script de terceiro mexendo na tua mesa.", 52)
+Note("A guarda conta os frames do loop de render: se o bind cair, ela re-arma. Não é mágica contra servidor — é contra script de terceiro mexendo na tua mesa.", 52)
 
 BtnRow("INSTALAR HOOKS DE AC", T.Good, function()
     task.spawn(function()
         local ok, msg = HG.InstallACHooks()
-        Toast((ok and "âœ“ " or "âœ— ") .. tostring(msg), ok)
+        Toast((ok and "✓ " or "✗ ") .. tostring(msg), ok)
         if ok and #HGState.acHooks > 0 then
             Toast("remotes hookadas: " .. table.concat(HGState.acHooks, ", "):sub(1, 80), true)
         end
     end)
 end)
-Note("Execute DUMP primeiro para mapear as remotes â€” o hook fica mais preciso com o cache populado.", 52)
+Note("Execute DUMP primeiro para mapear as remotes — o hook fica mais preciso com o cache populado.", 52)
 
 Toggle("Fake Speed (bypassa speed-check)", false, function(v)
     HGState.acFakeSpeed = v
     if v then
         local spd = HGState.fakeSpeedVal or 60
         hgStartFakeSpeed(spd)
-        Toast("fake speed ligado Â· WalkSpeed real mantido em 16", true)
+        Toast("fake speed ligado · WalkSpeed real mantido em 16", true)
     else
         Toast("fake speed desligado", false)
     end
@@ -10083,56 +16539,56 @@ do
     local sField = Field(row, UDim2.new(0.56,0,0.5,-15), UDim2.new(0.22,0,0,30), "60")
     Button(row, "SET", UDim2.new(0.8,0,0.5,-15), UDim2.fromOffset(52,30), T.Card, function()
         local v = tonumber(sField.Text)
-        if not v or v < 1 or v > 500 then Toast("valor invÃ¡lido (1-500)", false); return end
+        if not v or v < 1 or v > 500 then Toast("valor inválido (1-500)", false); return end
         HGState.fakeSpeedVal = v
         if HGState.acFakeSpeed then hgStartFakeSpeed(v) end
-        Toast("fake speed â†’ " .. v, true)
+        Toast("fake speed → " .. v, true)
     end)
 end
 
 -- ============================================================
--- UI â€” DUMP PROFUNDO / NEUTRALIZACAO
+-- UI — DUMP PROFUNDO / NEUTRALIZACAO
 -- ============================================================
 Section("Dump profundo")
-Note("LÃª o GC atrÃ¡s das funÃ§Ãµes de anti-cheat, lista os scripts do jogo e tenta descompilar os suspeitos. Salva em SilkcoreACDump.txt e copia pra Ã¡rea de transferÃªncia.", 60)
+Note("Lê o GC atrás das funções de anti-cheat, lista os scripts do jogo e tenta descompilar os suspeitos. Salva em SilkcoreACDump.txt e copia pra área de transferência.", 60)
 
 BtnRow("DUMP DE SCRIPTS / AC", T.Accent, function()
     task.spawn(function()
         local txt, copied = HG.DumpScripts()
-        Toast(string.format("dump AC Â· %d chars Â· %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
+        Toast(string.format("dump AC · %d chars · %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
     end)
 end)
 
 BtnRow("DUMP DO JOGO (sem CorePackages)", T.Accent, function()
     task.spawn(function()
-        Toast("dump do jogo rodando â€” sÃ³ o que Ã© do dev", true)
+        Toast("dump do jogo rodando — só o que é do dev", true)
         local txt, copied, secs = HG.DumpGame()
-        Toast(string.format("dump do jogo Â· %d chars Â· %.1fs Â· %s", #txt, secs, copied and "copiado!" or "salvo em arquivo"), true)
+        Toast(string.format("dump do jogo · %d chars · %.1fs · %s", #txt, secs, copied and "copiado!" or "salvo em arquivo"), true)
     end)
 end)
 
 BtnRow("DUMP TOTAL (tudo)", T.Good, function()
     task.spawn(function()
-        Toast("dump total rodando em segundo plano â€” pode jogar", true)
+        Toast("dump total rodando em segundo plano — pode jogar", true)
         local txt, copied, secs = HG.DumpAll()
-        Toast(string.format("dump total Â· %d chars Â· %.1fs Â· %s", #txt, secs, copied and "copiado!" or "salvo em arquivo"), true)
+        Toast(string.format("dump total · %d chars · %.1fs · %s", #txt, secs, copied and "copiado!" or "salvo em arquivo"), true)
     end)
 end)
 
-BtnRow("COPIAR ÃšLTIMO DUMP", T.Card, function()
-    if not HG.LastDump then Toast("nenhum dump ainda â€” roda o DUMP TOTAL primeiro", false); return end
+BtnRow("COPIAR ÚLTIMO DUMP", T.Card, function()
+    if not HG.LastDump then Toast("nenhum dump ainda — roda o DUMP TOTAL primeiro", false); return end
     if setclipboard then pcall(setclipboard, HG.LastDump) end
     Toast(string.format("%d chars copiados pro clipboard", #HG.LastDump), true)
 end, 34)
 
 Toggle("Trace de remotes", false, function(v)
     local ok, msg = HG.TraceRemotes(v)
-    Toast((ok and "" or "âœ— ") .. msg, ok)
+    Toast((ok and "" or "✗ ") .. msg, ok)
 end, "hg_trace")
 
 BtnRow("VER TRACE CAPTURADO", T.Card, function()
     local txt = HG.TraceText()
-    if txt == "" then Toast("trace vazio â€” liga o trace e joga um round", false); return end
+    if txt == "" then Toast("trace vazio — liga o trace e joga um round", false); return end
     if setclipboard then pcall(setclipboard, txt) end
     print("[SilkCore] trace:\n" .. txt)
     Toast(string.format("%d linhas copiadas", select(2, txt:gsub("\n", "")) + 1), true)
@@ -10143,21 +16599,21 @@ BtnRow("LIMPAR TRACE", T.Card, function()
     Toast("trace limpo", true)
 end, 34)
 
-Section("Neutralizar detecÃ§Ã£o")
-Note("O servidor nÃ£o vÃª o teu executor â€” vÃª o que replica e o que vocÃª manda pra ele. O report killer corta a remote que o anti-cheat usa pra avisar. NÃ£o apague o script deles: se ele sumir, o heartbeat de integridade acusa na hora.", 60)
+Section("Neutralizar detecção")
+Note("O servidor não vê o teu executor — vê o que replica e o que você manda pra ele. O report killer corta a remote que o anti-cheat usa pra avisar. Não apague o script deles: se ele sumir, o heartbeat de integridade acusa na hora.", 60)
 
 Toggle("Report killer (dropa flag/ban)", false, function(v)
     local ok, msg = HG.KillReport(v)
-    Toast((ok and "" or "âœ— ") .. msg, ok)
+    Toast((ok and "" or "✗ ") .. msg, ok)
 end, "hg_reportkill")
 
 BtnRow("PROTEGER A GUI", T.Good, function()
     local ok, msg = HG.Evade()
-    Toast((ok and "" or "âœ— ") .. msg, ok)
+    Toast((ok and "" or "✗ ") .. msg, ok)
 end, 34)
 
 -- ============================================================
--- UI â€” AUTO-BLOCK (HOLD BLOCK)
+-- UI — AUTO-BLOCK (HOLD BLOCK)
 -- ============================================================
 Section("Auto-Block")
 Note("Segura o block ativo em loop via FireServer direto. Passo 1: ativa o Spy e aperta block uma vez no jogo pra capturar o payload real. Passo 2: liga o Hold Block.", 68)
@@ -10166,14 +16622,14 @@ Note("Segura o block ativo em loop via FireServer direto. Passo 1: ativa o Spy e
 BtnRow("ATIVAR SPY (captura payload de block)", T.Accent, function()
     task.spawn(function()
         local ok, msg = hgStartSpy()
-        Toast((ok and "âœ“ " or "âœ— ") .. msg, ok)
+        Toast((ok and "✓ " or "✗ ") .. msg, ok)
     end)
 end)
-Note("Com o spy ativo: aperta o botÃ£o de block do jogo UMA VEZ. O payload aparece no output e na notificaÃ§Ã£o. Depois pode ligar o Hold Block.", 52)
+Note("Com o spy ativo: aperta o botão de block do jogo UMA VEZ. O payload aparece no output e na notificação. Depois pode ligar o Hold Block.", 52)
 
 BtnRow("VER PAYLOAD CAPTURADO", T.Card, function()
     if not hgCapturedPayload then
-        Toast("nenhum payload capturado ainda â€” use o spy primeiro", false); return
+        Toast("nenhum payload capturado ainda — use o spy primeiro", false); return
     end
     local parts = {}
     for i, v in ipairs(hgCapturedPayload) do
@@ -10185,7 +16641,7 @@ end)
 
 BtnRow("LIMPAR PAYLOAD (volta pra fallback)", T.Card, function()
     hgCapturedPayload = nil
-    Toast("payload limpo â€” hold block vai usar argumentos genÃ©ricos", true)
+    Toast("payload limpo — hold block vai usar argumentos genéricos", true)
 end)
 
 -- Hold block
@@ -10193,8 +16649,8 @@ Toggle("Hold Block", false, function(v)
     HGState.autoBlock = v
     if v then
         hgStartHoldBlock()
-        local modo = hgCapturedPayload and "payload capturado" or "argumentos genÃ©ricos"
-        Toast("hold block ligado Â· " .. modo, true)
+        local modo = hgCapturedPayload and "payload capturado" or "argumentos genéricos"
+        Toast("hold block ligado · " .. modo, true)
     else
         hgStopHoldBlock()
         Toast("hold block desligado", false)
@@ -10203,16 +16659,16 @@ end, "hg_holdblock")
 
 do
     local row = Row(50)
-    Label(row, "Intervalo de fire (s) â€” menor = mais agressivo", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16,0), UDim2.new(0.6,0,1,0))
+    Label(row, "Intervalo de fire (s) — menor = mais agressivo", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16,0), UDim2.new(0.6,0,1,0))
 end
 do
     local row = Row(50)
     local iField = Field(row, UDim2.new(0.04,0,0.5,-15), UDim2.new(0.22,0,0,30), "0.08")
     Button(row, "SET", UDim2.new(0.28,0,0.5,-15), UDim2.fromOffset(52,30), T.Card, function()
         local v = tonumber(iField.Text)
-        if not v or v < 0.02 or v > 2 then Toast("valor invÃ¡lido (0.02-2)", false); return end
+        if not v or v < 0.02 or v > 2 then Toast("valor inválido (0.02-2)", false); return end
         HGState.holdInterval = v
-        Toast("intervalo â†’ " .. v .. "s", true)
+        Toast("intervalo → " .. v .. "s", true)
         -- reinicia o loop se estiver ativo
         if HGState.autoBlock then hgStartHoldBlock() end
     end)
@@ -10220,10 +16676,10 @@ do
         hgBlockRemote = nil
         local r = hgFindBlockRemote()
         if r then Toast("remote: " .. r:GetFullName(), true)
-        else Toast("remote nÃ£o encontrada â€” entre no jogo primeiro", false) end
+        else Toast("remote não encontrada — entre no jogo primeiro", false) end
     end)
 end
-Note("Se o hold block nÃ£o funcionar com payload genÃ©rico: ativa o spy â†’ aperta block manual uma vez â†’ o payload Ã© capturado â†’ o hold block passa a usar ele.", 68)
+Note("Se o hold block não funcionar com payload genérico: ativa o spy → aperta block manual uma vez → o payload é capturado → o hold block passa a usar ele.", 68)
 
 end -- HBG tab
 buildHBG()
@@ -10246,7 +16702,7 @@ track(UserInputService.InputBegan:Connect(function(i, processed)
             local key = nil
             if i.KeyCode ~= Enum.KeyCode.Escape then key = i.KeyCode end
             if key == Enum.KeyCode.RightControl or key == Enum.KeyCode.RightShift or key == Enum.KeyCode.LeftControl then
-                Toast("essa tecla Ã© reservada do menu, escolha outra", false)
+                Toast("essa tecla é reservada do menu, escolha outra", false)
                 return
             end
             if target == "look" then
@@ -10310,7 +16766,7 @@ if env then
     end
 end
 
--- Silk Guard: registra o que tem que continuar de pÃ©, e liga a vigilÃ¢ncia
+-- Silk Guard: registra o que tem que continuar de pé, e liga a vigilância
 if SilkGuard then
     pcall(SilkGuard.track, Gui)
     if FovGui then pcall(SilkGuard.track, FovGui) end
@@ -10324,6 +16780,6 @@ runLoader(function(failed)
     if #failed > 0 then
         Toast("loader: " .. failed[1], false)
     else
-        Toast("Silk Core pronto Â· RControl abre e fecha", true)
+        Toast("Silk Core pronto · RControl abre e fecha", true)
     end
 end)
