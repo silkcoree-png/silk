@@ -4709,170 +4709,115 @@ local function _jsonDecode(s)
     return nil
 end
 
--- ── hosts ─────────────────────────────────────────────────────────────────────
+-- ── endpoints ─────────────────────────────────────────────────────────────────
 -- O gate (403 code 22 "In-experience search is denied for this place or
--- universe") fica no /search/items/details e só nele. Isolado aqui:
---   catalog.roblox.com/v1/search/items          + Roblox-Place-Id  -> 200
---   catalog.roblox.com/v1/search/items/details  + Roblox-Place-Id  -> 403
--- O executor anexa o Roblox-Place-Id sozinho — herda do stack HTTP do jogo — e
--- escreve DEPOIS dos nossos headers. Prova com header duplicado:
---   "none" e depois "123456789"  -> 403   (o valor do executor vence, é o último)
---   "123456789" e depois "none"  -> 200
--- Ou seja, não dá pra sobrescrever por header. Sobra o relay: allorigins e jina
--- montam a requisição no servidor DELES, o header do executor morre no caminho e
--- nunca chega no Roblox. Os dois primeiros hosts ficam pra quem roda fora do
--- jogo (ou num executor que não anexe o header).
-local _HOSTS = {
-    {tag = "roproxy", cat = "https://catalog.roproxy.com/v1"},
-    {tag = "roblox",  cat = "https://catalog.roblox.com/v1"},
-    {tag = "allorigins", relay = "https://api.allorigins.win/raw?url=", cat = "https://catalog.roblox.com/v1"},
-    {tag = "jina", relay = "https://r.jina.ai/", cat = "https://catalog.roblox.com/v1"},
-}
+-- universe") fica só no /search/items/details. Fora dele, dois endpoints
+-- primeiro-party cobrem o browse inteiro, com o header do place presente:
+--   catalog.roblox.com/v1/search/items?category=N&limit=28  -> {id, itemType}
+--   economy.roblox.com/v2/assets/<id>/details               -> Name, AssetTypeId, PriceInRobux, Creator
+-- Os dois voltam 200 com Roblox-Place-Id preenchido. O relay saiu porque o
+-- header do executor não era o que quebrava o jina: da máquina, jina responde
+-- 200 até com UA da Roblox e place id; dentro do jogo devolve 403, e o
+-- allorigins 522 (a origem dele está fora do ar). O request() do executor sai
+-- pela infra da Roblox, e Cloudflare trata tráfego de datacenter assim. Sem
+-- relay, esse modo de falha não existe.
+local _API  = "https://catalog.roblox.com/v1"
+local _ECON = "https://economy.roblox.com/v2"
 
--- Host preferido. O jina já entra na frente: medido aqui, 9 chamadas seguidas em
--- ~0,6–1,3 s, todas 200 e com o payload inteiro. O allorigins também fura o gate
--- mas estoura o limite em rajada (1 de 9 passou), então fica de reserva.
-local _JINA = 4
-local _pref = { cat = _JINA }
 local _hostLog = ""
+local _logBuf  = {}
 
 local function _urlEnc(s)
     s = tostring(s):gsub("[^%w%-_%.~ ]", function(c)
         return string.format("%%%02X", string.byte(c))
     end)
-    s = s:gsub(" ", "+")
-    return s
+    return (s:gsub(" ", "+"))
 end
 
-local function _hostUrl(h, kind, path)
-    local full = h[kind] .. path
-    if h.relay then return h.relay .. _urlEnc(full) end
-    return full
-end
-
--- O r.jina.ai devolve {"code":200,"status":20000,"data":{"content":"<json>"}}.
--- O campo data do envelope tem o mesmo nome do data do catálogo: sem
--- desembrulhar, o loop do grid lê um hash, não encontra item nenhum e a grade
--- sai vazia — sem erro, sem pista. Era esse o sintoma.
-local function _unwrap(d)
-    if type(d) == "table" and type(d.data) == "table"
-        and type(d.data.content) == "string" and #d.data.content > 20 then
-        local inner = _jsonDecode(d.data.content)
-        if type(inner) == "table" then return inner end
+-- Uma chamada, sem sorteio de host. 429 é limite de rajada do catálogo e some
+-- em ~20 s; três tentativas com 1,2 s de intervalo cobrem o caso normal sem
+-- travar a tela.
+local function _get2(url, tag)
+    local data, status
+    for attempt = 1, 3 do
+        local body, st = _httpGet(url)
+        status = tonumber(st) or 0
+        _lastHttp = "HTTP " .. tostring(status)
+        _logBuf[#_logBuf + 1] = tag .. ":" .. tostring(status)
+        while #_logBuf > 4 do table.remove(_logBuf, 1) end
+        _hostLog = table.concat(_logBuf, " ")
+        data = _jsonDecode(body)
+        if status ~= 429 then break end
+        if attempt < 3 then task.wait(1.2) end
     end
-    return d
-end
-
-local function _isCatalog(d)
-    if type(d) ~= "table" or type(d.data) ~= "table" then return false end
-    return type(d.data.content) ~= "string"
-end
-
-local function _getJson(kind, path)
-    local pref = _pref[kind] or 1
-    local order = { pref }
-    for i = 1, #_HOSTS do
-        if i ~= pref then order[#order + 1] = i end
-    end
-
-    _hostLog = ""
-    local n = 0
-    for _, i in ipairs(order) do
-        local h = _HOSTS[i]
-        local body, status = _httpGet(_hostUrl(h, kind, path))
-        local data = _unwrap(_jsonDecode(body))
-
-        -- Um registro por host: nome, status e "!" quando bateu no gate. Antes o
-        -- motivo era guardado numa variável só e o último host tentado apagava a
-        -- explicação do primeiro — a tela dizia "403" sem dizer de quem nem por quê.
-        local gate = (body and body:find("In-experience search is denied", 1, true)) and "!" or ""
-        n = n + 1
-        _hostLog = _hostLog .. (n > 1 and "  " or "") .. h.tag .. ":" .. tostring(status) .. gate
-
-        if _isCatalog(data) then
-            _pref[kind] = i
-            return data
-        end
-        if data and data.errors and data.errors[1] then
-            local m = tostring(data.errors[1].message or "")
-            if #m > 0 then _lastHttp = tostring(status) .. " / " .. m end
-        end
-    end
-    return nil
+    return data, status
 end
 
 -- ── catalog categories ────────────────────────────────────────────────────────
--- A API v1/search/items/details tem três regras que o código antigo violava:
+-- Regras medidas no /v1/search/items (o endpoint, não o /details):
 --   · limit só aceita 10, 28 ou 30
---   · category=0 devolve 400 "Category subcategory selection not supported"
---   · assetType= é aceito e IGNORADO — nunca filtrou nada
--- Era isso que zerava a grade e fazia o aviso culpar o executor. Agora a URL só
--- leva category válido (1=Em Alta, 3=Roupas, 11=Acessórios, 12=Emotes) ou
--- keyword, e o filtro por tipo de item é feito aqui no cliente.
+--   · category e keyword PODEM ir juntos aqui — era o /details que dava 400
+--   · devolve só {id, itemType}; nome e tipo vêm do economy/v2 por id
 local _CATS = {
     {id="featured", label="Em Alta",    category=1},
     {id="emotes",   label="Emotes",     category=12},
     {id="clothes",  label="Roupas",     category=3},
     {id="acc",      label="Acessórios", category=11},
-    {id="hats",     label="Chapéu",     kw="hat",   types={[8]=true}},
-    {id="hair",     label="Cabelo",     kw="hair",  types={[41]=true}},
-    {id="face",     label="Rosto",      kw="face",  types={[18]=true,[42]=true}},
-    {id="shirt",    label="Camisa",     kw="shirt", types={[11]=true}},
-    {id="pants",    label="Calça",      kw="pants", types={[12]=true}},
+    {id="hats",     label="Chapéu",     category=11, kw="hat"},
+    {id="hair",     label="Cabelo",     category=11, kw="hair"},
+    {id="face",     label="Rosto",      category=11, kw="face"},
+    {id="shirt",    label="Camisa",     category=3,  kw="shirt"},
+    {id="pants",    label="Calça",      category=3,  kw="pants"},
     {id="search",   label="Busca"},
 }
 
-local function _pagePath(cat, kw, cursor)
-    local u = "/search/items/details?limit=30&sortOrder=Desc"
-    -- Aba por categoria usa category; aba por palavra usa keyword. Nunca as duas
-    -- juntas: a API responde 400 "Category subcategory selection not supported".
-    if not cat.category and kw and #kw > 0 then
-        u = u .. "&keyword=" .. _urlEnc(kw)
-    elseif cat.category then
-        u = u .. "&category=" .. tostring(cat.category)
-    end
+-- Ids da página. Só Asset entra: Bundle não abre no economy/v2 e sairia sem nome.
+local function _searchIds(cat, kw, cursor)
+    local u = _API .. "/search/items?limit=28&sortOrder=Desc"
+    if cat.category then u = u .. "&category=" .. tostring(cat.category) end
+    if kw and #kw > 0 then u = u .. "&keyword=" .. _urlEnc(kw) end
     if cursor and #cursor > 0 then u = u .. "&cursor=" .. _urlEnc(cursor) end
-    return u
+
+    local data, status = _get2(u, "busca")
+    if type(data) ~= "table" or type(data.data) ~= "table" then
+        return nil, "", "busca HTTP " .. tostring(status)
+    end
+
+    local ids = {}
+    for _, it in ipairs(data.data) do
+        local id = tonumber(it.id)
+        if it.itemType == "Asset" and id then ids[#ids + 1] = id end
+    end
+    return ids, tostring(data.nextPageCursor or ""), nil
 end
 
--- O relay tem limite de requisições, e alternar entre abas batia na API de novo
--- a cada toque. Guarda a página pronta por aba+palavra+cursor: voltar pra uma
--- aba já vista não gasta chamada. Falha não entra no cache.
-local _pageCache = {}
+-- Nome, tipo e preço por id. 28 chamadas por página é o custo real do browse, e
+-- o cache permanente faz a segunda visita à mesma aba sair de graça.
+local _detCache, _detOrder = {}, {}
+local function _assetDetail(id)
+    local hit = _detCache[id]
+    if hit then return hit end
 
-local function _fetchPage(cat, keyword, cursor)
-    local kw = cat.kw or ""
-    if cat.id == "search" then kw = keyword or "" end
-
-    local key = cat.id .. "|" .. kw .. "|" .. (cursor or "")
-    local hit = _pageCache[key]
-    if hit then return hit[1], hit[2], nil end
-
-    -- Abas que filtram por tipo varrem mais de uma página: uma página de
-    -- acessórios traz só parte dos chapéus e a grade sairia pela metade. Duas
-    -- rodadas enchem a grade; quatro gastavam chamada sem mudar o resultado — e
-    -- chamada extra é justamente o que estoura o limite do relay.
-    local rounds = (cat.types and 2) or 1
-    local items, nextCur = {}, cursor or ""
-
-    for _ = 1, rounds do
-        local data = _getJson("cat", _pagePath(cat, kw, nextCur))
-        if not data or not data.data then
-            if #items == 0 then
-                return {}, "", _lastHttp .. "  [" .. _hostLog .. "]"
-            end
-            break
-        end
-        for _, it in ipairs(data.data) do
-            local t = tonumber(it.assetType)
-            if not cat.types or (t and cat.types[t]) then items[#items+1] = it end
-        end
-        nextCur = tostring(data.nextPageCursor or "")
-        if #items >= 20 or #nextCur == 0 then break end
+    if #_detOrder > 700 then
+        _detCache[_detOrder[1]] = nil
+        table.remove(_detOrder, 1)
     end
 
-    if #items > 0 then _pageCache[key] = { items, nextCur } end
-    return items, nextCur, nil
+    local data, status = _get2(_ECON .. "/assets/" .. tostring(id) .. "/details", "item")
+    if type(data) ~= "table" or type(data.Name) ~= "string" then
+        return nil, "item HTTP " .. tostring(status)
+    end
+
+    local d = {
+        id        = id,
+        name      = data.Name,
+        assetType = tonumber(data.AssetTypeId) or 0,
+        price     = tonumber(data.PriceInRobux) or 0,
+        creator   = (type(data.Creator) == "table" and tostring(data.Creator.Name or "")) or "",
+    }
+    _detCache[id] = d
+    _detOrder[#_detOrder + 1] = id
+    return d
 end
 
 -- ── browse state ──────────────────────────────────────────────────────────────
@@ -5028,69 +4973,109 @@ local function _clearBrowseGrid()
     end
 end
 
-local _bFetchFailed = false   -- true quando o último fetch não retornou dados
-local _bFetchReason = nil     -- por que falhou: status http ou mensagem da API
+local _bFetchFailed = false   -- true quando a última página não trouxe nada
+local _bFetchReason = nil     -- status http ou mensagem que explica
+local _bGen = 0               -- a carga mais nova é a única que desenha
 
-local function _renderPage()
-    _clearBrowseGrid()
+local function _renderEmpty()
     if not _browseGrid then return end
-    if #_bItems == 0 then
-        -- O motivo real na tela. "Nada voltou da API" sozinho não dizia se foi
-        -- limite do relay, gate do place ou erro de Lua — e era essa a
-        -- informação que faltava pra fechar cada rodada.
-        local msg = _bFetchFailed
-            and (tostring(_bFetchReason or "?") .. "\nTente RECARREGAR.")
-            or  "Nenhum item encontrado para essa busca."
-        local lbl = New("TextLabel", {
-            Text=msg, Font=F.Mono, TextSize=11,
-            TextColor3 = _bFetchFailed and T.Bad or T.Faint,
-            BackgroundTransparency=1, Size=UDim2.new(1,0,0,60),
-            TextXAlignment=Enum.TextXAlignment.Left, TextWrapped=true,
-        }, _browseGrid)
-        if _bInfoLbl then _bInfoLbl.Text = "0 itens" end
-        if _bNextBtn  then _bNextBtn.Visible = false  end
-        return
-    end
-    for _, it in ipairs(_bItems) do
-        local c = _makeBrowseCard(_browseGrid, it)
-        _browseCards[#_browseCards+1] = c
-    end
-    if _bInfoLbl  then _bInfoLbl.Text = #_bItems .. " itens" end
-    if _bNextBtn  then _bNextBtn.Visible  = #_bItems >= 30         end
-    if _bPrevBtn  then _bPrevBtn.Visible  = (_bCursor and #_bCursor > 0) end
+    local msg = _bFetchFailed
+        and (tostring(_bFetchReason or "?") .. "\nTente RECARREGAR.")
+        or  "Nenhum item encontrado para essa busca."
+    New("TextLabel", {
+        Text=msg, Font=F.Mono, TextSize=11,
+        TextColor3 = _bFetchFailed and T.Bad or T.Faint,
+        BackgroundTransparency=1, Size=UDim2.new(1,0,0,60),
+        TextXAlignment=Enum.TextXAlignment.Left, TextWrapped=true,
+    }, _browseGrid)
 end
 
+-- Duas etapas: uma chamada traz os ids, e cada card nasce assim que o nome do id
+-- chega. Antes a tela prendia em "Carregando..." até o último host responder —
+-- com quatro hosts em timeout, mais de um minuto — e o guarda _bLoading engolia
+-- todo clique de aba nesse meio-tempo. Era isso que travava o Browse. _bGen
+-- resolve: cada carga tem número, e a antiga para de desenhar quando outra começa.
 local function _loadPage(cursor)
-    if _bLoading then return end
+    _bGen = _bGen + 1
+    local gen = _bGen
     _bLoading = true
+    _bItems = {}
     _clearBrowseGrid()
+
+    local statusLbl
     if _browseGrid then
-        New("TextLabel", {
+        statusLbl = New("TextLabel", {
             Text="Carregando...", Font=F.Mono, TextSize=11, TextColor3=T.Faint,
             BackgroundTransparency=1, Size=UDim2.new(1,0,0,32),
             TextXAlignment=Enum.TextXAlignment.Left,
         }, _browseGrid)
     end
+
     task.spawn(function()
-        local cat = _CATS[_bCatIdx] or _CATS[1]
-        -- pcall em volta: erro dentro do task.spawn morre no console e a tela fica
-        -- em "Carregando..." pra sempre. Aqui o erro vira texto na grade, que é
-        -- o que faz a próxima rodada de teste valer alguma coisa.
-        local ok, items, nextCur, reason = pcall(_fetchPage, cat, _bKeyword, cursor or "")
+        local ok, err0 = pcall(function()
+            local cat = _CATS[_bCatIdx] or _CATS[1]
+            local kw  = cat.kw or ""
+            if cat.id == "search" then kw = _bKeyword or "" end
+
+            local ids, nextCur, err = _searchIds(cat, kw, cursor or "")
+            if gen ~= _bGen then return end
+            if not ids then
+                _bFetchFailed, _bFetchReason = true, err
+                return
+            end
+
+            local shown, pages, pool, lastErr = 0, 0, ids, nil
+
+            while gen == _bGen do
+                for _, id in ipairs(pool) do
+                    if gen ~= _bGen then return end
+                    if shown >= 28 then break end
+                    local d, derr = _assetDetail(id)
+                    if d then
+                        local okc, card = pcall(_makeBrowseCard, _browseGrid, d)
+                        if okc and card then
+                            _browseCards[#_browseCards + 1] = card
+                            _bItems[#_bItems + 1] = d
+                            shown = shown + 1
+                            if statusLbl and statusLbl.Parent then
+                                statusLbl.Text = shown .. " itens"
+                            end
+                        else
+                            lastErr = "card: " .. tostring(card)
+                        end
+                    else
+                        lastErr = derr
+                    end
+                    task.wait()
+                end
+
+                -- Grade magra: busca outra página. Duas extras cobrem as abas por
+                -- palavra, que trazem coisa fora do tipo pedido (o id listado é
+                -- só {id, itemType} — o tipo real só aparece no economy/v2).
+                if shown >= 20 or pages >= 2 or #nextCur == 0 then break end
+                pages = pages + 1
+                local more, nc, e2 = _searchIds(cat, kw, nextCur)
+                if not more or #more == 0 then break end
+                pool, nextCur, err = more, nc, e2 or err
+            end
+
+            _bCursor = nextCur
+            _bFetchFailed = (shown == 0)
+            _bFetchReason = lastErr or err
+        end)
+
         if not ok then
-            items, nextCur, reason = {}, "", "erro no fetch: " .. tostring(items)
-        end
-        _bFetchFailed = (#items == 0)
-        _bFetchReason = reason
-        _bItems  = items
-        _bCursor = nextCur
-        _bLoading = false
-        local ok2, err2 = pcall(_renderPage)
-        if not ok2 then
             _bItems, _bFetchFailed = {}, true
-            _bFetchReason = "erro ao desenhar: " .. tostring(err2)
-            pcall(_renderPage)
+            _bFetchReason = "erro no fetch: " .. tostring(err0)
         end
+        if gen ~= _bGen then return end
+
+        _bLoading = false
+        if statusLbl and statusLbl.Parent then statusLbl:Destroy() end
+        if _bInfoLbl then _bInfoLbl.Text = #_bItems .. " itens" end
+        if _bNextBtn then _bNextBtn.Visible = (#_bItems >= 20 and #_bCursor > 0) end
+        if _bPrevBtn then _bPrevBtn.Visible = (cursor ~= nil and #tostring(cursor) > 0) end
+        if #_bItems == 0 then pcall(_renderEmpty) end
     end)
 end
 
@@ -5106,15 +5091,18 @@ do
         _bFetchFailed = false
         _loadPage("")
     end)
-    -- teste de verdade: passa pelos hosts na ordem e mostra o registro de cada um
-    Button(row, "TESTAR HTTP", UDim2.fromOffset(116,3), UDim2.fromOffset(90,30), T.Card, function()
+Button(row, "TESTAR HTTP", UDim2.fromOffset(116,3), UDim2.fromOffset(90,30), T.Card, function()
         task.spawn(function()
-            local data = _getJson("cat", "/search/items/details?limit=10")
-            local n = (data and data.data and #data.data) or 0
-            -- _hostLog traz nome:status de cada host tentado, com "!" onde o gate
-            -- apareceu. É a única leitura que diz o host que respondeu de fato.
-            local msg = ("itens=%d  %s  |  %s"):format(n, _lastHttp, _hostLog)
-            Toast(msg, n > 0)
+            local ids, _, e1 = _searchIds(_CATS[4], "", "")
+            local n = (ids and #ids) or 0
+            local d, e2 = nil, nil
+            if n > 0 then d, e2 = _assetDetail(ids[1]) end
+            -- leitura única: a busca respondeu, veio id, o nome saiu?
+            local msg = ("busca=%d %s  nome=%s  [%s]"):format(
+                n, e1 or "ok",
+                d and ("'" .. d.name .. "'") or (e2 or "-"),
+                _hostLog)
+            Toast(msg, n > 0 and d ~= nil)
             pcall(function() print("[SilkCore Browse]", msg) end)
         end)
     end)
