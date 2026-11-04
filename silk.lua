@@ -13513,16 +13513,20 @@ local ND = {
     spin = 0,
     acc = 0,
     conn = nil,
+    ghosts = {},       -- pecas criadas por mim (so eu vejo)
+    create = true,     -- completar a forma com pecas proprias
+    want = 48,         -- quantas pecas a forma deve ter
 }
 HackState.ndOrbital = ND
 
 -- tudo que e chamado antes de existir precisa estar declarado aqui
 local ndShape, ndPoly, ndResample, ndNormalize, ndCustomOutline
 local ndRoot, ndBlocked, ndQuery, ndCollect, ndRelease, ndRebuild, ndVolumetric
+local ndClearGhosts, ndMakeGhosts, ndOnlyOwn
 local ndStep, ndStart, ndCount
 
 Section("Orbital de Peças")
-Note("Puxa as peças soltas depois do desastre e monta a forma escolhida. Peças presas entram se você liberar.", 52)
+Note("Puxa as peças soltas depois do desastre e monta a forma escolhida. Peças presas entram se você liberar. O que faltar ele cria — essas só você vê.", 66)
 
 -- ------------------------------------------------------------------ utilidade
 ndRoot = function()
@@ -13537,7 +13541,7 @@ ndBlocked = function(part)
     if part:IsDescendantOf(Workspace.Terrain) then return true end
     local s = part.Size
     if math.max(s.X, s.Y, s.Z) > 150 then return true end
-    if part.Name == "Baseplate" then return true end
+    if part.Name == "Baseplate" or part.Name == "silk_orbital" then return true end
     for _, plr in ipairs(Players:GetPlayers()) do
         local c = plr.Character
         if c and part:IsDescendantOf(c) then return true end
@@ -13558,6 +13562,37 @@ ndQuery = function(center, size)
     end
     local r3 = Region3.new(center - size / 2, center + size / 2)
     return Workspace:FindPartsInRegion3(r3, LocalPlayer.Character, 5000)
+end
+
+ndClearGhosts = function()
+    for i = #ND.ghosts, 1, -1 do
+        local p = ND.ghosts[i]
+        if p then pcall(function() p:Destroy() end) end
+        ND.ghosts[i] = nil
+    end
+end
+
+-- peca propria: criada no cliente, so quem roda o script ve
+ndMakeGhosts = function(n)
+    ndClearGhosts()
+    local list = {}
+    for i = 1, n do
+        local p = Instance.new("Part")
+        p.Name = "silk_orbital"
+        p.Anchored = true
+        p.CanCollide = false
+        p.CanQuery = false
+        p.CanTouch = false
+        p.Massless = true
+        p.Size = Vector3.new(1.6, 1.6, 1.6)
+        p.Material = Enum.Material.Neon
+        p.Color = Color3.fromRGB(130, 200, 255)
+        p.Transparency = 0.15
+        p.Parent = Workspace
+        ND.ghosts[i] = p
+        list[i] = p
+    end
+    return list
 end
 
 ndCollect = function()
@@ -13591,14 +13626,28 @@ ndCollect = function()
         part.Massless = true
         list[i] = part
     end
+    if ND.create and #list < ND.want then
+        local g = ndMakeGhosts(ND.want - #list)
+        for i = 1, #g do list[#list + 1] = g[i] end
+    end
     ND.parts = list
     ndRebuild()
     return #list
 end
 
+-- forma montada so com pecas proprias, sem puxar nada do mapa
+ndOnlyOwn = function()
+    ndRelease()
+    ND.parts = ndMakeGhosts(ND.want)
+    ndRebuild()
+    ndStart()
+    return #ND.parts
+end
+
 ndRelease = function()
     ND.on = false
     if ND.conn then ND.conn:Disconnect(); ND.conn = nil end
+    ndClearGhosts()
     for part, st in pairs(ND.orig) do
         if part and part.Parent then
             pcall(function()
@@ -13851,6 +13900,11 @@ BtnRow("Puxar Só as Soltas de Novo", T.Card, function()
     Toast(got > 0 and ("repuxadas " .. got .. " peças") or "nada novo por perto", got > 0)
 end)
 
+BtnRow("Forma Só com Peças Próprias (não puxa nada)", T.Accent, function()
+    local n = ndOnlyOwn()
+    Toast("forma montada com " .. n .. " peças próprias", true)
+end)
+
 Section("Formas")
 
 local function ndSetShape(name, label)
@@ -13878,6 +13932,15 @@ BtnRow("Forma: Meu Desenho", T.Accent, function()
 end)
 
 Section("Ajustes do Orbital")
+
+Slider("Peças na forma", 8, 200, 48, "%.0f", function(v)
+    ND.want = math.floor(v)
+    ndRebuild()
+end, "nd_want")
+
+Toggle("Criar peças se faltar (só você vê)", true, function(v)
+    ND.create = v
+end, "nd_criar")
 
 Slider("Raio da forma", 4, 40, 14, "%.0f studs", function(v)
     ND.radius = v
@@ -14208,10 +14271,13 @@ local FL = {
     conn = nil,
     velocidade = 16,
     perseguir = true,
+    forca = 100000,
+    plataforma = true,
+    last = nil,
 }
 HackState.ndFling = FL
 
-local flNearest, flStop, flPlay, flAlvo
+local flNearest, flStop, flPlay, flAlvo, flRespawnConn
 
 flNearest = function(pos)
     local melhor, melhorD = nil, math.huge
@@ -14248,6 +14314,8 @@ flStop = function()
             root.AssemblyAngularVelocity = Vector3.zero
         end)
     end
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if hum then pcall(function() hum.PlatformStand = false end) end
 end
 
 flPlay = function(animId, apelido)
@@ -14260,27 +14328,33 @@ flPlay = function(animId, apelido)
     end
     flStop()
 
-    local anim = Instance.new("Animation")
-    anim.AnimationId = "rbxassetid://" .. tostring(animId)
-    local animator = hum:FindFirstChildOfClass("Animator")
-    local ok, track = pcall(function()
-        return (animator or hum):LoadAnimation(anim)
-    end)
-    if not ok or not track then
-        ok, track = pcall(function() return hum:LoadAnimation(anim) end)
-    end
-    if not ok or not track then
-        Toast("animação " .. tostring(animId) .. " não carregou", false)
-        return
+    if animId and animId ~= "" then
+        local anim = Instance.new("Animation")
+        anim.AnimationId = "rbxassetid://" .. tostring(animId)
+        local animator = hum:FindFirstChildOfClass("Animator")
+        local ok, track = pcall(function()
+            return (animator or hum):LoadAnimation(anim)
+        end)
+        if not ok or not track then
+            ok, track = pcall(function() return hum:LoadAnimation(anim) end)
+        end
+        if ok and track then
+            FL.track = track
+            pcall(function()
+                track.Priority = Enum.AnimationPriority.Action
+                track.Looped = false
+                track:Play(0.1)
+            end)
+        else
+            Toast("animação " .. tostring(animId) .. " não carregou — o fling vai sem ela", false)
+        end
     end
 
-    FL.track = track
     FL.on = true
-    pcall(function()
-        track.Priority = Enum.AnimationPriority.Action
-        track.Looped = false
-        track:Play(0.1)
-    end)
+    FL.last = { animId, apelido }
+    if FL.plataforma then
+        pcall(function() hum.PlatformStand = true end)
+    end
     Toast("fling: " .. apelido .. " (aperte Parar pra sair)", true)
 
     local flip = 1
@@ -14295,8 +14369,9 @@ flPlay = function(animId, apelido)
         end
 
         flip = -flip
-        r.AssemblyLinearVelocity = Vector3.new(100000 * flip, 0, 100000 * flip)
-        r.AssemblyAngularVelocity = Vector3.new(100000 * flip, 100000 * flip, 100000 * flip)
+        local f = FL.forca * flip
+        r.AssemblyLinearVelocity = Vector3.new(f, 0, f)
+        r.AssemblyAngularVelocity = Vector3.new(f, f, f)
 
         RunService.RenderStepped:Wait()
         if not FL.on then return end
@@ -14349,6 +14424,41 @@ BtnRow("Parar Fling (solta o corpo)", T.Card, function()
     Toast("fling parado", true)
 end)
 
+BtnRow("Roleta (fling sem animação)", T.Card, function()
+    flAlvo(nil, "roleta")
+end)
+
+BtnRow("Testar as 8 Animações (resultado no console)", T.Card, function()
+    task.spawn(function()
+        local char = LocalPlayer.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if not hum then
+            Toast("sem personagem", false)
+            return
+        end
+        local boas = 0
+        for _, a in ipairs(FLING_ANIM) do
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. a.id
+            local animator = hum:FindFirstChildOfClass("Animator")
+            local ok, track = pcall(function() return (animator or hum):LoadAnimation(anim) end)
+            if ok and track then
+                task.wait(0.25)
+                if track.Length and track.Length > 0 then
+                    boas = boas + 1
+                    print("[silk] animação boa: " .. a.nome .. "  " .. a.id .. "  " .. string.format("%.2fs", track.Length))
+                else
+                    print("[silk] animação morta: " .. a.nome .. "  " .. a.id)
+                end
+                pcall(function() track:Destroy() end)
+            else
+                print("[silk] animação não carregou: " .. a.nome .. "  " .. a.id)
+            end
+        end
+        Toast("animações boas: " .. boas .. " de " .. #FLING_ANIM .. " (veja o console)", boas > 0)
+    end)
+end)
+
 BtnRow("Voadora em Todos (um por vez)", T.Card, function()
     task.spawn(function()
         for _, plr in ipairs(Players:GetPlayers()) do
@@ -14370,6 +14480,27 @@ end)
 Slider("Velocidade do fling", 1, 60, 16, "%.0f", function(v)
     FL.velocidade = v
 end, "nd_fling_vel")
+
+Slider("Força do fling (o soco)", 10000, 500000, 100000, "%.0f", function(v)
+    FL.forca = v
+end, "nd_fling_forca")
+
+Toggle("Modo 100% (prende o corpo durante o fling)", true, function(v)
+    FL.plataforma = v
+    Toast("modo 100% " .. (v and "ligado" or "desligado"), v)
+end, "nd_fling_plataforma")
+
+Toggle("Religar o fling quando renascer", false, function(v)
+    if flRespawnConn then flRespawnConn:Disconnect() end
+    flRespawnConn = nil
+    if v then
+        flRespawnConn = LocalPlayer.CharacterAdded:Connect(function()
+            task.wait(1)
+            if FL.last then flPlay(FL.last[1], FL.last[2]) end
+        end)
+    end
+    Toast("religar ao renascer " .. (v and "ligado" or "desligado"), v)
+end, "nd_fling_respawn")
 
 Toggle("Perseguir o alvo mais perto", true, function(v)
     FL.perseguir = v
@@ -14596,6 +14727,51 @@ local function ndDump(modo)
         add("")
     end
 
+    if modo == "tudo" or modo == "kill" then
+        add("[caca ao kill]")
+        local chaves = { "kill", "damage", "hit", "attack", "die", "death", "hurt", "burn", "brick" }
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                local n = obj.Name:lower()
+                local bate = false
+                for _, k in ipairs(chaves) do
+                    if n:find(k, 1, true) then
+                        bate = true
+                        break
+                    end
+                end
+                local toque = obj:FindFirstChildOfClass("TouchTransmitter") ~= nil
+                if bate or toque then
+                    add(string.format("  %-46s anchored=%-5s toque=%-5s size=%s",
+                        obj:GetFullName(), tostring(obj.Anchored), tostring(toque), tostring(obj.Size)))
+                end
+            end
+        end
+        add("")
+        add("[pecas soltas perto de mim - da pra puxar e jogar em alguem]")
+        local meu = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if meu then
+            local perto = {}
+            for _, obj in ipairs(Workspace:GetDescendants()) do
+                if obj:IsA("BasePart") and not obj.Anchored and obj ~= meu then
+                    local d = (obj.Position - meu.Position).Magnitude
+                    if d <= 400 then
+                        perto[#perto + 1] = { d = d, p = obj }
+                    end
+                end
+            end
+            table.sort(perto, function(a, b) return a.d < b.d end)
+            for i = 1, math.min(#perto, 60) do
+                local it = perto[i]
+                add(string.format("  %6.0f studs   %-42s size=%s", it.d, it.p:GetFullName(), tostring(it.p.Size)))
+            end
+            add("  total de pecas soltas ate 400 studs: " .. #perto)
+        else
+            add("  sem personagem agora")
+        end
+        add("")
+    end
+
     local texto = table.concat(out, "\n")
     if setclipboard then pcall(setclipboard, texto) end
     if writefile then pcall(writefile, "silk_dump.txt", texto) end
@@ -14606,6 +14782,7 @@ end
 BtnRow("Dump: Tudo", T.Accent, function() ndDump("tudo") end)
 BtnRow("Dump: Remotes", T.Card, function() ndDump("remotes") end)
 BtnRow("Dump: Peças de Perigo", T.Card, function() ndDump("perigo") end)
+BtnRow("Dump: Caça ao Kill", T.Accent, function() ndDump("kill") end)
 BtnRow("Dump: Ferramentas", T.Card, function() ndDump("tools") end)
 BtnRow("Dump: Scripts", T.Card, function() ndDump("scripts") end)
 BtnRow("Dump: Jogadores", T.Card, function() ndDump("players") end)
