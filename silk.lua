@@ -4723,23 +4723,17 @@ end
 -- nunca chega no Roblox. Os dois primeiros hosts ficam pra quem roda fora do
 -- jogo (ou num executor que não anexe o header).
 local _HOSTS = {
-    {tag = "roproxy", cat = "https://catalog.roproxy.com/v1", thumb = "https://thumbnails.roproxy.com/v1"},
-    {tag = "roblox",  cat = "https://catalog.roblox.com/v1",  thumb = "https://thumbnails.roblox.com/v1"},
-    {tag = "allorigins", relay = "https://api.allorigins.win/raw?url=",
-     cat = "https://catalog.roblox.com/v1", thumb = "https://thumbnails.roblox.com/v1"},
-    {tag = "jina", relay = "https://r.jina.ai/",
-     cat = "https://catalog.roblox.com/v1", thumb = "https://thumbnails.roblox.com/v1"},
+    {tag = "roproxy", cat = "https://catalog.roproxy.com/v1"},
+    {tag = "roblox",  cat = "https://catalog.roblox.com/v1"},
+    {tag = "allorigins", relay = "https://api.allorigins.win/raw?url=", cat = "https://catalog.roblox.com/v1"},
+    {tag = "jina", relay = "https://r.jina.ai/", cat = "https://catalog.roblox.com/v1"},
 }
 
--- Último host que respondeu, por tipo de chamada. Catálogo e miniatura têm
--- disponibilidade diferente — miniatura nunca é barrada — então cada um guarda
--- a própria preferência em vez de arrastar o outro pro relay.
--- O jina já entra preferido pro catálogo: medido aqui, 9 chamadas seguidas em
--- ~0,6–1,3 s, todas 200 e com o payload inteiro. O allorigins também furou o
--- gate mas estoura o limite em rajada (1 de 9 passou), então fica de reserva.
--- Miniatura não é barrada, então sai direto pelo roproxy.
+-- Host preferido. O jina já entra na frente: medido aqui, 9 chamadas seguidas em
+-- ~0,6–1,3 s, todas 200 e com o payload inteiro. O allorigins também fura o gate
+-- mas estoura o limite em rajada (1 de 9 passou), então fica de reserva.
 local _JINA = 4
-local _pref = { cat = _JINA, thumb = 1 }
+local _pref = { cat = _JINA }
 local _hostLog = ""
 
 local function _urlEnc(s)
@@ -4841,13 +4835,24 @@ local function _pagePath(cat, kw, cursor)
     return u
 end
 
+-- O relay tem limite de requisições, e alternar entre abas batia na API de novo
+-- a cada toque. Guarda a página pronta por aba+palavra+cursor: voltar pra uma
+-- aba já vista não gasta chamada. Falha não entra no cache.
+local _pageCache = {}
+
 local function _fetchPage(cat, keyword, cursor)
     local kw = cat.kw or ""
     if cat.id == "search" then kw = keyword or "" end
 
-    -- Abas que filtram por tipo varrem mais de uma página: uma página de 30
-    -- acessórios traz só ~5 chapéus, e a grade sairia vazia.
-    local rounds = (cat.types and 4) or 1
+    local key = cat.id .. "|" .. kw .. "|" .. (cursor or "")
+    local hit = _pageCache[key]
+    if hit then return hit[1], hit[2], nil end
+
+    -- Abas que filtram por tipo varrem mais de uma página: uma página de
+    -- acessórios traz só parte dos chapéus e a grade sairia pela metade. Duas
+    -- rodadas enchem a grade; quatro gastavam chamada sem mudar o resultado — e
+    -- chamada extra é justamente o que estoura o limite do relay.
+    local rounds = (cat.types and 2) or 1
     local items, nextCur = {}, cursor or ""
 
     for _ = 1, rounds do
@@ -4866,25 +4871,8 @@ local function _fetchPage(cat, keyword, cursor)
         if #items >= 20 or #nextCur == 0 then break end
     end
 
+    if #items > 0 then _pageCache[key] = { items, nextCur } end
     return items, nextCur, nil
-end
-
-local _thumbCache = {}
-local function _fetchThumbs(ids)
-    local needed = {}
-    for _, id in ipairs(ids) do
-        if not _thumbCache[id] then needed[#needed+1] = tostring(id) end
-    end
-    if #needed == 0 then return end
-    local data = _getJson("thumb",
-        "/assets?assetIds=" .. table.concat(needed, ",") ..
-        "&size=150x150&format=Png&isCircular=false")
-    if not data then return end
-    for _, entry in ipairs(data.data or {}) do
-        if entry.state == "Completed" then
-            _thumbCache[tostring(entry.targetId)] = entry.imageUrl
-        end
-    end
 end
 
 -- ── browse state ──────────────────────────────────────────────────────────────
@@ -4971,11 +4959,14 @@ local function _makeBrowseCard(parent, item)
     Round(card, 8)
     Stroke(card, T.Stroke, 1)
 
-    local cachedThumb = _thumbCache[tostring(id)]
+    -- Miniatura direto pelo id. A API de miniatura devolve uma URL do
+    -- tr.rbxcdn.com, e Image de ImageLabel não carrega URL externa: o card ficava
+    -- com o nome e sem imagem, porque essa URL sobrescrevia o rbxthumb que já
+    -- estava funcionando. rbxthumb é o formato que o cliente resolve sozinho.
     local thumb = New("ImageLabel", {
         Size=UDim2.fromOffset(126,100), Position=UDim2.fromOffset(11,10),
         BackgroundColor3=T.Bg, BorderSizePixel=0, ScaleType=Enum.ScaleType.Fit,
-        Image = cachedThumb or ("rbxthumb://type=Asset&id="..tostring(id).."&w=150&h=150"),
+        Image = "rbxthumb://type=Asset&id="..tostring(id).."&w=150&h=150",
     }, card)
     Round(thumb, 6)
 
@@ -5044,30 +5035,22 @@ local function _renderPage()
     _clearBrowseGrid()
     if not _browseGrid then return end
     if #_bItems == 0 then
+        -- O motivo real na tela. "Nada voltou da API" sozinho não dizia se foi
+        -- limite do relay, gate do place ou erro de Lua — e era essa a
+        -- informação que faltava pra fechar cada rodada.
         local msg = _bFetchFailed
-            and ("Nada voltou da API.\n" .. tostring(_bFetchReason or "?") .. "\nTente RECARREGAR.")
+            and (tostring(_bFetchReason or "?") .. "\nTente RECARREGAR.")
             or  "Nenhum item encontrado para essa busca."
         local lbl = New("TextLabel", {
             Text=msg, Font=F.Mono, TextSize=11,
             TextColor3 = _bFetchFailed and T.Bad or T.Faint,
-            BackgroundTransparency=1, Size=UDim2.new(1,0,0,48),
+            BackgroundTransparency=1, Size=UDim2.new(1,0,0,60),
             TextXAlignment=Enum.TextXAlignment.Left, TextWrapped=true,
         }, _browseGrid)
         if _bInfoLbl then _bInfoLbl.Text = "0 itens" end
         if _bNextBtn  then _bNextBtn.Visible = false  end
         return
     end
-    local ids = {}
-    for _, it in ipairs(_bItems) do ids[#ids+1] = tonumber(it.id) or 0 end
-    task.spawn(function()
-        _fetchThumbs(ids)
-        for _, c in ipairs(_browseCards) do
-            if c.outer and c.outer.Parent then
-                local url = _thumbCache[tostring(c._id)]
-                if url then c.thumb.Image = url end
-            end
-        end
-    end)
     for _, it in ipairs(_bItems) do
         local c = _makeBrowseCard(_browseGrid, it)
         _browseCards[#_browseCards+1] = c
@@ -5090,13 +5073,24 @@ local function _loadPage(cursor)
     end
     task.spawn(function()
         local cat = _CATS[_bCatIdx] or _CATS[1]
-        local items, nextCur, reason = _fetchPage(cat, _bKeyword, cursor or "")
+        -- pcall em volta: erro dentro do task.spawn morre no console e a tela fica
+        -- em "Carregando..." pra sempre. Aqui o erro vira texto na grade, que é
+        -- o que faz a próxima rodada de teste valer alguma coisa.
+        local ok, items, nextCur, reason = pcall(_fetchPage, cat, _bKeyword, cursor or "")
+        if not ok then
+            items, nextCur, reason = {}, "", "erro no fetch: " .. tostring(items)
+        end
         _bFetchFailed = (#items == 0)
         _bFetchReason = reason
         _bItems  = items
         _bCursor = nextCur
         _bLoading = false
-        _renderPage()
+        local ok2, err2 = pcall(_renderPage)
+        if not ok2 then
+            _bItems, _bFetchFailed = {}, true
+            _bFetchReason = "erro ao desenhar: " .. tostring(err2)
+            pcall(_renderPage)
+        end
     end)
 end
 
