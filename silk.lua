@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.6 · fix12  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix13  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.6 · fix12", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix13", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.6 · fix12"
+SILK_VER = "v2.6 · fix13"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -5318,6 +5318,7 @@ local function _stopEmotes(animator)
         end
     end)
     _activeEmote = nil
+    SilkAnimAtiva = nil
     SilkAnimDesejada = nil
 end
 
@@ -5379,11 +5380,12 @@ local function _playEmote(id, opts)
     pcall(function() track.Looped = (opts.looped ~= false) end)
     pcall(function() track:Play(0.1, 1, 1) end)
     _activeEmote = track
+    SilkAnimAtiva = track
     SilkAnimDesejada = anim
 
     pcall(function()
         track.Stopped:Connect(function()
-            if _activeEmote == track then _activeEmote = nil end
+            if _activeEmote == track then _activeEmote = nil; SilkAnimAtiva = nil end
         end)
     end)
 
@@ -5396,6 +5398,9 @@ local function _playEmote(id, opts)
 
     return true, "tocando"
 end
+
+-- o motor nasce dentro do bloco do Browse, entao a aba Animacoes enxerga por aqui
+SilkPlayEmote = _playEmote
 
 -- ── card factory ──────────────────────────────────────────────────────────────
 local function _makeBrowseCard(parent, item)
@@ -5783,6 +5788,7 @@ do
         if _activeEmote then
             pcall(function() _activeEmote:Stop() end)
             _activeEmote = nil
+            SilkAnimAtiva = nil
             SilkAnimDesejada = nil
             Toast("emote parado", true)
         else
@@ -6834,7 +6840,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE12"
+local BUILD = "BE13"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8118,7 +8124,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.6 · fix12  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix13  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -11485,7 +11491,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.6 fix12", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix13", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11741,7 +11747,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.6 fix12 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix13 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11925,7 +11931,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.6 · fix12", 48)
+Note("SILK CORE v2.6 · fix13", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -12560,18 +12566,62 @@ local customAnims = {
 -- proprio jogo entao toca o clipe em cada estado — parado, andando, correndo,
 -- pulando — e isso replica pros outros igual o idle normal. O original fica
 -- guardado pra voltar com um botao.
-function SilkPackAplicar(id)
+
+-- HTTP de executor: request / syn.request / http_request. HttpService nao serve
+-- aqui (o cliente nao tem permissao), mas todo executor decente tem um dos tres.
+function SilkHttpGet(url)
+    for _, nome in ipairs({ "syn", "request", "http_request" }) do
+        local fn = nil
+        if nome == "syn" then
+            local ok, syn = pcall(function() return getgenv().syn end)
+            if ok and type(syn) == "table" and type(syn.request) == "function" then fn = syn.request end
+        else
+            local ok, f = pcall(function() return getgenv()[nome] end)
+            if ok and type(f) == "function" then fn = f end
+        end
+        if fn then
+            local ok2, res = pcall(fn, { Url = url, Method = "GET" })
+            if ok2 and type(res) == "table" and type(res.Body) == "string" and #res.Body > 0 then
+                return res.Body
+            end
+        end
+    end
+    return nil
+end
+
+-- O que muda o pack de verdade: valida TODOS os ids antes de encostar no Animate.
+-- Se nada carregar, o personagem fica intocado (antes ele trocava na fé e o
+-- corpo ia pra T-pose).
+function SilkPackSwap(mapa)
     local char = Morph.Char()
-    if not char then Toast("sem personagem", false) return end
+    if not char then Toast("sem personagem", false) return false end
 
     local velho = char:FindFirstChild("Animate")
     if not velho then
-        Toast("esse jogo não usa o Animate padrão — aqui usa TOCAR (clipe)", false)
-        return
+        Toast("esse jogo não usa o Animate padrão — usa TOCAR (clipe) aqui", false)
+        return false
     end
 
-    local asset = SilkAnimId(id)
-    if asset == "" then Toast("id vazio", false) return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local animator = hum and hum:FindFirstChildOfClass("Animator")
+    local validos = 0
+    for _, asset in pairs(mapa) do
+        if animator then
+            local a = Instance.new("Animation")
+            a.AnimationId = asset
+            pcall(function() game:GetService("ContentProvider"):PreloadAsync({ a }) end)
+            local ok, t = pcall(function() return animator:LoadAnimation(a) end)
+            if ok and t then
+                local okLen, len = pcall(function() return t.Length end)
+                if okLen and type(len) == "number" and len > 0 then validos = validos + 1 end
+                pcall(function() t:Destroy() end)
+            end
+        end
+    end
+    if validos == 0 then
+        Toast("esse id não é uma animação (bundle, asset privado ou não existe) — não mexi no personagem", false)
+        return false
+    end
 
     if not SilkPackOriginal then
         local okC, copia = pcall(function() return velho:Clone() end)
@@ -12579,11 +12629,10 @@ function SilkPackAplicar(id)
     end
 
     local novo = velho:Clone()
-    if not novo then Toast("não consegui copiar o Animate", false) return end
+    if not novo then Toast("não consegui copiar o Animate", false) return false end
 
     local alvo = {idle = true, walk = true, run = true}
-    local tudo = not (HackState and HackState.animPackTudo == false)
-    if tudo then
+    if not (HackState and HackState.animPackTudo == false) then
         alvo.jump, alvo.fall, alvo.climb, alvo.swim, alvo.swimidle = true, true, true, true, true
     end
 
@@ -12593,7 +12642,9 @@ function SilkPackAplicar(id)
             local pai = d.Parent and tostring(d.Parent.Name) or ""
             local nome = d.Name
             if nome == "Animation1" or nome == "Animation2" then nome = pai end
-            if alvo[tostring(nome):lower()] then
+            local base = tostring(nome):lower()
+            local asset = mapa[base]
+            if asset and alvo[base] then
                 pcall(function() d.AnimationId = asset end)
                 n = n + 1
             end
@@ -12601,12 +12652,34 @@ function SilkPackAplicar(id)
     end
     if n == 0 then
         Toast("esse Animate não tem os estados esperados", false)
-        return
+        return false
     end
 
     pcall(function() velho:Destroy() end)
     novo.Parent = char
-    Toast("pack aplicado em " .. n .. " estado(s) — anda/pula com ele e todo mundo vê", true)
+
+    -- rede de seguranca: se em 1.2s nada estiver tocando, devolve o original
+    task.delay(1.2, function()
+        local c2 = Morph.Char()
+        local h2 = c2 and c2:FindFirstChildOfClass("Humanoid")
+        local a2 = h2 and h2:FindFirstChildOfClass("Animator")
+        local tocando = false
+        if a2 then
+            pcall(function()
+                for _, t in ipairs(a2:GetPlayingAnimationTracks()) do
+                    local okLen, len = pcall(function() return t.Length end)
+                    if t.IsPlaying and okLen and type(len) == "number" and len > 0 then tocando = true end
+                end
+            end)
+        end
+        if not tocando then
+            SilkPackRestaurar()
+            Toast("o pack não carregou — voltei pro original", false)
+        end
+    end)
+
+    Toast("pack aplicado em " .. n .. " estado(s) — anda/pula com ele", true)
+    return true
 end
 
 function SilkPackRestaurar()
@@ -12625,6 +12698,68 @@ function SilkPackRestaurar()
     Toast("não tenho o original salvo (recarrega o personagem)", false)
 end
 
+-- Link de bundle (o que você colou) não é asset: /bundles/79 é o pacote inteiro.
+-- Consulta o catalogo, pega as animacoes de dentro e monta estado por estado.
+function SilkPackAplicarBundle(bundleId)
+    local body = SilkHttpGet("https://catalog.roblox.com/v1/bundles/" .. tostring(bundleId) .. "/details")
+    if not body then
+        Toast("esse executor não deixa consultar bundle — cola o ID de uma animação", false)
+        return
+    end
+    local ok, data = pcall(function() return game:GetService("HttpService"):JSONDecode(body) end)
+    if not ok or type(data) ~= "table" then
+        Toast("o bundle não respondeu", false)
+        return
+    end
+
+    local mapa, achou = {}, 0
+    for _, it in ipairs(data.items or {}) do
+        local nome = tostring(it.name or ""):lower()
+        local id = tonumber(it.id)
+        if id then
+            local asset = "rbxassetid://" .. id
+            if nome:find("swimidle") then mapa.swimidle = asset
+            elseif nome:find("swim") then mapa.swim = asset
+            elseif nome:find("idle") then mapa.idle = asset
+            elseif nome:find("walk") then mapa.walk = asset
+            elseif nome:find("run") then mapa.run = asset
+            elseif nome:find("jump") then mapa.jump = asset
+            elseif nome:find("fall") then mapa.fall = asset
+            elseif nome:find("climb") then mapa.climb = asset end
+            achou = achou + 1
+        end
+    end
+    if achou == 0 then
+        Toast("o bundle não trouxe animação nenhuma", false)
+        return
+    end
+
+    -- o que faltou vai no run (ou no idle), pra nao ficar estado sem animacao
+    local base = mapa.run or mapa.walk or mapa.idle
+    if base then
+        for _, k in ipairs({ "idle", "walk", "run", "jump", "fall", "climb", "swim", "swimidle" }) do
+            mapa[k] = mapa[k] or base
+        end
+    end
+    SilkPackSwap(mapa)
+end
+
+function SilkPackAplicar(id)
+    local bruto = tostring(id or "")
+    local bid = bruto:match("/bundles/(%d+)")
+    if bid then
+        SilkPackAplicarBundle(bid)
+        return
+    end
+    local asset = SilkAnimId(id)
+    if asset == "" then Toast("id vazio", false) return end
+    local mapa = {}
+    for _, k in ipairs({ "idle", "walk", "run", "jump", "fall", "climb", "swim", "swimidle" }) do
+        mapa[k] = asset
+    end
+    SilkPackSwap(mapa)
+end
+
 -- Antes daqui saia Humanoid:LoadAnimation + Play() cru: prioridade Core, sem
 -- preload e sem travar. Core perde ate pro idle do jogo (o idle e Movement),
 -- entao na pratica nao aparecia nem pra quem clicou. Agora tudo entra no mesmo
@@ -12640,7 +12775,7 @@ function SilkTocaAnim(nome, id, loopado)
         SilkPackAplicar(id)
         return
     end
-    local ok, msg = _playEmote(id, {looped = loopado})
+    local ok, msg = SilkPlayEmote(id, { looped = loopado })
     if not ok then
         Toast("nao deu: " .. tostring(msg), false)
         return
@@ -12656,11 +12791,11 @@ for _, animData in ipairs(customAnims) do
 end
 
 Section("Pack (parado / andando / pulando)")
-Note("Aqui a animação não toca por cima: ela entra no lugar do idle/walk/run/jump. Você anda e o personagem anda com ela, pula e ela toca no pulo. Replica pra quem estiver olhando igual o idle normal do jogo.", 52)
+Note("Aqui a animação não toca por cima: ela entra no lugar do idle/walk/run/jump. Você anda e o personagem anda com ela, pula e ela toca no pulo. Replica pra quem estiver olhando igual o idle normal do jogo. Aceita o ID da animação (o número que fica em rbxassetid) ou o link do bundle inteiro — nesse caso eu consulto o catálogo e separo cada parte (idle, walk, run, jump). O que NÃO é animação não entra: eu testo os IDs antes de encostar no seu personagem, então não tem mais corpo esticado.", 60)
 do
     local row = Row(46)
-    Label(row, "Animation ID", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.3, 0, 1, 0))
-    local packField = Field(row, UDim2.new(0.32, 0, 0.5, -15), UDim2.new(0.30, 0, 0, 30), "rbxassetid://...")
+    Label(row, "Anim / bundle", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.3, 0, 1, 0))
+    local packField = Field(row, UDim2.new(0.32, 0, 0.5, -15), UDim2.new(0.30, 0, 0, 30), "ID da animacao ou link do bundle")
     Button(row, "APLICAR", UDim2.new(0.63, 0, 0.5, -15), UDim2.fromOffset(74, 30), T.Accent, function()
         SilkPackAplicar(packField.Text)
     end)
@@ -12690,7 +12825,7 @@ Toggle("Stop All Animations", false, function(v)
                     if hum then
                         for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
                             -- com "travar" ligado, nao derruba a que voce escolheu
-                            if not (HackState.animLock and track == _activeEmote) then
+                            if not (HackState.animLock and track == SilkAnimAtiva) then
                                 track:Stop()
                             end
                         end
@@ -12746,7 +12881,7 @@ Toggle("Travar animação (o jogo não derruba)", false, function(v)
                 local tocando = false
                 pcall(function()
                     for _, t in ipairs(animator:GetPlayingAnimationTracks()) do
-                        if t == _activeEmote and t.IsPlaying then tocando = true end
+                        if t == SilkAnimAtiva and t.IsPlaying then tocando = true end
                     end
                 end)
                 if not tocando then
@@ -12758,7 +12893,7 @@ Toggle("Travar animação (o jogo não derruba)", false, function(v)
                         if HackState.animSpeed then
                             pcall(function() novo:AdjustSpeed(HackState.animSpeed) end)
                         end
-                        _activeEmote = novo
+                        SilkAnimAtiva = novo
                     end
                 end
             end
@@ -12768,9 +12903,9 @@ Toggle("Travar animação (o jogo não derruba)", false, function(v)
 end, "anim_lock")
 
 BtnRow("Parar animação atual", T.Card, function()
-    if _activeEmote then
-        pcall(function() _activeEmote:Stop() end)
-        _activeEmote = nil
+    if SilkAnimAtiva then
+        pcall(function() SilkAnimAtiva:Stop() end)
+        SilkAnimAtiva = nil
         SilkAnimDesejada = nil
         Toast("animação parada", true)
     else
