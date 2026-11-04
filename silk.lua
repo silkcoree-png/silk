@@ -7199,15 +7199,17 @@ end
 
 BtnRow("DIAGNOSTICO DA LINHA", T.Card, function()
     local n, vis = 0, 0
+    local sum = 0
     for _, p in pairs(VB.pairs) do
         n = n + 1
         if p.l and p.l.Visible then vis = vis + 1 end
+        sum = sum + (p.yoff or 0)
     end
     local cam = Workspace.CurrentCamera
-    local msg = ("bk=%s gui=%s on=%s pairs=%d visiveis=%d beats=%d cam=%s err=%s"):format(
+    local msg = ("bk=%s gui=%s on=%s pairs=%d visiveis=%d yoff=%.1f beats=%d cam=%s err=%s"):format(
         HAS_DRAWING and "drawing" or "frame",
         tostring(VBGui ~= nil and VBGui.Parent ~= nil),
-        tostring(VB.On), n, vis, SilkGuard.Beats,
+        tostring(VB.On), n, vis, (n > 0) and (sum / n) or 0, SilkGuard.Beats,
         tostring(cam ~= nil), tostring(stepErr or VBX.Err or "-"))
     Toast(msg, VB.On and vis > 0)
     pcall(function() print("[SilkCore Volei]", msg) end)
