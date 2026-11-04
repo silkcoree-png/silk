@@ -6355,6 +6355,7 @@ local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 4, Outline = 2, Alpha = 1, Dot = 5, ShowDot = true,
     pairs = {}, ballLine = nil, ballOl = nil, ballDot = nil, cache = nil, t = 0,
+    ForceFrame = false,
     Enemy = Color3.fromRGB(255, 60, 60),
     BallC = Color3.fromRGB(255, 214, 84),
     Dark  = Color3.fromRGB(0, 0, 0),
@@ -6401,40 +6402,83 @@ do
     VB.layer = layer
 end
 
--- Contorno escuro atrás da linha colorida: é isso que faz a linha aparecer
--- contra qualquer fundo. Sem ele, vermelho em parede vermelha some.
+-- ── backend do desenho ──────────────────────────────────────────────────────
+-- Drawing escreve direto no compositor do executor: mudar .From/.To não passa
+-- por layout nenhum, então acompanha o frame sem engasgo. Frame girado é o
+-- plano B — aparece em qualquer executor, mas cada escrita de Position/Size/
+-- Rotation dispara um passo de layout da interface, e é isso que fazia a linha
+-- andar aos pulos. Aqui os dois caminhos existem; o Drawing tem prioridade.
+local HAS_DRAWING = false
+do
+    if Drawing and type(Drawing.new) == "function" then
+        HAS_DRAWING = pcall(function()
+            local probe = Drawing.new("Line")
+            probe.Visible = false
+            probe:Remove()
+        end)
+    end
+end
+
 local function applyStyle(p)
-    local ol = VB.Thick + VB.Outline * 2
-    p.ol.AnchorPoint = Vector2.new(0.5, 0.5)
-    p.ol.Size        = UDim2.new(0, 0, 0, ol)
-    p.ol.BackgroundTransparency = 0.25
-    p.l.AnchorPoint  = Vector2.new(0.5, 0.5)
-    p.l.Size         = UDim2.new(0, 0, 0, VB.Thick)
-    p.l.BackgroundTransparency  = 1 - VB.Alpha
-    p.d.AnchorPoint  = Vector2.new(0.5, 0.5)
-    p.d.Size         = UDim2.fromOffset(VB.Dot * 2, VB.Dot * 2)
-    p.d.BackgroundTransparency  = 1 - VB.Alpha
+    local olT = VB.Thick + VB.Outline * 2
+    if p.kind == "drawing" then
+        p.ol.Thickness, p.ol.Transparency = olT, 0.25
+        p.l.Thickness,  p.l.Transparency  = VB.Thick, 1 - VB.Alpha
+        p.d.Radius, p.d.Thickness = VB.Dot, 2
+        p.d.Transparency = 1 - VB.Alpha
+    else
+        p.ol.AnchorPoint = Vector2.new(0.5, 0.5)
+        p.ol.Size        = UDim2.new(0, 0, 0, olT)
+        p.ol.BackgroundTransparency = 0.25
+        p.l.AnchorPoint  = Vector2.new(0.5, 0.5)
+        p.l.Size         = UDim2.new(0, 0, 0, VB.Thick)
+        p.l.BackgroundTransparency  = 1 - VB.Alpha
+        p.d.AnchorPoint  = Vector2.new(0.5, 0.5)
+        p.d.Size         = UDim2.fromOffset(VB.Dot * 2, VB.Dot * 2)
+        p.d.BackgroundTransparency  = 1 - VB.Alpha
+        -- altura guardada no par: ler Size.Y.Offset a cada quadro é uma travessia
+        -- de reflect por jogador, por quadro, à toa.
+        p.olH, p.lH = olT, VB.Thick
+        p.last = nil
+    end
 end
 
 local function paint(p)
-    p.l.BackgroundColor3 = VB.Enemy
-    p.d.BackgroundColor3 = VB.Enemy
+    if p.kind == "drawing" then
+        p.l.Color, p.d.Color = VB.Enemy, VB.Enemy
+    else
+        p.l.BackgroundColor3, p.d.BackgroundColor3 = VB.Enemy, VB.Enemy
+    end
 end
 
 local function mkpair()
+    if HAS_DRAWING and not VB.ForceFrame then
+        local ol = Drawing.new("Line")
+        local l  = Drawing.new("Line")
+        local d  = Drawing.new("Circle")
+        ol.Color, ol.Visible = VB.Dark, false
+        l.Visible, d.Visible = false, false
+        d.Filled, d.NumSides = true, 24
+        local p = { kind = "drawing", ol = ol, l = l, d = d }
+        applyStyle(p); paint(p)
+        return p
+    end
     local ol = New("Frame", {BackgroundColor3=VB.Dark,  BorderSizePixel=0, Visible=false}, VB.layer)
     local l  = New("Frame", {BackgroundColor3=VB.Enemy, BorderSizePixel=0, Visible=false}, VB.layer)
     local d  = New("Frame", {BackgroundColor3=VB.Enemy, BorderSizePixel=0, Visible=false}, VB.layer)
     Round(d, 999)
-    local p = { ol = ol, l = l, d = d }
-    applyStyle(p)
-    paint(p)
+    local p = { kind = "frame", ol = ol, l = l, d = d }
+    applyStyle(p); paint(p)
     return p
 end
 
 local function killpair(p)
     for _, k in ipairs({"ol", "l", "d"}) do
-        if p[k] and p[k].Parent then pcall(function() p[k]:Destroy() end) end
+        local o = p[k]
+        if o then
+            if p.kind == "drawing" then pcall(function() o:Remove() end)
+            else pcall(function() o:Destroy() end) end
+        end
     end
 end
 
@@ -6444,8 +6488,12 @@ local function restyleAll()
     end
 end
 
+-- câmera resolvida uma vez por quadro: Workspace.CurrentCamera é travessia de
+-- serviço, e proj é chamado 2x por jogador e 2x por segmento de trajetória.
+local CAM = nil
+
 local function proj(pos)
-    local cam = Workspace.CurrentCamera
+    local cam = CAM or Workspace.CurrentCamera
     if not cam then return nil end
     local v = cam:WorldToViewportPoint(pos)
     -- O segundo retorno do Roblox (onScreen) é falso sempre que o ponto sai do
@@ -6791,12 +6839,32 @@ function VBX.step(ball)
 end
 
 
+-- Roda fora do passo de render: criar Instance (ou Drawing) dentro do quadro é
+-- o que fazia a interface engasgar. Aqui só a lista de pares é mantida, e a
+-- altura da origem é medida uma vez por personagem.
 local function sync()
     local seen = {}
+    local now = os.clock()
     for _, plr in ipairs(Players:GetPlayers()) do
         if plr ~= LocalPlayer then
             seen[plr] = true
-            if not VB.pairs[plr] then VB.pairs[plr] = mkpair() end
+            local p = VB.pairs[plr]
+            if not p then p = mkpair(); VB.pairs[plr] = p end
+            local char = plr.Character
+            if char and not char.Parent then char = nil end
+            if char ~= p.char or (char and now - (p.yoffAt or 0) > 4) then
+                p.char, p.yoffAt, p.yoff, p.dir = char, now, 0, nil
+                if char then
+                    -- Origem = centro do corpo. O HumanoidRootPart deste jogo fica
+                    -- no chão, e era por isso que a linha nascia no pé. A caixa do
+                    -- modelo não depende de nome de parte nem do rig que ele usa.
+                    local ok, box = pcall(function() return char:GetBoundingBox() end)
+                    local root = char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart
+                    if ok and box and root then
+                        p.yoff = math.clamp(box.Position.Y - root.Position.Y, -2, 7)
+                    end
+                end
+            end
         end
     end
     for plr, p in pairs(VB.pairs) do
@@ -6808,7 +6876,7 @@ local stepErr = nil
 
 local function stepRaw(dt)
     SilkGuard.Beats = SilkGuard.Beats + 1
-    sync()
+    CAM = Workspace.CurrentCamera
 
     VB.t = VB.t + dt
     if VB.Predict or VB.t > 2 then VB.t = 0; VB.cache = findBall() end
@@ -6817,39 +6885,62 @@ local function stepRaw(dt)
     for plr, p in pairs(VB.pairs) do
         local char = plr.Character
         if char and not char.Parent then char = nil end
-        local head = char and (char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart"))
+        local root = char and (char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart or char:FindFirstChild("Head"))
         -- O jogo usa Team real do Roblox (Red/Purple/White/Black/Orange Team),
         -- então comparar o objeto Team é exato. Sem time (lobby), mostra todos.
         local ally = VB.OnlyEnemy and myTeam ~= nil and plr.Team == myTeam
-        if VB.On and head and not ally then
-            local o = head.Position
-            local a = proj(o)
-            local b = proj(o + lookVec(char, head) * VB.Len)
-            if a and b then
-                -- Frame girado em torno do ponto médio: posição no meio, ângulo
-                -- do vetor, comprimento na largura. Assim a ponta cai exatamente
-                -- em b, sem depender de Drawing.
-                local dx, dy = b.X - a.X, b.Y - a.Y
-                local len = math.sqrt(dx * dx + dy * dy)
-                local mid = (a + b) * 0.5
-                local ang = math.deg(math.atan2(dy, dx))
-                p.ol.Position, p.ol.Rotation, p.ol.Visible =
-                    UDim2.fromOffset(mid.X, mid.Y), ang, true
-                p.ol.Size = UDim2.new(0, len, 0, p.ol.Size.Y.Offset)
-                p.l.Position, p.l.Rotation, p.l.Visible =
-                    UDim2.fromOffset(mid.X, mid.Y), ang, true
-                p.l.Size = UDim2.new(0, len, 0, p.l.Size.Y.Offset)
-                p.d.Position = UDim2.fromOffset(b.X, b.Y)
-                p.d.Visible  = VB.ShowDot
+        if VB.On and root and not ally then
+            local o = root.Position + Vector3.new(0, p.yoff or 0, 0)
+            -- A direção sai do Neck, que replica a ~10-20 Hz e NÃO é interpolado
+            -- pelo cliente — era daí que vinha o pulo quadro a quadro. Suaviza
+            -- com lerp dependente de dt: mesma velocidade em qualquer FPS.
+            local want = lookVec(char, root)
+            local d = p.dir
+            if not d then
+                p.dir = want
             else
-                p.ol.Visible, p.l.Visible, p.d.Visible = false, false, false
+                local nd = d:Lerp(want, math.clamp(dt * 14, 0, 1))
+                p.dir = (nd.Magnitude > 0.05) and nd.Unit or want
+            end
+            local a = proj(o)
+            local b = proj(o + p.dir * VB.Len)
+            if a and b then
+                if p.kind == "drawing" then
+                    p.ol.From, p.ol.To, p.ol.Visible = a, b, true
+                    p.l.From,  p.l.To,  p.l.Visible  = a, b, true
+                    p.d.Position, p.d.Visible = b, VB.ShowDot
+                else
+                    -- Cada escrita em Frame dispara layout de interface: só grava
+                    -- o que mudou de verdade. Abaixo de meio pixel e meio grau o
+                    -- olho não vê — e era esse excesso que travava a linha.
+                    local dx, dy = b.X - a.X, b.Y - a.Y
+                    local len = math.sqrt(dx * dx + dy * dy)
+                    local mid = (a + b) * 0.5
+                    local ang = math.deg(math.atan2(dy, dx))
+                    local L = p.last
+                    if not L or math.abs(L.x - mid.X) > 0.5 or math.abs(L.y - mid.Y) > 0.5
+                       or math.abs(L.len - len) > 0.5 or math.abs(L.ang - ang) > 0.4 then
+                        p.ol.Position = UDim2.fromOffset(mid.X, mid.Y)
+                        p.ol.Size     = UDim2.new(0, len, 0, p.olH)
+                        p.ol.Rotation = ang
+                        p.l.Position  = UDim2.fromOffset(mid.X, mid.Y)
+                        p.l.Size      = UDim2.new(0, len, 0, p.lH)
+                        p.l.Rotation  = ang
+                        p.last = {x = mid.X, y = mid.Y, len = len, ang = ang}
+                    end
+                    p.d.Position = UDim2.fromOffset(b.X, b.Y)
+                    if not p.ol.Visible then p.ol.Visible, p.l.Visible = true, true end
+                    if p.d.Visible ~= VB.ShowDot then p.d.Visible = VB.ShowDot end
+                end
+            else
+                if p.ol.Visible then p.ol.Visible, p.l.Visible, p.d.Visible = false, false, false end
             end
         else
-            p.ol.Visible, p.l.Visible, p.d.Visible = false, false, false
+            if p.ol.Visible then p.ol.Visible, p.l.Visible, p.d.Visible = false, false, false end
         end
     end
 
-    if Drawing then
+    if HAS_DRAWING and Drawing then
     if not VB.ballLine then
         VB.ballOl   = Drawing.new("Line")
         VB.ballLine = Drawing.new("Line")
@@ -6903,6 +6994,24 @@ end
 -- vigia acabava guardando nil. Era esse nil que matava a linha de mira no
 -- primeiro travamento do frame.
 VOL_STEP = step
+
+-- lista de pares mantida fora do quadro de render
+pcall(function() Players.PlayerAdded:Connect(function() task.spawn(sync) end) end)
+pcall(function() Players.PlayerRemoving:Connect(function() task.spawn(sync) end) end)
+task.spawn(function()
+    while VBGui and VBGui.Parent do
+        local ok, err = pcall(sync)
+        if not ok and not stepErr then stepErr = "sync: " .. tostring(err) end
+        task.wait(0.35)
+    end
+end)
+
+-- troca de backend a quente: derruba os pares e remonta no outro caminho
+local function rebuild()
+    for plr, p in pairs(VB.pairs) do killpair(p); VB.pairs[plr] = nil end
+    local ok, err = pcall(sync)
+    if not ok then stepErr = "rebuild: " .. tostring(err) end
+end
 
 local COLORS = {
     {n = "vermelho", c = Color3.fromRGB(255, 60, 60)},
@@ -6981,6 +7090,7 @@ VB.OnlyEnemy = Persist.Get("volley:Volley enemy only", true) ~= false
 VB.Ball      = Persist.Get("volley:Volley ball trajec", true) ~= false
 VB.ShowDot   = Persist.Get("volley:Volley dot on", true) ~= false
 VB.Predict   = Persist.Get("volley:Volley predict", false) == true
+VB.ForceFrame = Persist.Get("volley:Volley use drawing", true) == false
 
 Slider("Alcance da previsao", 1, 10, 8, "%d s", function(v)
     VBX.Span = v
@@ -6999,7 +7109,15 @@ end
 
 Note("Duas fases. Mirando o saque, a marca usa o destino que o proprio jogo ja calculou (attachment TrajectoryFinish no Terrain) e escreve MIRA. Com a bola no ar, a aceleracao e medida dela quadro a quadro e a queda sai da equacao exata de parabola que o jogo usa. Rede no caminho corta o arco e pinta de ambar. A contagem e o tempo real ate o impacto. Tudo leitura: nada sai daqui.", 76)
 
-Note("A linha sai da cabeça do adversário na direção em que ele está olhando. O Roblox replica a rotação do pescoço, então dá pra ler a intenção de ataque antes do toque. É desenho de tela: nada é criado no jogo, nada replica pro servidor.", 58)
+Note("A linha sai do centro do corpo do adversário — medida pela caixa do modelo, não pelo nome da parte, porque neste jogo o HumanoidRootPart fica no chão — na direção em que ele está olhando. O Roblox replica a rotação do pescoço, então dá pra ler a intenção de ataque antes do toque. A direção é suavizada por lerp: o pescoço replica a 10-20 Hz e sem isso a linha andava aos pulos. É desenho de tela: nada é criado no jogo, nada replica pro servidor.", 58)
+
+if HAS_DRAWING then
+    Toggle("Desenho por Drawing (mais liso)", true, function(v)
+        VB.ForceFrame = not v
+        rebuild()
+        Toast(v and "desenho: Drawing" or "desenho: Frame de GUI", true)
+    end, "Volley use drawing")
+end
 
 BtnRow("DIAGNOSTICO DA LINHA", T.Card, function()
     local n, vis = 0, 0
@@ -7008,9 +7126,9 @@ BtnRow("DIAGNOSTICO DA LINHA", T.Card, function()
         if p.l and p.l.Visible then vis = vis + 1 end
     end
     local cam = Workspace.CurrentCamera
-    local msg = ("gui=%s layer=%s on=%s pairs=%d visiveis=%d beats=%d cam=%s err=%s"):format(
+    local msg = ("bk=%s gui=%s on=%s pairs=%d visiveis=%d beats=%d cam=%s err=%s"):format(
+        HAS_DRAWING and "drawing" or "frame",
         tostring(VBGui ~= nil and VBGui.Parent ~= nil),
-        tostring(VB.layer ~= nil and VB.layer.Parent ~= nil),
         tostring(VB.On), n, vis, SilkGuard.Beats,
         tostring(cam ~= nil), tostring(stepErr or VBX.Err or "-"))
     Toast(msg, VB.On and vis > 0)
