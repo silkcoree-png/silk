@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.2 · fix07  (Roblox / executor, Luau)
+    SILK CORE v2.3 · fix08  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2767,7 +2767,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.2 · fix07"
+SILK_VER = "v2.3 · fix08"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -4324,6 +4324,7 @@ Toggle("Pernas retas", State.Straight, function(v)
 end, "Straight legs")
 
 Section("Cores do corpo")
+Note("Pinta as partes REAIS do seu personagem. O Roblox não replica cor de cliente, então quem vê é só você.", 40)
 do
     local ready = false
     local TARGET_SETS = {
@@ -5135,25 +5136,34 @@ local function _playEmote(id)
     local char = Morph.Char()
     local hum  = char and char:FindFirstChildOfClass("Humanoid")
     if not hum then return false, "sem personagem" end
+
+    -- O Animator TEM que ser o do servidor. Animator criado aqui no cliente não
+    -- replica: o emote "toca" so na sua tela (e muitas vezes nem toca). Espera o
+    -- do servidor em vez de criar um novo.
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then
-        animator = Instance.new("Animator")
-        animator.Parent = hum
+        animator = hum:WaitForChild("Animator", 3)
     end
+    if not animator then return false, "sem Animator (recarrega o script)" end
 
     _stopEmotes(animator)
 
     local anim = Instance.new("Animation")
     anim.AnimationId = "rbxassetid://" .. tostring(id)
 
+    -- Sem preload o Play sai antes do asset chegar e nao toca nada. Preload e o
+    -- motivo numero 1 de emote "nao funcionar" sem erro nenhum.
+    pcall(function()
+        game:GetService("ContentProvider"):PreloadAsync({ anim })
+    end)
+
     local ok, track = pcall(function() return animator:LoadAnimation(anim) end)
     if not ok or not track then return false, "falha ao carregar emote" end
 
-    -- Action4 ganha de qualquer animação que o jogo esteja rodando. Looped=false
-    -- porque emote é gesto, não estado — e começar/terminar deixa o servidor
-    -- replicar a faixa inteira pros outros players.
+    -- Action4 ganha de qualquer animacao do jogo. Looped porque emote de catálogo
+    -- e ciclado: com Looped=false ele some no meio do gesto e parece quebrado.
     pcall(function() track.Priority = Enum.AnimationPriority.Action4 end)
-    pcall(function() track.Looped = false end)
+    pcall(function() track.Looped = true end)
     pcall(function() track:Play(0.1) end)
     _activeEmote = track
 
@@ -5161,6 +5171,13 @@ local function _playEmote(id)
         track.Stopped:Connect(function()
             if _activeEmote == track then _activeEmote = nil end
         end)
+    end)
+
+    -- Confere de verdade se tocou, em vez de dizer "tocando" e nao ter tocado nada.
+    task.delay(0.4, function()
+        if _activeEmote == track and not track.IsPlaying then
+            Toast("esse emote foi bloqueado (anima so no dono ou nao existe)", false)
+        end
     end)
 
     return true, "emote tocando"
@@ -6602,7 +6619,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE07"
+local BUILD = "BE08"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -7886,7 +7903,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.2 · fix07  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.3 · fix08  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -8138,7 +8155,7 @@ function runLoader(onDone)
     end
     local corners = {
         {"SILK CORE // BOOT", UDim2.fromOffset(20, 16), Enum.TextXAlignment.Left},
-        {"v2.2", UDim2.new(1, -220, 0, 16), Enum.TextXAlignment.Right},
+        {"v2.3", UDim2.new(1, -220, 0, 16), Enum.TextXAlignment.Right},
         {"executor: " .. execName, UDim2.new(0, 20, 1, -30), Enum.TextXAlignment.Left},
         {"place " .. tostring(game.PlaceId), UDim2.new(1, -220, 1, -30), Enum.TextXAlignment.Right},
     }
@@ -11230,7 +11247,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.2 fix07", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.3 fix08", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11486,7 +11503,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.2 fix07 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.3 fix08 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11670,7 +11687,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.2 · fix07", 48)
+Note("SILK CORE v2.3 · fix08", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -13592,6 +13609,8 @@ end, "exh_edgejump")
 -- Visual estendido
 Section("Visual Estendido")
 
+Note("O Roblox só replica do cliente: física (posição, giro, velocidade) e animação do SEU personagem, mais peças SOLTAS que você controla. Cor e material são propriedade de aparência: mudam só na sua tela. Isso aqui embaixo é visual seu.", 74)
+
 Toggle("Rainbow Character", false, function(v)
     HackState.rainbowChar = v
     if v then
@@ -13734,6 +13753,7 @@ local ND = {
     bob = 0,           -- sobe/desce o conjunto
     fps = 30,          -- gravacoes de CFrame por segundo
     maxParts = 120,
+    reach = 300,       -- alcance da busca (studs); antes era 80 e nao pegava nada do mapa
     anchored = false,  -- incluir pecas presas no mapa
     follow = true,     -- forma virada pra camera
     closed = true,     -- fechar o desenho
@@ -13742,7 +13762,8 @@ local ND = {
     acc = 0,
     conn = nil,
     ghosts = {},       -- pecas criadas por mim (so eu vejo)
-    create = true,     -- completar a forma com pecas proprias
+    create = false,    -- completar a forma com pecas proprias (SOMENTE VOCE VE)
+    colide = true,     -- pecas empurram quem encostar
     want = 48,         -- quantas pecas a forma deve ter
 }
 HackState.ndOrbital = ND
@@ -13754,7 +13775,7 @@ local ndClearGhosts, ndMakeGhosts, ndOnlyOwn
 local ndStep, ndStart, ndCount
 
 Section("Orbital de Peças")
-Note("Puxa as peças soltas depois do desastre e monta a forma escolhida. Peças presas entram se você liberar. O que faltar ele cria — essas só você vê.", 66)
+Note("Puxa as peças SOLTAS do mapa no alcance que você escolher e gira elas em volta em alta velocidade. Peça solta o jogo deixa você empurrar: TODO MUNDO vê, e quem encostar é arremessado (com o FallDamage do jogo isso mata). Peça presa (ancorada) e peça que eu crio só aparecem pra você — o Roblox não replica criação de cliente.", 92)
 
 -- ------------------------------------------------------------------ utilidade
 ndRoot = function()
@@ -13781,11 +13802,18 @@ end
 
 -- busca por caixa em volta do personagem (OverlapParams; Region3 como reserva)
 ndQuery = function(center, size)
-    if Workspace.GetPartBoundsInBox and OverlapParams then
-        local p = OverlapParams.new()
+    local p = nil
+    if OverlapParams then
+        p = OverlapParams.new()
         p.FilterType = Enum.RaycastFilterType.Exclude
         p.FilterDescendantsInstances = { LocalPlayer.Character }
         p.MaxParts = 0
+    end
+    -- raio e melhor que caixa: devolve so o que esta perto de verdade
+    if p and Workspace.GetPartBoundsInRadius then
+        return Workspace:GetPartBoundsInRadius(center, size.X / 2, p)
+    end
+    if p and Workspace.GetPartBoundsInBox then
         return Workspace:GetPartBoundsInBox(CFrame.new(center), size, p)
     end
     local r3 = Region3.new(center - size / 2, center + size / 2)
@@ -13826,7 +13854,7 @@ end
 ndCollect = function()
     local root = ndRoot()
     local center = root and root.Position or Vector3.zero
-    local reach = math.max(80, ND.radius * 4)
+    local reach = math.max(60, ND.reach or 300)
     local found = ndQuery(center, Vector3.new(reach, reach, reach))
 
     local pick = {}
@@ -13835,11 +13863,23 @@ ndCollect = function()
             pick[#pick + 1] = part
         end
     end
+    -- Peça cujo dono de rede é você = o servidor aceita seu movimento e os outros
+    -- players veem. Peça de outro dono você move só na sua tela. Então as suas vêm
+    -- primeiro, e a distância desempata.
+    local function dono(p)
+        local ok, o = pcall(function() return p:GetNetworkOwner() end)
+        return (ok and o) or nil
+    end
     table.sort(pick, function(a, b)
+        local am = (dono(a) == LocalPlayer) and 0 or 1
+        local bm = (dono(b) == LocalPlayer) and 0 or 1
+        if am ~= bm then return am < bm end
         return (a.Position - center).Magnitude < (b.Position - center).Magnitude
     end)
 
     local list = {}
+    local meus = 0
+    local mapa = 0
     for i = 1, math.min(#pick, ND.maxParts) do
         local part = pick[i]
         if not ND.orig[part] then
@@ -13850,8 +13890,9 @@ ndCollect = function()
                 massless = part.Massless,
             }
         end
-        part.CanCollide = false
-        part.Massless = true
+        if dono(part) == LocalPlayer then meus = meus + 1 end
+        part.CanCollide = (ND.colide ~= false)
+        part.Massless = false
         list[i] = part
     end
     if ND.create and #list < ND.want then
@@ -13859,6 +13900,8 @@ ndCollect = function()
         for i = 1, #g do list[#list + 1] = g[i] end
     end
     ND.parts = list
+    ND.lastMap = mapa
+    ND.lastDono = meus
     ndRebuild()
     return #list
 end
@@ -14103,11 +14146,15 @@ end
 BtnRow("Puxar Peças do Mapa", T.Accent, function()
     ndRelease()
     local got = ndCollect()
+    local mapa = ND.lastMap or 0
+    local minhas = got - mapa
     if got > 0 then
         ndStart()
-        Toast("orbital ligado com " .. got .. " peças", true)
+        Toast(("orbital: %d do mapa + %d minhas (alcance %d)")
+            :format(mapa, minhas, math.floor(ND.reach or 300)), true)
     else
-        Toast("nenhuma peça encontrada por perto", false)
+        Toast(("nada solto em %d studs - aumenta o alcance ou liga as pecas presas")
+            :format(math.floor(ND.reach or 300)), false)
     end
 end)
 
@@ -14166,9 +14213,14 @@ Slider("Peças na forma", 8, 200, 48, "%.0f", function(v)
     ndRebuild()
 end, "nd_want")
 
-Toggle("Criar peças se faltar (só você vê)", true, function(v)
+Toggle("Completar com peças minhas (SÓ VOCÊ VÊ)", false, function(v)
     ND.create = v
 end, "nd_criar")
+
+Toggle("Peças empurram quem encostar (colisão)", true, function(v)
+    ND.colide = v
+    Toast(v and "colisao ligada: peca jogada arremessa quem encostar" or "colisao desligada", v)
+end, "nd_colide")
 
 Slider("Raio da forma", 4, 40, 14, "%.0f studs", function(v)
     ND.radius = v
@@ -14195,13 +14247,18 @@ Slider("Maximo de pecas", 20, 400, 120, "%.0f", function(v)
     ND.maxParts = math.floor(v)
 end, "nd_max")
 
+Slider("Alcance do puxão", 60, 800, 300, "%.0f studs", function(v)
+    ND.reach = math.floor(v)
+    Toast("alcance: " .. math.floor(v) .. " studs", true)
+end, "nd_reach")
+
 Slider("Gravações por segundo", 10, 60, 30, "%.0f/s", function(v)
     ND.fps = math.floor(v)
 end, "nd_fps")
 
-Toggle("Incluir peças presas (anchored)", false, function(v)
+Toggle("Incluir peças presas do mapa (mexe só na sua tela)", false, function(v)
     ND.anchored = v
-    Toast("peças presas " .. (v and "liberadas" or "ignoradas"), v)
+    Toast(v and "peças presas: só você vê mexer (o Roblox não deixa replicar)" or "peças presas ignoradas", v)
 end, "nd_anchored")
 
 Toggle("Forma virada pra câmera", true, function(v)
@@ -15029,10 +15086,266 @@ CurTab = Tab("Fling", 0, false)
 Persist.Scope = "fling"
 
 Section("Voadora Universal R15")
-Note("Voadora por fisica de braco, para rig R15.", 52)
+Note("Motor novo: empurra por fisica no corpo inteiro. Nao destroi as juntas do rig, entao nada quebra quando voce para.", 60)
+
+-- ==========================================================================
+-- FLING: motor proprio + botoes na tela + teclas escolhidas por voce
+-- Fica dentro de funcao de proposito: o chunk principal bateu no limite de 200
+-- registradores do Luau, e local dentro de funcao nao gasta registro do chunk.
+-- ==========================================================================
+local function flnBuild()
+local FLN = {
+    modo = "soco",
+    poder = 500,
+    ocupado = false,
+    hud = nil,
+    hudOn = true,
+    teclas = {},
+}
+
+local function flCorpo()
+    local c = LocalPlayer.Character
+    if not c then return nil end
+    local hum = c:FindFirstChildOfClass("Humanoid")
+    local hrp = c:FindFirstChild("HumanoidRootPart")
+    if not hum or not hrp then return nil end
+    return c, hum, hrp
+end
+
+local function flPara()
+    local c, hum, hrp = flCorpo()
+    if hrp then
+        pcall(function()
+            hrp.AssemblyLinearVelocity = Vector3.zero
+            hrp.AssemblyAngularVelocity = Vector3.zero
+            hrp.CustomPhysicalProperties = nil
+        end)
+    end
+    if hum then
+        pcall(function() hum:ChangeState(Enum.HumanoidStateType.GettingUp) end)
+    end
+    FLN.ocupado = false
+end
+
+local function flPerto(alcance)
+    local c, hum, hrp = flCorpo()
+    if not hrp then return nil, math.huge end
+    local melhor, melhorD = nil, alcance or math.huge
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character then
+            local tr = plr.Character:FindFirstChild("HumanoidRootPart")
+            local th = plr.Character:FindFirstChildOfClass("Humanoid")
+            if tr and th and th.Health > 0 then
+                local d = (tr.Position - hrp.Position).Magnitude
+                if d < melhorD then melhor, melhorD = plr, d end
+            end
+        end
+    end
+    return melhor, melhorD
+end
+
+local function flBate(alvo, modo, poder)
+    local c, hum, hrp = flCorpo()
+    if not hrp then Toast("sem personagem", false) return end
+    alvo = alvo or flPerto(220)
+    if not alvo or not alvo.Character then Toast("nenhum alvo por perto", false) return end
+    local tr = alvo.Character:FindFirstChild("HumanoidRootPart")
+    local th = alvo.Character:FindFirstChildOfClass("Humanoid")
+    if not tr or not th then Toast("alvo sem corpo", false) return end
+
+    modo = modo or FLN.modo
+    poder = poder or FLN.poder
+
+    local dif = tr.Position - hrp.Position
+    local plano = Vector3.new(dif.X, 0, dif.Z)
+    local dir = (plano.Magnitude > 0.1) and plano.Unit or Vector3.new(0, 0, -1)
+
+    local vel, gir
+    if modo == "chute" then
+        vel = (dir + Vector3.new(0, 0.35, 0)) * poder * 0.7
+        gir = Vector3.new(poder * 5, 0, 0)
+    elseif modo == "voadora" then
+        vel = (dir + Vector3.new(0, 0.5, 0)) * poder * 0.9
+        gir = Vector3.new(poder * 4, poder * 4, poder * 4)
+    else
+        vel = dir * poder * 0.7
+        gir = Vector3.new(0, poder * 6, 0)
+    end
+
+    if HackState.flingAim ~= false then
+        pcall(function()
+            hrp.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(tr.Position.X, hrp.Position.Y, tr.Position.Z))
+        end)
+    end
+    -- solta o humanoid pra fisica: sem isso ele freia a velocidade no primeiro frame
+    pcall(function() hum:ChangeState(Enum.HumanoidStateType.Physics) end)
+    pcall(function() hrp.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0, 0, 1, 1) end)
+
+    FLN.ocupado = true
+    Toast("fling " .. modo .. " em " .. alvo.Name, true)
+
+    task.spawn(function()
+        local t0 = tick()
+        while (tick() - t0) < 0.5 do
+            local cc, hh, rr = flCorpo()
+            if not rr then break end
+            pcall(function()
+                rr.AssemblyLinearVelocity = vel
+                rr.AssemblyAngularVelocity = gir
+            end)
+            task.wait()
+        end
+        flPara()
+    end)
+end
+
+-- escolher a tecla: aperta o botao e a proxima tecla que voce tocar vira o bind
+local function flTecla(qual, chip)
+    Toast("aperte a tecla que voce quer usar", true)
+    local conn
+    conn = UserInputService.InputBegan:Connect(function(input, processado)
+        if processado then return end
+        if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
+        local k = input.KeyCode
+        if k == Enum.KeyCode.Unknown then return end
+        if conn then conn:Disconnect() end
+        FLN.teclas[qual] = k
+        if Persist.Set then pcall(function() Persist.Set("fling:tecla:" .. qual, k.Name) end) end
+        if chip then chip.Text = k.Name end
+        Toast("tecla de " .. qual .. ": " .. k.Name, true)
+    end)
+end
+
+-- barra na tela, fora do menu (continua aparecendo com o menu fechado)
+local function flHud()
+    if FLN.hud then return FLN.hud end
+    local sg = New("ScreenGui", {
+        Name = "SilkcoreFling", ResetOnSpawn = false, IgnoreGuiInset = true,
+        DisplayOrder = 40, ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+    }, guiParent)
+    local box = New("Frame", {
+        Size = UDim2.fromOffset(200, 134), Position = UDim2.new(1, -216, 0.5, -67),
+        BackgroundColor3 = T.Panel, BackgroundTransparency = 0.06, BorderSizePixel = 0,
+    }, sg)
+    Round(box, 10)
+    Stroke(box, T.Stroke, 1)
+    local topo = New("Frame", {
+        Size = UDim2.new(1, 0, 0, 26), BackgroundColor3 = T.Card, BorderSizePixel = 0,
+    }, box)
+    Label(topo, "FLING", 11, T.Accent, F.Bold, Enum.TextXAlignment.Left, UDim2.fromOffset(10, 6), UDim2.new(0.5, 0, 0, 14))
+    local chip = Label(topo, "sem tecla", 10, T.Faint, F.Mono, Enum.TextXAlignment.Right, UDim2.new(0.5, 0, 6), UDim2.new(0.5, -12, 0, 14))
+
+    do -- arrastar pela barra de cima
+        local arrastando, ini, base = false, nil, nil
+        topo.InputBegan:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                arrastando, ini, base = true, i.Position, box.Position
+                i.Changed:Connect(function()
+                    if i.UserInputState == Enum.UserInputState.End then arrastando = false end
+                end)
+            end
+        end)
+        topo.InputChanged:Connect(function(i)
+            if arrastando and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+                local d = i.Position - ini
+                box.Position = UDim2.new(base.X.Scale, base.X.Offset + d.X, base.Y.Scale, base.Y.Offset + d.Y)
+            end
+        end)
+    end
+
+    Button(box, "FLING", UDim2.fromOffset(10, 32), UDim2.fromOffset(88, 28), T.Accent, function()
+        flBate(nil, FLN.modo)
+    end)
+    Button(box, "SOCO", UDim2.fromOffset(102, 32), UDim2.fromOffset(88, 28), T.Card2, function()
+        FLN.modo = "soco"
+        flBate(nil, "soco")
+    end)
+    Button(box, "CHUTE", UDim2.fromOffset(10, 66), UDim2.fromOffset(88, 28), T.Card2, function()
+        FLN.modo = "chute"
+        flBate(nil, "chute")
+    end)
+    Button(box, "PARAR", UDim2.fromOffset(102, 66), UDim2.fromOffset(88, 28), T.Bad, function()
+        flPara()
+        Toast("fling parado", true)
+    end)
+    Label(box, "arrasta pela barra de cima", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+        UDim2.fromOffset(10, 100), UDim2.new(1, -20, 0, 12))
+
+    FLN.hud = box
+    FLN.hudChip = chip
+    return box
+end
+
+-- ------------------------------------------------------ botoes + teclas na tela
+BtnRow("Mostrar / Esconder os botoes na tela", T.Accent, function()
+    FLN.hudOn = not FLN.hudOn
+    flHud().Visible = FLN.hudOn
+    Toast("botoes na tela: " .. (FLN.hudOn and "ligados" or "desligados"), true)
+end)
+
+Note("A barra fica fora do menu: continua na tela com o menu fechado. Arrasta ela pela barra de cima.", 54)
+
+do
+    local defs = {
+        { id = "fling", nome = "FLING no mais proximo", dica = "aciona o modo escolhido" },
+        { id = "soco",  nome = "SOCO", dica = "empurrao frontal" },
+        { id = "chute", nome = "CHUTE", dica = "empurrao com subida" },
+        { id = "hud",   nome = "MOSTRAR/ESCONDER botoes", dica = "liga e desliga a barra" },
+    }
+    for _, d in ipairs(defs) do
+        local row = Row(46)
+        Label(row, d.nome, 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.5, 0, 0, 16))
+        Label(row, d.dica, 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 18), UDim2.new(0.5, 0, 0, 14))
+        local chip = Label(row, "nenhuma", 11, T.Accent, F.Mono, Enum.TextXAlignment.Center,
+            UDim2.new(1, -150, 0.5, -11), UDim2.fromOffset(72, 22))
+        Button(row, "ESCOLHER", UDim2.new(1, -74, 0.5, -11), UDim2.fromOffset(62, 22), T.Card2, function()
+            flTecla(d.id, chip)
+        end)
+        local salvo = Persist.Get("fling:tecla:" .. d.id, nil)
+        if type(salvo) == "string" and Enum.KeyCode[salvo] then
+            FLN.teclas[d.id] = Enum.KeyCode[salvo]
+            chip.Text = salvo
+        end
+    end
+end
+
+-- teclas funcionam com o menu fechado
+UserInputService.InputBegan:Connect(Safe(function(input, processado)
+    if processado then return end
+    if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
+    local k = input.KeyCode
+    local t = FLN.teclas
+    if t.fling and k == t.fling then
+        flBate(nil, FLN.modo)
+    elseif t.soco and k == t.soco then
+        flBate(nil, "soco")
+    elseif t.chute and k == t.chute then
+        flBate(nil, "chute")
+    elseif t.hud and k == t.hud then
+        FLN.hudOn = not FLN.hudOn
+        flHud().Visible = FLN.hudOn
+    end
+end, "fling tecla"))
+
+if FLN.hudOn then flHud() end
+
+-- o resto da aba fala com o motor por aqui (nao por local, que gastaria registro)
+HackState.flingEngine = {
+    cfg = FLN,
+    bate = flBate,
+    para = flPara,
+    perto = flPerto,
+    hudBuild = flHud,
+    tecla = flTecla,
+    corpo = flCorpo,
+}
+
+end
+flnBuild()
 
 -- Estado do fling (Luau type-safe)
 HackState.flingActive = false :: boolean
+HackState.flingAim = true :: boolean
 HackState.flingPower = 500 :: number
 HackState.flingTarget = nil :: Player?
 HackState.flingMode = "punch" :: string
@@ -15220,20 +15533,15 @@ local function performFling(targetPlayer: Player): ()
     end)
 end
 
-BtnRow("Setup Fling (R15)", T.Accent, function()
-    Toast("preparando personagem para fling...", true)
-    local success = setupFlingCharacter()
-    if success then
-        Toast("fling preparado! use os botoes abaixo", true)
-    else
-        Toast("falhou - certifique-se que e R15", false)
-    end
-end)
+-- o motor novo assume daqui pra baixo; a funcao antiga fica so como referencia
+performFling = function(p) return HackState.flingEngine.bate(p) end
 
 Section("Configuracao do Fling")
 
 Slider("Poder do Fling", 100, 2000, 500, "%d", function(v)
     HackState.flingPower = v
+    local fe = HackState.flingEngine
+    if fe then fe.cfg.poder = v end
 end, "fling_power")
 
 Note("Poder 500 = medio | 1000 = forte | 2000 = ULTRA", 40)
@@ -15311,85 +15619,78 @@ end, "fling_auto")
 
 Section("Modos de Ataque")
 
-BtnRow("Modo: Soco Único", T.Accent, function()
-    HackState.flingMode = "punch"
-    Toast("modo: soco unico", true)
+BtnRow("Modo: SOCO (frontal)", T.Accent, function()
+    local fe = HackState.flingEngine
+    if fe then fe.cfg.modo = "soco" end
+    Toast("modo: soco", true)
 end)
 
-BtnRow("Modo: Voadora (Combo)", T.Accent, function()
-    HackState.flingMode = "flying_kick"
-    Toast("modo: voadora combo", true)
+BtnRow("Modo: CHUTE (com subida)", T.Accent, function()
+    local fe = HackState.flingEngine
+    if fe then fe.cfg.modo = "chute" end
+    Toast("modo: chute", true)
 end)
 
-BtnRow("Modo: Spin Attack", T.Accent, function()
-    HackState.flingMode = "spin"
+BtnRow("Modo: VOADORA (gira no ar)", T.Accent, function()
+    local fe = HackState.flingEngine
+    if fe then fe.cfg.modo = "voadora" end
+    Toast("modo: voadora", true)
+end)
+
+BtnRow("Girar e Bater em Todos (spin)", T.Card2, function()
+    local fe = HackState.flingEngine
+    if not fe then Toast("motor nao carregou", false) return end
+    local c, hum, hrp = fe.corpo()
+    if not hrp then Toast("sem personagem", false) return end
     HackState.flingActive = true
-    
+    fe.cfg.ocupado = true
+    pcall(function() hum:ChangeState(Enum.HumanoidStateType.Physics) end)
+    pcall(function() hrp.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0, 0, 1, 1) end)
+    Toast("spin ligado", true)
     task.spawn(function()
-        local char = LocalPlayer.Character
-        if char then
-            local root = char:FindFirstChild("HumanoidRootPart")
-            for i = 1, 20 do
-                if root and HackState.flingActive then
-                    root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(18), 0)
-                    
-                    -- Fling em todos próximos
-                    for _, player in ipairs(Players:GetPlayers()) do
-                        if player ~= LocalPlayer and player.Character then
-                            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
-                            if targetRoot and (targetRoot.Position - root.Position).Magnitude < 10 then
-                                performFling(player)
-                            end
-                        end
-                    end
-                end
-                task.wait(0.05)
-            end
-            HackState.flingActive = false
+        local t0 = tick()
+        while HackState.flingActive and (tick() - t0) < 4 do
+            local cc, hh, rr = fe.corpo()
+            if not rr then break end
+            pcall(function()
+                rr.AssemblyAngularVelocity = Vector3.new(0, fe.cfg.poder * 6, 0)
+            end)
+            task.wait()
         end
+        HackState.flingActive = false
+        fe.para()
+        Toast("spin terminado", true)
     end)
 end)
 
 BtnRow("Parar Fling", T.Card, function()
     HackState.flingActive = false
     HackState.autoFlingNearby = false
-    
-    local char = LocalPlayer.Character
-    if char then
-        for _, limb in ipairs(char:GetDescendants()) do
-            if limb:FindFirstChild("FlingVelocity") then
-                limb.FlingVelocity.AngularVelocity = Vector3.new(0, 0, 0)
-            end
-        end
-    end
-    
+    local fe = HackState.flingEngine
+    if fe then fe.para() end
     Toast("fling parado", true)
 end)
 
 Section("Sistema Avancado")
 
-Toggle("Fling com Animação", true, function(v)
-    HackState.flingAnim = v
-    Toast("fling animation "..(v and "ligado" or "desligado"), v)
-end, "fling_anim")
-
-Toggle("Auto Aim no Alvo", true, function(v)
-    HackState.flingAutoAim = v
-    Toast("auto aim "..(v and "ligado" or "desligado"), v)
+Toggle("Mirar no alvo antes de bater", true, function(v)
+    HackState.flingAim = v
 end, "fling_aim")
 
-Toggle("Fling Stealth Mode", false, function(v)
+Toggle("Stealth (poder mais baixo)", false, function(v)
     HackState.flingStealth = v
-    if v then
-        -- Reduz a velocidade e poder para ser menos óbvio
-        HackState.flingPower = math.min(HackState.flingPower, 300)
-        Toast("stealth mode ligado - poder reduzido", true)
-    else
-        Toast("stealth mode desligado", true)
+    local fe = HackState.flingEngine
+    if fe then
+        if v then
+            fe.cfg.poder = math.min(fe.cfg.poder, 300)
+        else
+            fe.cfg.poder = HackState.flingPower or 500
+        end
     end
+    Toast("stealth " .. (v and "ligado" or "desligado"), true)
 end, "fling_stealth")
 
-Note("Faz o setup uma vez e usa em qualquer rig R15.", 68)
+Note("Nao precisa de setup: os botoes na tela e as teclas ja funcionam. Se nao pegar, sobe o poder.", 68)
 
 end -- Fling
 
