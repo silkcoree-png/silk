@@ -11412,7 +11412,7 @@ do
     local scriptBox = Instance.new("TextBox")
     scriptBox.Size = UDim2.new(1, -32, 0, 140)
     scriptBox.Position = UDim2.fromOffset(16, 25)
-    scriptBox.BackgroundColor3 = T.Field
+    scriptBox.BackgroundColor3 = T.Bg
     scriptBox.BorderColor3 = T.Accent
     scriptBox.BorderSizePixel = 1
     scriptBox.Text = ""
@@ -12703,7 +12703,7 @@ do
     local codeBox = Instance.new("TextBox")
     codeBox.Size = UDim2.new(1, -32, 0, 50)
     codeBox.Position = UDim2.fromOffset(16, 25)
-    codeBox.BackgroundColor3 = T.Field
+    codeBox.BackgroundColor3 = T.Bg
     codeBox.BorderColor3 = T.Accent
     codeBox.BorderSizePixel = 1
     codeBox.Text = ""
