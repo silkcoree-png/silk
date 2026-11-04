@@ -2825,6 +2825,7 @@ end
 -- TRILHO DE NAVEGACAO (icones desenhados com frames, sem asset nenhum)
 --------------------------------------------------------------------------------
 local NAVB, tabs, tabHooks = {}, {}, {}
+local NavArea
 local NavPill, curName, curFrame, ShowTab, SetBadge
 do
 local Rail = New("Frame", {
@@ -2834,9 +2835,12 @@ local Rail = New("Frame", {
 LAY.Rail = Rail
 Round(Rail, 8)
 Stroke(Rail, T.Stroke, 1)
-local NavArea = New("ScrollingFrame", {
-    Size = UDim2.new(1, 0, 1, -66), BackgroundTransparency = 1, BorderSizePixel = 0, ScrollBarThickness = 0,
-    CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y, ClipsDescendants = true,
+NavArea = New("ScrollingFrame", {
+    Name = "NavArea",
+    Size = UDim2.new(1, 0, 1, -66), BackgroundTransparency = 1, BorderSizePixel = 0,
+    ScrollBarThickness = 4, ScrollBarImageColor3 = T.Stroke2,
+    CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y,
+    ScrollingDirection = Enum.ScrollingDirection.Y, ScrollingEnabled = true, ClipsDescendants = true,
 }, Rail)
 NavPill = New("Frame", {
     Size = UDim2.new(1, -16, 0, 28), Position = UDim2.fromOffset(8, 26), BackgroundColor3 = T.Card2,
@@ -2966,11 +2970,11 @@ do
         for _, it in ipairs(grp.items) do
             local btn = New("TextButton", {
                 Text = "", AutoButtonColor = false, BackgroundColor3 = T.Card2, BackgroundTransparency = 1,
-                BorderSizePixel = 0, Size = UDim2.new(1, -16, 0, 28), Position = UDim2.fromOffset(8, navY), ZIndex = 3,
+                BorderSizePixel = 0, Size = UDim2.new(1, -16, 0, 24), Position = UDim2.fromOffset(8, navY), ZIndex = 3,
             }, NavArea)
             Round(btn, 6)
             local holder = New("Frame", {
-                Size = UDim2.fromOffset(18, 18), Position = UDim2.fromOffset(12, 5), BackgroundTransparency = 1, ZIndex = 3,
+                Size = UDim2.fromOffset(18, 18), Position = UDim2.fromOffset(12, 3), BackgroundTransparency = 1, ZIndex = 3,
             }, btn)
             local icon = ICONS[it.icon](holder, T.Sub)
             local lbl = New("TextLabel", {
@@ -2979,7 +2983,7 @@ do
             }, btn)
             local badge = New("TextLabel", {
                 Text = "", Font = F.Mono, TextSize = 10, TextColor3 = T.Faint, TextXAlignment = Enum.TextXAlignment.Right,
-                BackgroundTransparency = 1, Position = UDim2.new(1, -40, 0, 0), Size = UDim2.fromOffset(32, 28), ZIndex = 3,
+                BackgroundTransparency = 1, Position = UDim2.new(1, -40, 0, 0), Size = UDim2.fromOffset(32, 24), ZIndex = 3,
             }, btn)
             local name = it.id
             btn.MouseEnter:Connect(function()
@@ -2987,7 +2991,7 @@ do
                     Tween(btn, 0.15, {BackgroundTransparency = 0.5}) 
                 end
                 -- Anima ícone para direita com bounce
-                TweenEx(holder, 0.3, Enum.EasingStyle.Back, {Position = UDim2.fromOffset(16, 5)})
+                TweenEx(holder, 0.3, Enum.EasingStyle.Back, {Position = UDim2.fromOffset(16, 3)})
                 -- Pulso sutil no texto
                 TweenService:Create(lbl, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {TextSize = 13}):Play()
             end)
@@ -2995,7 +2999,7 @@ do
                 if curName ~= name then
                     Tween(btn, 0.2, {BackgroundTransparency = 1})
                 end
-                Tween(holder, 0.2, {Position = UDim2.fromOffset(12, 5)})
+                Tween(holder, 0.2, {Position = UDim2.fromOffset(12, 3)})
                 TweenService:Create(lbl, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {TextSize = 12}):Play()
             end)
             btn.MouseButton1Click:Connect(Safe(function()
@@ -3020,9 +3024,69 @@ do
                 end
             end, "nav " .. name))
             NAVB[name] = {btn = btn, icon = icon, lbl = lbl, badge = badge, y = navY, meta = it}
-            navY = navY + 29
+            navY = navY + 25
         end
         navY = navY + 6
+    end
+
+    -- canvas medido na mao: se o engine nao aplicar o automatico, a lista de baixo ficaria presa
+    NavArea.CanvasSize = UDim2.fromOffset(0, navY + 24)
+
+    -- rolagem garantida: roda do mouse e arrasto, sem depender da barrinha
+    do
+        local guiInset = Vector2.new(0, 36)
+        pcall(function()
+            local gs = game:GetService("GuiService")
+            if gs and gs.GetGuiInset then guiInset = gs:GetGuiInset() end
+        end)
+
+        local arrastando, inicioY, canvasY = false, 0, 0
+
+        local function limite()
+            local c = NavArea.AbsoluteCanvasSize.Y
+            if not c or c <= 0 then c = navY + 24 end
+            return math.max(0, c - NavArea.AbsoluteSize.Y)
+        end
+
+        local function dentro(pos)
+            local ap, as = NavArea.AbsolutePosition, NavArea.AbsoluteSize
+            return pos.X >= ap.X and pos.X <= ap.X + as.X and pos.Y >= ap.Y - 10 and pos.Y <= ap.Y + as.Y + 10
+        end
+
+        local function mouseDentro()
+            local m = UserInputService:GetMouseLocation() + guiInset
+            return dentro(m)
+        end
+
+        UserInputService.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                if dentro(input.Position) then
+                    arrastando = true
+                    inicioY = input.Position.Y
+                    canvasY = NavArea.CanvasPosition.Y
+                end
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseWheel then
+                if mouseDentro() then
+                    local passo = (input.Position.Z or 0) * 60
+                    if passo == 0 then passo = 60 end
+                    NavArea.CanvasPosition = Vector2.new(0, math.clamp(NavArea.CanvasPosition.Y - passo, 0, limite()))
+                end
+                return
+            end
+            if arrastando and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                NavArea.CanvasPosition = Vector2.new(0, math.clamp(canvasY - (input.Position.Y - inicioY), 0, limite()))
+            end
+        end)
+
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                arrastando = false
+            end
+        end)
     end
 end
 function SetBadge(name, text)
@@ -3684,6 +3748,17 @@ function ShowTab(name)
     PaintNav()
     LAY.S3.kick(0.55)
     TweenEx(NavPill, 0.42, Enum.EasingStyle.Quint, {Position = UDim2.fromOffset(8, e.y)})
+    if NavArea then
+        local altura = NavArea.AbsoluteSize.Y
+        local span = math.max(0, NavArea.AbsoluteCanvasSize.Y - altura)
+        local y = NavArea.CanvasPosition.Y
+        if e.y < y + 8 then
+            y = e.y - 8
+        elseif (e.y + 24) > (y + altura - 8) then
+            y = e.y + 24 - altura + 8
+        end
+        NavArea.CanvasPosition = Vector2.new(0, math.clamp(y, 0, span))
+    end
     TypeText(HeaderTitle, e.meta.title)
     HeaderSub.Text = e.meta.sub
     SetInfo("")
