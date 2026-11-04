@@ -24,7 +24,7 @@ local AIM_BIND    = "SilkcoreAimlock"
 local STRETCH_BIND = "SilkcoreStretch"
 local FOV_BIND     = "SilkcoreFovMod"
 local VOL_BIND     = "SilkcoreVolley"
-local VOL_STEP     = nil   -- o passo de render da aba Vôlei, exportado do bloco
+local VOL_STEP     = nil   -- o passo de render da aba VÃ´lei, exportado do bloco
 local ESP_NAME     = "SilkcoreESP"
 
 -- clean previous run (gui, render step, old connections)
@@ -46,14 +46,14 @@ local oldBlur = game:GetService("Lighting"):FindFirstChild("SilkcoreBlur")
 if oldBlur then oldBlur:Destroy() end
 
 --------------------------------------------------------------------------------
--- SILK GUARD — a camada que segura o que existe
+-- SILK GUARD â€” a camada que segura o que existe
 --------------------------------------------------------------------------------
--- Três frentes, só três:
---   1. a GUI volta sozinha se alguém desabilitar ou soltar da árvore
---   2. o loop de render é contado — se parar, o bind é refeito
---   3. o que existe não é achável: nada em _G, nada de tabela com nome óbvio
--- O que ela NÃO promete: esconder do servidor. Não existe tráfego pra esconder
--- porque o que a gente faz é leitura. Arma invisível se a arma não dispara.
+-- TrÃªs frentes, sÃ³ trÃªs:
+--   1. a GUI volta sozinha se alguÃ©m desabilitar ou soltar da Ã¡rvore
+--   2. o loop de render Ã© contado â€” se parar, o bind Ã© refeito
+--   3. o que existe nÃ£o Ã© achÃ¡vel: nada em _G, nada de tabela com nome Ã³bvio
+-- O que ela NÃƒO promete: esconder do servidor. NÃ£o existe trÃ¡fego pra esconder
+-- porque o que a gente faz Ã© leitura. Arma invisÃ­vel se a arma nÃ£o dispara.
 local SilkGuard = { On = true, Beats = 0, Ghost = false } do
     local G = SilkGuard
     local roots, draws, binds = {}, {}, {}
@@ -93,9 +93,9 @@ local SilkGuard = { On = true, Beats = 0, Ghost = false } do
         while G.On do
             task.wait(1)
             if G.Beats == lastBeats then stalls = stalls + 1 else stalls = 0 end
-            -- Dois segundos parado, não um. Um request() do catálogo segura o frame
-            -- por mais de um segundo e isso NÃO é bind morto. Antes o vigia agia no
-            -- primeiro tique e remarranhava o passo com um callback nil (a função
+            -- Dois segundos parado, nÃ£o um. Um request() do catÃ¡logo segura o frame
+            -- por mais de um segundo e isso NÃƒO Ã© bind morto. Antes o vigia agia no
+            -- primeiro tique e remarranhava o passo com um callback nil (a funÃ§Ã£o
             -- estava fora de escopo naquele ponto), matando a linha de mira de vez.
             if stalls >= 2 then
                 for i = 1, #binds do
@@ -1302,7 +1302,7 @@ function Morph.ApplyFull(userId, notify)
     pcall(function() d = Players:GetHumanoidDescriptionFromUserId(userId) end)
     pcall(function() model = Players:GetCharacterAppearanceAsync(userId) end)
     if not (d or model) then
-        if notify then notify("não consegui buscar esse avatar", false) end
+        if notify then notify("nÃ£o consegui buscar esse avatar", false) end
         return false
     end
 
@@ -1364,7 +1364,7 @@ function Morph.Reset(notify)
         pcall(function() hum:ApplyDescription(State.OriginalDescription) end)
         if notify then notify("avatar original restaurado", true) end
     elseif notify then
-        notify("sem snapshot salvo, renasça pra resetar", false)
+        notify("sem snapshot salvo, renasÃ§a pra resetar", false)
     end
 end
 
@@ -1375,10 +1375,10 @@ end
 -- pecas diferentes do padrao nas partes reais, alinhadas pelas attachments de junta.
 --------------------------------------------------------------------------------
 local WARD = {
-    {field = "Head",     label = "Cabeça",          parts = {"Head"}},
+    {field = "Head",     label = "CabeÃ§a",          parts = {"Head"}},
     {field = "Torso",    label = "Tronco",          parts = {"UpperTorso", "LowerTorso"}},
-    {field = "LeftArm",  label = "Braço esquerdo",  parts = {"LeftUpperArm", "LeftLowerArm", "LeftHand"}},
-    {field = "RightArm", label = "Braço direito",   parts = {"RightUpperArm", "RightLowerArm", "RightHand"}},
+    {field = "LeftArm",  label = "BraÃ§o esquerdo",  parts = {"LeftUpperArm", "LeftLowerArm", "LeftHand"}},
+    {field = "RightArm", label = "BraÃ§o direito",   parts = {"RightUpperArm", "RightLowerArm", "RightHand"}},
     {field = "LeftLeg",  label = "Perna esquerda",  parts = {"LeftUpperLeg", "LeftLowerLeg", "LeftFoot"}},
     {field = "RightLeg", label = "Perna direita",   parts = {"RightUpperLeg", "RightLowerLeg", "RightFoot"}},
 }
@@ -1414,7 +1414,7 @@ local function wardPlace(clone, real, src, r)
     local mot = real:FindFirstChildOfClass("Motor6D")
     local attName = mot and (mot.Name .. "RigAttachment")
     local ra = attName and real:FindFirstChild(attName)
-    -- preferência: attachment que está no clone (preservado); fallback: src ainda vivo
+    -- preferÃªncia: attachment que estÃ¡ no clone (preservado); fallback: src ainda vivo
     local sa = attName and (clone:FindFirstChild(attName) or src:FindFirstChild(attName))
     if ra and sa and ra:IsA("Attachment") and sa:IsA("Attachment") then
         local rel = sa.CFrame
@@ -1460,14 +1460,14 @@ local function wardSources(def, id)
             end
         end
         if changedAny then return srcs, rig, "rig" end
-        -- a rota rig voltou o padrão sem trocar nada (ID não resolveu via
-        -- CreateHumanoidModelFromDescription, comum em cabeças tipo Korblox).
-        -- descarta e tenta puxar a peça direto do asset.
+        -- a rota rig voltou o padrÃ£o sem trocar nada (ID nÃ£o resolveu via
+        -- CreateHumanoidModelFromDescription, comum em cabeÃ§as tipo Korblox).
+        -- descarta e tenta puxar a peÃ§a direto do asset.
         rig:Destroy()
         srcs = {}
     end
     local ok, objs = pcall(game.GetObjects, game, "rbxassetid://" .. tostring(id))
-    if not (ok and objs) or #objs == 0 then return nil, nil, "asset não carregou" end
+    if not (ok and objs) or #objs == 0 then return nil, nil, "asset nÃ£o carregou" end
     local holder = Instance.new("Folder")
     for _, o in ipairs(objs) do o.Parent = holder end
     local first
@@ -1498,7 +1498,7 @@ local function wardBuild(char, def, id)
                 native = native + 1 -- o proprio jogo ja mostra essa malha
             elseif differs then
                 local clone = src:Clone()
-                -- remover vínculos de rig; PRESERVAR Attachments (usados pra posicionamento
+                -- remover vÃ­nculos de rig; PRESERVAR Attachments (usados pra posicionamento
                 -- em wardPlace), ParticleEmitter, Fire, Smoke, Beam, Trail (efeitos visuais)
                 for _, c in ipairs(clone:GetChildren()) do
                     if c:IsA("Motor6D") or c:IsA("Weld") or c:IsA("WeldConstraint")
@@ -1512,7 +1512,7 @@ local function wardBuild(char, def, id)
                 local r = wardRatio(real, base or src)
                 clone.Size = Vector3.new(src.Size.X * r.X, src.Size.Y * r.Y, src.Size.Z * r.Z)
                 wardPlace(clone, real, src, r)
-                -- sanitize apenas a BasePart raiz — não desce nos filhos pra não matar efeitos
+                -- sanitize apenas a BasePart raiz â€” nÃ£o desce nos filhos pra nÃ£o matar efeitos
                 clone.CanCollide  = false
                 clone.CanTouch    = false
                 clone.CanQuery    = false
@@ -1534,21 +1534,21 @@ local function wardBuild(char, def, id)
     if made == 0 and native == 0 then
         folder:Destroy()
         clearConns(conns)
-        return false, "esse ID não troca nada nessa peça (igual ao padrão?)"
+        return false, "esse ID nÃ£o troca nada nessa peÃ§a (igual ao padrÃ£o?)"
     end
     if made == 0 then folder:Destroy() end
-    return true, (native > 0 and "nativo" or how) .. " · " .. (made + native) .. " peça(s)"
+    return true, (native > 0 and "nativo" or how) .. " Â· " .. (made + native) .. " peÃ§a(s)"
 end
 
 function Ward.Apply(field, id)
     local def = WARD_BY[field]
-    if not def then return false, "slot inválido" end
+    if not def then return false, "slot invÃ¡lido" end
     id = tonumber(id)
-    if not id or id <= 0 then return false, "ID inválido" end
+    if not id or id <= 0 then return false, "ID invÃ¡lido" end
     local hum = Morph.Hum()
-    if not hum then return false, "humanoid não encontrado" end
+    if not hum then return false, "humanoid nÃ£o encontrado" end
     if hum.RigType ~= Enum.HumanoidRigType.R15 and field ~= "Head" then
-        return false, "só funciona em R15 (Cabeça funciona em R15 e R6)"
+        return false, "sÃ³ funciona em R15 (CabeÃ§a funciona em R15 e R6)"
     end
     local char = Morph.Char()
     Morph.SaveOriginal()
@@ -1690,7 +1690,7 @@ local THEMES = {
     {id = "ouro",     name = "Ouro",     a = Color3.fromRGB(255, 190, 64),  b = Color3.fromRGB(255, 112, 64)},
     {id = "jade",     name = "Jade",     a = Color3.fromRGB(46, 214, 150),  b = Color3.fromRGB(196, 255, 124)},
     {id = "gelo",     name = "Gelo",     a = Color3.fromRGB(86, 190, 255),  b = Color3.fromRGB(196, 242, 255)},
-    {id = "orquidea", name = "Orquídea", a = Color3.fromRGB(190, 112, 255), b = Color3.fromRGB(255, 120, 200)},
+    {id = "orquidea", name = "OrquÃ­dea", a = Color3.fromRGB(190, 112, 255), b = Color3.fromRGB(255, 120, 200)},
     {id = "custom",   name = "Personalizado", a = Color3.fromRGB(236, 236, 240), b = Color3.fromRGB(160, 160, 172)},
 }
 
@@ -1814,8 +1814,8 @@ function Log.add(level, msg)
 end
 local upperPT
 do
-    local MAP = {["ç"] = "Ç", ["ã"] = "Ã", ["õ"] = "Õ", ["á"] = "Á", ["à"] = "À", ["â"] = "Â", ["é"] = "É", ["ê"] = "Ê",
-        ["í"] = "Í", ["ó"] = "Ó", ["ô"] = "Ô", ["ú"] = "Ú", ["ü"] = "Ü"}
+    local MAP = {["Ã§"] = "Ã‡", ["Ã£"] = "Ãƒ", ["Ãµ"] = "Ã•", ["Ã¡"] = "Ã", ["Ã "] = "Ã€", ["Ã¢"] = "Ã‚", ["Ã©"] = "Ã‰", ["Ãª"] = "ÃŠ",
+        ["Ã­"] = "Ã", ["Ã³"] = "Ã“", ["Ã´"] = "Ã”", ["Ãº"] = "Ãš", ["Ã¼"] = "Ãœ"}
     function upperPT(s)
         local r = s:gsub("[\195][\128-\191]", function(c) return MAP[c] or c end)
         return string.upper(r)
@@ -2743,7 +2743,7 @@ do
         LAY.S3.kick(1.3)
     end, "logo"))
 end
-Label(Top, "avatar suite  ·  v2.0", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(200, 14))
+Label(Top, "avatar suite  Â·  v2.0", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(200, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
 do
     local chip = New("TextButton", {
@@ -2914,18 +2914,18 @@ local NAV = {
     {group = "AVATAR", items = {
         {id = "Clonar", icon = "clone", title = "Clonar avatar", sub = "copie o visual de qualquer jogador"},
         {id = "Corpo", icon = "body", title = "Corpo & morphs", sub = "headless, korblox e escala"},
-        {id = "Roupa", icon = "shirt", title = "Partes do corpo", sub = "troque cabeça, tronco, braços e pernas por ID"},
-        {id = "Catálogo", icon = "grid", title = "Catálogo de itens", sub = "qualquer ID: acessório, roupa, tool ou parte do corpo"},
-        {id = "Browse", icon = "grid", title = "Browse / Loja", sub = "explore o catálogo do Roblox e emotes diretamente"},
-        {id = "Efeitos", icon = "spark", title = "Efeitos", sub = "partículas e rastro no personagem"},
+        {id = "Roupa", icon = "shirt", title = "Partes do corpo", sub = "troque cabeÃ§a, tronco, braÃ§os e pernas por ID"},
+        {id = "CatÃ¡logo", icon = "grid", title = "CatÃ¡logo de itens", sub = "qualquer ID: acessÃ³rio, roupa, tool ou parte do corpo"},
+        {id = "Browse", icon = "grid", title = "Browse / Loja", sub = "explore o catÃ¡logo do Roblox e emotes diretamente"},
+        {id = "Efeitos", icon = "spark", title = "Efeitos", sub = "partÃ­culas e rastro no personagem"},
         {id = "Looks", icon = "star", title = "Looks", sub = "salve, aplique, exporte e importe looks completos"},
     }},
     {group = "MUNDO", items = {
-        {id = "Ambiente", icon = "sun", title = "Ambiente", sub = "filtros de câmera, hora do dia e modo foto"},
+        {id = "Ambiente", icon = "sun", title = "Ambiente", sub = "filtros de cÃ¢mera, hora do dia e modo foto"},
     }},
     {group = "FERRAMENTAS", items = {
         {id = "Aimlock", icon = "cross", title = "Aimlock", sub = "segure o bind pra travar no alvo"},
-        {id = "Volei", icon = "pulse", title = "Vôlei", sub = "linha de mira dos adversários"},
+        {id = "Volei", icon = "pulse", title = "VÃ´lei", sub = "linha de mira dos adversÃ¡rios"},
         {id = "Hacks", icon = "spark", title = "Hacks universais", sub = "velocidade, voo, noclip, god mode e Infinite Yield"},
         {id = "Brookhaven", icon = "house", title = "Brookhaven", sub = "dump, desbloqueio de itens e teleporte"},
         {id = "HBG", icon = "cross", title = "HBG", sub = "dump de remotes, bypass de anti-cheat e auto-block"},
@@ -2933,8 +2933,8 @@ local NAV = {
         {id = "Timebomb", icon = "bomb", title = "Timebomb", sub = "ferramentas do modo"},
     }},
     {group = "SISTEMA", items = {
-        {id = "Desempenho", icon = "pulse", title = "Desempenho", sub = "fps, ping e memória ao vivo, e ajustes de gráficos"},
-        {id = "Config", icon = "gear", title = "Configurações", sub = "tema, atalhos e registro de eventos"},
+        {id = "Desempenho", icon = "pulse", title = "Desempenho", sub = "fps, ping e memÃ³ria ao vivo, e ajustes de grÃ¡ficos"},
+        {id = "Config", icon = "gear", title = "ConfiguraÃ§Ãµes", sub = "tema, atalhos e registro de eventos"},
     }},
 }
 
@@ -3692,8 +3692,8 @@ local function MakePreview(parent, pos, size, caption)
         }),
     }, scan)
     Label(holder, caption or "PREVIEW", 9, T.Faint, F.Mono, nil, UDim2.fromOffset(10, 8), UDim2.fromOffset(120, 12)).ZIndex = 3
-    Label(holder, "arraste · scroll", 9, T.Faint, F.Mono, nil, UDim2.new(0, 10, 1, -20), UDim2.fromOffset(92, 12)).ZIndex = 3
-    local rot = Label(holder, "000°", 9, T.Faint, F.Mono, Enum.TextXAlignment.Right, UDim2.new(1, -70, 1, -20), UDim2.fromOffset(60, 12))
+    Label(holder, "arraste Â· scroll", 9, T.Faint, F.Mono, nil, UDim2.new(0, 10, 1, -20), UDim2.fromOffset(92, 12)).ZIndex = 3
+    local rot = Label(holder, "000Â°", 9, T.Faint, F.Mono, Enum.TextXAlignment.Right, UDim2.new(1, -70, 1, -20), UDim2.fromOffset(60, 12))
     rot.ZIndex = 3
     local obj = {
         holder = holder, vp = vp, cam = cam, rot = rot, scan = scan, motes = motes, base = base, rim = rim,
@@ -3803,7 +3803,7 @@ track(RunService.Heartbeat:Connect(function(dt)
             local d = p.dist * p.zoom
             local pos = p.center + Vector3.new(math.sin(p.angle) * d, 0.6 + (p.zoom - 1) * 0.5, math.cos(p.angle) * d)
             p.cam.CFrame = CFrame.lookAt(pos, p.center)
-            p.rot.Text = string.format("%03d°", math.floor(math.deg(p.angle) % 360))
+            p.rot.Text = string.format("%03dÂ°", math.floor(math.deg(p.angle) % 360))
             p.scan.Position = UDim2.new(0, 0, (p.t * 0.28) % 1, 0)
             for i, m in ipairs(p.motes) do
                 local a = p.t * m.sp + m.ph
@@ -3864,14 +3864,14 @@ do
     }, card)
     Round(PreviewImg, 26)
     Stroke(PreviewImg, T.Stroke2, 1)
-    Input = Field(card, UDim2.fromOffset(280, 42), UDim2.new(1, -294, 0, 36), "usuário ou UserId...", Persist.Get("cloner:user", ""))
-    Label(card, "digite um usuário ou UserId e clique em clonar", 10, T.Faint, F.Mono, nil,
+    Input = Field(card, UDim2.fromOffset(280, 42), UDim2.new(1, -294, 0, 36), "usuÃ¡rio ou UserId...", Persist.Get("cloner:user", ""))
+    Label(card, "digite um usuÃ¡rio ou UserId e clique em clonar", 10, T.Faint, F.Mono, nil,
         UDim2.fromOffset(218, 98), UDim2.new(1, -232, 0, 14))
     local busy = false
     Button(card, "CLONAR AVATAR", UDim2.fromOffset(218, 124), UDim2.new(1, -232, 0, 42), T.Accent, function()
         if busy then return end
         if #Input.Text == 0 then
-            Toast("digite um usuário primeiro", false)
+            Toast("digite um usuÃ¡rio primeiro", false)
             return
         end
         busy = true
@@ -3882,7 +3882,7 @@ do
                     PreviewImg.Image = Morph.Thumb(id)
                     Morph.ApplyFull(id, Toast)
                 else
-                    Toast("usuário não encontrado", false)
+                    Toast("usuÃ¡rio nÃ£o encontrado", false)
                 end
             end)
             if not ok then
@@ -3908,7 +3908,7 @@ Input.FocusLost:Connect(function()
     loadThumb()
 end)
 loadThumb()
-Section("Opções")
+Section("OpÃ§Ãµes")
 Toggle("Reaplicar ao renascer", State.AutoReapplyOnRespawn, function(v)
     State.AutoReapplyOnRespawn = v
     Toast(v and "reaplicar ao renascer: ligado" or "reaplicar ao renascer: desligado", v)
@@ -3924,10 +3924,10 @@ CurTab = Tab("Corpo", 0, true)
 Persist.Scope = "body"
     -- engine de cores do corpo (so no seu cliente): BodyColors + cor direta das partes, travada contra reset do jogo
     local COLOR_GROUPS = {
-        {id = "Head", label = "Cabeça", parts = {"Head"}, r6 = {"Head"}},
+        {id = "Head", label = "CabeÃ§a", parts = {"Head"}, r6 = {"Head"}},
         {id = "Torso", label = "Tronco", parts = {"UpperTorso", "LowerTorso"}, r6 = {"Torso"}},
-        {id = "LeftArm", label = "Braço esquerdo", parts = {"LeftUpperArm", "LeftLowerArm", "LeftHand"}, r6 = {"Left Arm"}},
-        {id = "RightArm", label = "Braço direito", parts = {"RightUpperArm", "RightLowerArm", "RightHand"}, r6 = {"Right Arm"}},
+        {id = "LeftArm", label = "BraÃ§o esquerdo", parts = {"LeftUpperArm", "LeftLowerArm", "LeftHand"}, r6 = {"Left Arm"}},
+        {id = "RightArm", label = "BraÃ§o direito", parts = {"RightUpperArm", "RightLowerArm", "RightHand"}, r6 = {"Right Arm"}},
         {id = "LeftLeg", label = "Perna esquerda", parts = {"LeftUpperLeg", "LeftLowerLeg", "LeftFoot"}, r6 = {"Left Leg"}},
         {id = "RightLeg", label = "Perna direita", parts = {"RightUpperLeg", "RightLowerLeg", "RightFoot"}, r6 = {"Right Leg"}},
     }
@@ -4012,11 +4012,11 @@ Persist.Scope = "body"
         Persist.Set("color:" .. id, c and {math.floor(c.R * 255 + 0.5), math.floor(c.G * 255 + 0.5), math.floor(c.B * 255 + 0.5)} or nil)
     end
 
-Section("Cabeça")
+Section("CabeÃ§a")
 do
     local row = Row(56)
     Label(row, "Headless", 13, T.Text, F.Body, nil, UDim2.fromOffset(16, 10), UDim2.new(0.5, 0, 0, 18))
-    Label(row, "esconde a cabeça e o rosto", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 30), UDim2.new(0.6, 0, 0, 14))
+    Label(row, "esconde a cabeÃ§a e o rosto", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 30), UDim2.new(0.6, 0, 0, 14))
     local st = Label(row, State.IsHeadless and "ATIVO" or "INATIVO", 10, T.Faint, F.Mono, Enum.TextXAlignment.Right,
         UDim2.new(1, -236, 0, 0), UDim2.fromOffset(100, 56))
     Button(row, "ALTERNAR", UDim2.new(1, -118, 0.5, -15), UDim2.fromOffset(104, 30), T.Card, function()
@@ -4064,10 +4064,10 @@ local function refitLegs()
         end
     end
 end
-Toggle("Corrigir vão (pé flutuando)", State.GapFix, function(v)
+Toggle("Corrigir vÃ£o (pÃ© flutuando)", State.GapFix, function(v)
     State.GapFix = v
     refitLegs()
-    Toast("corrigir vão: " .. (v and "ligado" or "desligado"), true)
+    Toast("corrigir vÃ£o: " .. (v and "ligado" or "desligado"), true)
 end, "Gap fix (no floating feet)")
 Toggle("Pernas retas", State.Straight, function(v)
     State.Straight = v
@@ -4100,16 +4100,16 @@ do
         local row = Row(58)
         Label(row, "Aplicar em", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.fromOffset(90, 58))
         Segmented(row, {
-            {id = "all", label = "Tudo"}, {id = "head", label = "Cabeça"}, {id = "torso", label = "Tronco"},
-            {id = "arms", label = "Braços"}, {id = "legs", label = "Pernas"},
+            {id = "all", label = "Tudo"}, {id = "head", label = "CabeÃ§a"}, {id = "torso", label = "Tronco"},
+            {id = "arms", label = "BraÃ§os"}, {id = "legs", label = "Pernas"},
         }, target, function(id) target = id end, 110, 13, 82, 32, 6)
     end
-    local hS = Slider("Matiz", 0, 360, H * 360, "%d°", function(v)
+    local hS = Slider("Matiz", 0, 360, H * 360, "%dÂ°", function(v)
         H = v / 360
         setPicked()
         if ready then applyPicked() end
     end, "colorH")
-    local sS = Slider("Saturação", 0, 100, S * 100, "%d%%", function(v)
+    local sS = Slider("SaturaÃ§Ã£o", 0, 100, S * 100, "%d%%", function(v)
         S = v / 100
         setPicked()
         if ready then applyPicked() end
@@ -4169,7 +4169,7 @@ BtnRow("Restaurar avatar original", T.Bad, function()
     Morph.Reset(Toast)
 end, 40)
 BtnPair("Resetar escala", T.Card, function()
-    Toast(Morph.ResetScales() and "escala resetada" or "humanoid não encontrado", true)
+    Toast(Morph.ResetScales() and "escala resetada" or "humanoid nÃ£o encontrado", true)
 end, "Dump (copiar)", T.Card, function()
     local ok, copied = pcall(Morph.Dump)
     if not ok then Toast("dump falhou, veja o console", false)
@@ -4204,7 +4204,7 @@ local function slotRefresh(field)
     else
         u.thumb.Image = ""
         u.glyph.Visible = true
-        u.chip.Text = "PADRÃO"
+        u.chip.Text = "PADRÃƒO"
         unbindAcc(u.chip, "TextColor3")
         u.chip.TextColor3 = T.Faint
         u.meta.Text = "id -"
@@ -4232,7 +4232,7 @@ local function applySlot(field, id)
             Log.add("ERRO", "roupa " .. field .. ": " .. tostring(ok))
             Toast("falha ao aplicar (veja o registro em Config)", false)
         elseif ok then
-            Toast(WARD_BY[field].label .. " aplicada · " .. tostring(info), true)
+            Toast(WARD_BY[field].label .. " aplicada Â· " .. tostring(info), true)
         else
             Toast(tostring(info), false)
         end
@@ -4244,11 +4244,11 @@ Section("Preview e atalhos")
 do
     local card = Row(196)
     MakePreview(card, UDim2.fromOffset(12, 12), UDim2.fromOffset(176, 172), "PREVIEW")
-    local hint = Label(card, "Cole o ID de qualquer parte (ou o link do catálogo / rolimons). APLICAR troca na hora, LIMPAR volta ao original. Fica salvo e reaplica ao renascer.",
+    local hint = Label(card, "Cole o ID de qualquer parte (ou o link do catÃ¡logo / rolimons). APLICAR troca na hora, LIMPAR volta ao original. Fica salvo e reaplica ao renascer.",
         11, T.Sub, F.Body, nil, UDim2.fromOffset(204, 12), UDim2.new(1, -218, 0, 66))
     hint.TextWrapped = true
     hint.TextYAlignment = Enum.TextYAlignment.Top
-    Button(card, "KORBLOX DEATHWALKER · CABEÇA", UDim2.fromOffset(204, 92), UDim2.new(1, -218, 0, 36), T.Card, function()
+    Button(card, "KORBLOX DEATHWALKER Â· CABEÃ‡A", UDim2.fromOffset(204, 92), UDim2.new(1, -218, 0, 36), T.Card, function()
         if wardUI.Head then wardUI.Head.box.Text = "16580493236" end
         applySlot("Head", 16580493236)
     end)
@@ -4260,7 +4260,7 @@ do
     end)
 end
 
-Section("Peças")
+Section("PeÃ§as")
 local wardGrid = New("Frame", {
     Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1, LayoutOrder = nextOrder(),
 }, CurTab)
@@ -4278,14 +4278,14 @@ for i, w in ipairs(WARD) do
     Stroke(thumb, T.Stroke2, 1)
     local glyph = Label(thumb, "+", 20, T.Faint, F.Mono, Enum.TextXAlignment.Center, UDim2.new(), UDim2.fromScale(1, 1))
     Label(card, w.label, 13, T.Text, F.Bold, nil, UDim2.fromOffset(80, 12), UDim2.new(1, -92, 0, 18))
-    local chip = Label(card, "PADRÃO", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(80, 32), UDim2.new(1, -92, 0, 14))
+    local chip = Label(card, "PADRÃƒO", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(80, 32), UDim2.new(1, -92, 0, 14))
     local meta = Label(card, "id -", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(80, 48), UDim2.new(1, -92, 0, 14))
     local box = Field(card, UDim2.fromOffset(12, 80), UDim2.new(1, -24, 0, 30), "id ou link...", "")
     wardUI[w.field] = {thumb = thumb, glyph = glyph, chip = chip, meta = meta, box = box}
     Button(card, "APLICAR", UDim2.fromOffset(12, 118), UDim2.new(0.5, -17, 0, 26), T.Accent, function()
         local id = parseId(box.Text)
         if not id then
-            Toast("cole um ID válido", false)
+            Toast("cole um ID vÃ¡lido", false)
             return
         end
         applySlot(w.field, id)
@@ -4307,7 +4307,7 @@ end
 --------------------------------------------------------------------------------
 local Cat = {}
 do
-CurTab = Tab("Catálogo", 0, true)
+CurTab = Tab("CatÃ¡logo", 0, true)
 Persist.Scope = "cat"
 local ASSET_BODY = {[17] = "Head", [27] = "Torso", [28] = "RightArm", [29] = "LeftArm", [30] = "LeftLeg", [31] = "RightLeg"}
 local catCards = {}
@@ -4339,7 +4339,7 @@ local function assetTypeName(tid)
 end
 local function catLoad(id)
     local ok, objs = pcall(game.GetObjects, game, "rbxassetid://" .. tostring(id))
-    if not (ok and objs) or #objs == 0 then return nil, "asset não carregou" end
+    if not (ok and objs) or #objs == 0 then return nil, "asset nÃ£o carregou" end
     for _, o in ipairs(objs) do
         if o:IsA("Accessory") or o:IsA("Tool") or o:IsA("Shirt") or o:IsA("Pants") or o:IsA("ShirtGraphic") or o:IsA("Decal") then
             return o
@@ -4363,7 +4363,7 @@ local function catAttach(char, obj, id)
         Morph.Mount(char, obj)
         if obj.Parent ~= char then
             obj:Destroy()
-            return nil, "acessório sem handle"
+            return nil, "acessÃ³rio sem handle"
         end
         return {inst = obj}
     end
@@ -4386,7 +4386,7 @@ local function catAttach(char, obj, id)
         local head = char:FindFirstChild("Head")
         if not head then
             obj:Destroy()
-            return nil, "sem cabeça"
+            return nil, "sem cabeÃ§a"
         end
         local old = head:FindFirstChild("face")
         local res = {inst = obj}
@@ -4472,10 +4472,10 @@ end
 
 -- sincrono (usa yields): devolve ok, mensagem
 -- detail (opcional) vem do browse: {name, assetType}. Sem ele, cada APLICAR
--- gastava uma requisição bloqueante só pra descobrir o tipo de um item que a
--- grade já tinha na mão — era boa parte do lag no clique.
+-- gastava uma requisiÃ§Ã£o bloqueante sÃ³ pra descobrir o tipo de um item que a
+-- grade jÃ¡ tinha na mÃ£o â€” era boa parte do lag no clique.
 local function doAdd(id, quiet, detail)
-    if catFind(id) then return false, "já adicionado: " .. tostring(id) end
+    if catFind(id) then return false, "jÃ¡ adicionado: " .. tostring(id) end
     local entry = {id = id, pending = true, name = "carregando...", meta = "id " .. tostring(id)}
     State.Catalog[#State.Catalog + 1] = entry
     refreshCatalog()
@@ -4489,7 +4489,7 @@ local function doAdd(id, quiet, detail)
         nm  = info and info.Name or nil
     end
     if nm then entry.name = tostring(nm) end
-    entry.meta = (tid and assetTypeName(tid) or "Asset") .. " · " .. tostring(id)
+    entry.meta = (tid and assetTypeName(tid) or "Asset") .. " Â· " .. tostring(id)
     local field = tid and ASSET_BODY[tid] or nil
     if field then
         catDropEntry(entry)
@@ -4521,7 +4521,7 @@ local function catAdd(id, cb, quiet, detail)
     task.spawn(function()
         local okc, ok, msg = pcall(doAdd, id, quiet, detail)
         if not okc then
-            Log.add("ERRO", "catálogo " .. tostring(id) .. ": " .. tostring(ok))
+            Log.add("ERRO", "catÃ¡logo " .. tostring(id) .. ": " .. tostring(ok))
             ok, msg = false, "erro interno (veja o registro em Config)"
             local e = catFind(id)
             if e then
@@ -4564,14 +4564,14 @@ State.CatalogReapply = function()
 end
 
 
--- ══════════════════════════════════════════════════════════════════════════════
--- CATALOG BROWSE ENGINE — injected into Catálogo tab
--- Browse completo do catálogo Roblox: por categoria, busca, thumb grid, APLICAR.
+-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+-- CATALOG BROWSE ENGINE â€” injected into CatÃ¡logo tab
+-- Browse completo do catÃ¡logo Roblox: por categoria, busca, thumb grid, APLICAR.
 -- Body-safety: volleyball = block-only. HBG = aceita qualquer corpo.
 -- R6 / R15 compat via catAdd existente (detecta tipo, roteia Ward se body part).
--- ══════════════════════════════════════════════════════════════════════════════
+-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
--- ── game profile ──────────────────────────────────────────────────────────────
+-- â”€â”€ game profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 local function _buildBrowse()
 local _VOLLEYBALL_IDS = {
     [9358981663]=true,[4645842232]=true,[301549746]=true,
@@ -4594,27 +4594,27 @@ local function _blockBodyGame()
     return (bts and bts.Value < 0.05) and (bws and bws.Value > 0.95)
 end
 
--- ── asset type info ───────────────────────────────────────────────────────────
+-- â”€â”€ asset type info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 local _AT = {
-    [8]  = {label="Chapéu",    body=false},
+    [8]  = {label="ChapÃ©u",    body=false},
     [41] = {label="Cabelo",    body=false},
     [18] = {label="Rosto",     body=false},
     [11] = {label="Camisa",    body=false},
-    [12] = {label="Calça",     body=false},
+    [12] = {label="CalÃ§a",     body=false},
     [2]  = {label="T-Shirt",   body=false},
-    [17] = {label="Cabeça",    body=true, field="Head"},
+    [17] = {label="CabeÃ§a",    body=true, field="Head"},
     [27] = {label="Tronco",    body=true, field="Torso"},
-    [28] = {label="Braço Dir", body=true, field="RightArm"},
-    [29] = {label="Braço Esq", body=true, field="LeftArm"},
+    [28] = {label="BraÃ§o Dir", body=true, field="RightArm"},
+    [29] = {label="BraÃ§o Esq", body=true, field="LeftArm"},
     [30] = {label="Perna Esq", body=true, field="LeftLeg"},
     [31] = {label="Perna Dir", body=true, field="RightLeg"},
     [40] = {label="Pacote",    body=true, field=nil},
-    [61] = {label="Acessório", body=false},
-    [64] = {label="Acessório", body=false},
-    [65] = {label="Acessório", body=false},
+    [61] = {label="AcessÃ³rio", body=false},
+    [64] = {label="AcessÃ³rio", body=false},
+    [65] = {label="AcessÃ³rio", body=false},
 }
 
--- ── body-safety ───────────────────────────────────────────────────────────────
+-- â”€â”€ body-safety â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 local function _safeForGame(assetId, assetTypeId)
     if _isHBG() then return true end
     if not _blockBodyGame() then return true end
@@ -4639,32 +4639,32 @@ local function _safeForGame(assetId, assetTypeId)
     return ok and safe or true
 end
 
--- ── http / json ───────────────────────────────────────────────────────────────
+-- â”€â”€ http / json â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 local _httpFn = (syn and syn.request)
     or (typeof(request)      == "function" and request)
     or (typeof(http_request) == "function" and http_request)
     or (typeof(http)         == "table"    and http.request)
     or nil
 
--- ── http / json ───────────────────────────────────────────────────────────────
--- HttpService:RequestAsync não existe no cliente — o Roblox só permite essa API
--- no servidor. O código antigo tentava ela primeiro, gastando um erro por
--- requisição antes de cair no request() do executor. Aqui o request() vem
--- primeiro: é o único que funciona de dentro do cliente.
+-- â”€â”€ http / json â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- HttpService:RequestAsync nÃ£o existe no cliente â€” o Roblox sÃ³ permite essa API
+-- no servidor. O cÃ³digo antigo tentava ela primeiro, gastando um erro por
+-- requisiÃ§Ã£o antes de cair no request() do executor. Aqui o request() vem
+-- primeiro: Ã© o Ãºnico que funciona de dentro do cliente.
 local _lastHttp = "nada ainda"
 
--- O executor anexa Roblox-Place-Id em toda requisição — herda do stack HTTP do
--- jogo — e o catálogo recusa por causa disso:
+-- O executor anexa Roblox-Place-Id em toda requisiÃ§Ã£o â€” herda do stack HTTP do
+-- jogo â€” e o catÃ¡logo recusa por causa disso:
 --   403 code 22 "In-experience search is denied for this place or universe."
 -- Comprovado nos dois sentidos, aqui:
 --   header preenchido  -> 403
 --   header ausente     -> 200
 --   header = "none"    -> 200
--- Isso NÃO resolve dentro do jogo: o executor escreve o valor dele depois do
--- nosso, então continua 403 (ver o bloco de hosts). Os headers ficam porque
--- quando o valor nosso vence — executor que mescla em tabela e não concatena,
--- ou execução fora do jogo — a chamada direta volta a valer e é a via mais
--- rápida. Não é a solução; é a primeira tentativa.
+-- Isso NÃƒO resolve dentro do jogo: o executor escreve o valor dele depois do
+-- nosso, entÃ£o continua 403 (ver o bloco de hosts). Os headers ficam porque
+-- quando o valor nosso vence â€” executor que mescla em tabela e nÃ£o concatena,
+-- ou execuÃ§Ã£o fora do jogo â€” a chamada direta volta a valer e Ã© a via mais
+-- rÃ¡pida. NÃ£o Ã© a soluÃ§Ã£o; Ã© a primeira tentativa.
 local _HDRS = {
     ["Accept"]          = "application/json",
     ["User-Agent"]      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
@@ -4674,8 +4674,8 @@ local _HDRS = {
     ["roblox-game-id"]  = "none",
 }
 
--- Devolve corpo e status. O status por host é o que alimenta o registro da tela:
--- sem ele, "403" não diz de quem é o 403 nem se é o gate do place.
+-- Devolve corpo e status. O status por host Ã© o que alimenta o registro da tela:
+-- sem ele, "403" nÃ£o diz de quem Ã© o 403 nem se Ã© o gate do place.
 local function _httpGet(url)
     if _httpFn then
         local ok, res = pcall(_httpFn, {
@@ -4728,18 +4728,18 @@ local function _jsonDecode(s)
     return nil
 end
 
--- ── endpoints ─────────────────────────────────────────────────────────────────
+-- â”€â”€ endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 -- O gate (403 code 22 "In-experience search is denied for this place or
--- universe") fica só no /search/items/details. Fora dele, dois endpoints
+-- universe") fica sÃ³ no /search/items/details. Fora dele, dois endpoints
 -- primeiro-party cobrem o browse inteiro, com o header do place presente:
 --   catalog.roblox.com/v1/search/items?category=N&limit=28  -> {id, itemType}
 --   economy.roblox.com/v2/assets/<id>/details               -> Name, AssetTypeId, PriceInRobux, Creator
 -- Os dois voltam 200 com Roblox-Place-Id preenchido. O relay saiu porque o
--- header do executor não era o que quebrava o jina: da máquina, jina responde
--- 200 até com UA da Roblox e place id; dentro do jogo devolve 403, e o
--- allorigins 522 (a origem dele está fora do ar). O request() do executor sai
--- pela infra da Roblox, e Cloudflare trata tráfego de datacenter assim. Sem
--- relay, esse modo de falha não existe.
+-- header do executor nÃ£o era o que quebrava o jina: da mÃ¡quina, jina responde
+-- 200 atÃ© com UA da Roblox e place id; dentro do jogo devolve 403, e o
+-- allorigins 522 (a origem dele estÃ¡ fora do ar). O request() do executor sai
+-- pela infra da Roblox, e Cloudflare trata trÃ¡fego de datacenter assim. Sem
+-- relay, esse modo de falha nÃ£o existe.
 local _API  = "https://catalog.roblox.com/v1"
 local _ECON = "https://economy.roblox.com/v2"
 
@@ -4753,8 +4753,8 @@ local function _urlEnc(s)
     return (s:gsub(" ", "+"))
 end
 
--- Uma chamada, sem sorteio de host. 429 é limite de rajada do catálogo e some
--- em ~20 s; três tentativas com 1,2 s de intervalo cobrem o caso normal sem
+-- Uma chamada, sem sorteio de host. 429 Ã© limite de rajada do catÃ¡logo e some
+-- em ~20 s; trÃªs tentativas com 1,2 s de intervalo cobrem o caso normal sem
 -- travar a tela.
 local function _get2(url, tag)
     local data, status
@@ -4772,29 +4772,29 @@ local function _get2(url, tag)
     return data, status
 end
 
--- ── catalog categories ────────────────────────────────────────────────────────
--- Regras medidas no /v1/search/items (o endpoint, não o /details):
---   · limit só aceita 10, 28 ou 30
---   · category e keyword PODEM ir juntos aqui — era o /details que dava 400
---   · devolve só {id, itemType}; nome e tipo vêm do economy/v2 por id
+-- â”€â”€ catalog categories â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- Regras medidas no /v1/search/items (o endpoint, nÃ£o o /details):
+--   Â· limit sÃ³ aceita 10, 28 ou 30
+--   Â· category e keyword PODEM ir juntos aqui â€” era o /details que dava 400
+--   Â· devolve sÃ³ {id, itemType}; nome e tipo vÃªm do economy/v2 por id
 local _CATS = {
     {id="featured", label="Em Alta",    category=1,  mode="avatar"},
     {id="clothes",  label="Roupas",     category=3,  mode="avatar"},
-    {id="acc",      label="Acessórios", category=11, mode="avatar"},
-    {id="hats",     label="Chapéu",     category=11, kw="hat",   mode="avatar"},
+    {id="acc",      label="AcessÃ³rios", category=11, mode="avatar"},
+    {id="hats",     label="ChapÃ©u",     category=11, kw="hat",   mode="avatar"},
     {id="hair",     label="Cabelo",     category=11, kw="hair",  mode="avatar"},
     {id="face",     label="Rosto",      category=11, kw="face",  mode="avatar"},
     {id="shirt",    label="Camisa",     category=3,  kw="shirt", mode="avatar"},
-    {id="pants",    label="Calça",      category=3,  kw="pants", mode="avatar"},
+    {id="pants",    label="CalÃ§a",      category=3,  kw="pants", mode="avatar"},
     {id="emotes",   label="Emotes",     category=12, mode="emotes"},
-    {id="dance",    label="Dança",      category=12, kw="dance", mode="emotes"},
+    {id="dance",    label="DanÃ§a",      category=12, kw="dance", mode="emotes"},
     {id="wave",     label="Aceno",      category=12, kw="wave",  mode="emotes"},
     {id="laugh",    label="Rir",        category=12, kw="laugh", mode="emotes"},
     {id="search",   label="Busca",                   mode="both"},
 }
 
--- Cache de lista de ids: voltar numa aba já vista não gasta chamada de busca. Os
--- detalhes já são cacheados por id — juntos, revisitar uma aba sai de graça.
+-- Cache de lista de ids: voltar numa aba jÃ¡ vista nÃ£o gasta chamada de busca. Os
+-- detalhes jÃ¡ sÃ£o cacheados por id â€” juntos, revisitar uma aba sai de graÃ§a.
 local _idsCache = {}
 
 local function _searchIds(cat, kw, cursor)
@@ -4821,8 +4821,8 @@ local function _searchIds(cat, kw, cursor)
     return ids, nc, nil
 end
 
--- Nome, tipo e preço por id. 28 chamadas por página é o custo real do browse, e
--- o cache permanente faz a segunda visita à mesma aba sair de graça.
+-- Nome, tipo e preÃ§o por id. 28 chamadas por pÃ¡gina Ã© o custo real do browse, e
+-- o cache permanente faz a segunda visita Ã  mesma aba sair de graÃ§a.
 local _detCache, _detOrder = {}, {}
 local function _assetDetail(id)
     local hit = _detCache[id]
@@ -4850,23 +4850,23 @@ local function _assetDetail(id)
     return d
 end
 
--- ── browse state ──────────────────────────────────────────────────────────────
+-- â”€â”€ browse state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 local _bItems   = {}
 local _bCursor  = ""
 local _bCatIdx  = 1
 local _bKeyword = ""
 local _bMode    = "avatar"   -- "avatar" mostra itens, "emotes" mostra os emotes
-local _bPageCap = 15         -- cards por página: cada um custa uma requisição bloqueante
+local _bPageCap = 15         -- cards por pÃ¡gina: cada um custa uma requisiÃ§Ã£o bloqueante
 local _bLoading = false
 local _browseGrid    = nil
 local _browseCards   = {}
 local _bPrevBtn, _bNextBtn, _bInfoLbl
 
--- ── emote player ──────────────────────────────────────────────────────────────
+-- â”€â”€ emote player â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 local _activeEmote = nil
 
--- Derruba só as faixas de prioridade Action pra cima — ou seja, os emotes que
--- o jogo tocou. Idle/Walk/Run (priority Movement) ficam de pé, senão o
+-- Derruba sÃ³ as faixas de prioridade Action pra cima â€” ou seja, os emotes que
+-- o jogo tocou. Idle/Walk/Run (priority Movement) ficam de pÃ©, senÃ£o o
 -- personagem emenda um T-pose no meio do gesto.
 local function _stopEmotes(animator)
     pcall(function()
@@ -4901,8 +4901,8 @@ local function _playEmote(id)
     local ok, track = pcall(function() return animator:LoadAnimation(anim) end)
     if not ok or not track then return false, "falha ao carregar emote" end
 
-    -- Action4 ganha de qualquer animação que o jogo esteja rodando. Looped=false
-    -- porque emote é gesto, não estado — e começar/terminar deixa o servidor
+    -- Action4 ganha de qualquer animaÃ§Ã£o que o jogo esteja rodando. Looped=false
+    -- porque emote Ã© gesto, nÃ£o estado â€” e comeÃ§ar/terminar deixa o servidor
     -- replicar a faixa inteira pros outros players.
     pcall(function() track.Priority = Enum.AnimationPriority.Action4 end)
     pcall(function() track.Looped = false end)
@@ -4918,7 +4918,7 @@ local function _playEmote(id)
     return true, "emote tocando"
 end
 
--- ── card factory ──────────────────────────────────────────────────────────────
+-- â”€â”€ card factory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 local function _makeBrowseCard(parent, item)
     local id     = tonumber(item.id) or 0
     local name   = tostring(item.name or "?")
@@ -4937,9 +4937,9 @@ local function _makeBrowseCard(parent, item)
     Stroke(card, T.Stroke, 1)
 
     -- Miniatura direto pelo id. A API de miniatura devolve uma URL do
-    -- tr.rbxcdn.com, e Image de ImageLabel não carrega URL externa: o card ficava
-    -- com o nome e sem imagem, porque essa URL sobrescrevia o rbxthumb que já
-    -- estava funcionando. rbxthumb é o formato que o cliente resolve sozinho.
+    -- tr.rbxcdn.com, e Image de ImageLabel nÃ£o carrega URL externa: o card ficava
+    -- com o nome e sem imagem, porque essa URL sobrescrevia o rbxthumb que jÃ¡
+    -- estava funcionando. rbxthumb Ã© o formato que o cliente resolve sozinho.
     local thumb = New("ImageLabel", {
         Size=UDim2.fromOffset(126,100), Position=UDim2.fromOffset(11,10),
         BackgroundColor3=T.Bg, BorderSizePixel=0, ScaleType=Enum.ScaleType.Fit,
@@ -4959,12 +4959,12 @@ local function _makeBrowseCard(parent, item)
         BackgroundTransparency=1, Position=UDim2.fromOffset(11,132), Size=UDim2.fromOffset(126,12),
     }, card)
 
-    -- 61 = Emote, 24 = Animation, 68 = Mood. O código antigo só reconhecia o 24,
-    -- então TODO emote do catálogo (tipo 61) caía no ramo de peça vestível e
-    -- nem ganhava botão de tocar. Era por isso que emote não aparecia.
+    -- 61 = Emote, 24 = Animation, 68 = Mood. O cÃ³digo antigo sÃ³ reconhecia o 24,
+    -- entÃ£o TODO emote do catÃ¡logo (tipo 61) caÃ­a no ramo de peÃ§a vestÃ­vel e
+    -- nem ganhava botÃ£o de tocar. Era por isso que emote nÃ£o aparecia.
     local isAnim = (atId == 61) or (atId == 24) or (atId == 68)
     if isAnim then
-        -- animação tocada pelo cliente no próprio personagem é replicada pelo
+        -- animaÃ§Ã£o tocada pelo cliente no prÃ³prio personagem Ã© replicada pelo
         -- servidor: os outros players veem o gesto.
         Button(card, "TOCAR", UDim2.fromOffset(11,148), UDim2.fromOffset(126,30),
             T.Accent, function()
@@ -4978,7 +4978,7 @@ local function _makeBrowseCard(parent, item)
         Button(card, applyTxt, UDim2.fromOffset(11,148), UDim2.fromOffset(126,30),
             applyColor, function()
                 if not isSafe then
-                    Toast("corpo slim incompatível — disponível só no HBG", false)
+                    Toast("corpo slim incompatÃ­vel â€” disponÃ­vel sÃ³ no HBG", false)
                     return
                 end
                 catAdd(id, function(a, b) Toast(b, a) end, nil, item)
@@ -5005,9 +5005,9 @@ local function _clearBrowseGrid()
     end
 end
 
-local _bFetchFailed = false   -- true quando a última página não trouxe nada
+local _bFetchFailed = false   -- true quando a Ãºltima pÃ¡gina nÃ£o trouxe nada
 local _bFetchReason = nil     -- status http ou mensagem que explica
-local _bGen = 0               -- a carga mais nova é a única que desenha
+local _bGen = 0               -- a carga mais nova Ã© a Ãºnica que desenha
 
 local function _renderEmpty()
     if not _browseGrid then return end
@@ -5023,10 +5023,10 @@ local function _renderEmpty()
 end
 
 -- Duas etapas: uma chamada traz os ids, e cada card nasce assim que o nome do id
--- chega. Antes a tela prendia em "Carregando..." até o último host responder —
--- com quatro hosts em timeout, mais de um minuto — e o guarda _bLoading engolia
+-- chega. Antes a tela prendia em "Carregando..." atÃ© o Ãºltimo host responder â€”
+-- com quatro hosts em timeout, mais de um minuto â€” e o guarda _bLoading engolia
 -- todo clique de aba nesse meio-tempo. Era isso que travava o Browse. _bGen
--- resolve: cada carga tem número, e a antiga para de desenhar quando outra começa.
+-- resolve: cada carga tem nÃºmero, e a antiga para de desenhar quando outra comeÃ§a.
 local function _loadPage(cursor)
     _bGen = _bGen + 1
     local gen = _bGen
@@ -5087,9 +5087,9 @@ local function _loadPage(cursor)
                     task.wait()
                 end
 
-                -- Grade magra: busca outra página. Uma extra cobre as abas por palavra, que
-                -- trazem coisa fora do tipo pedido (a busca lista só {id, itemType};
-                -- o tipo real só aparece no economy/v2).
+                -- Grade magra: busca outra pÃ¡gina. Uma extra cobre as abas por palavra, que
+                -- trazem coisa fora do tipo pedido (a busca lista sÃ³ {id, itemType};
+                -- o tipo real sÃ³ aparece no economy/v2).
                 if shown >= _bPageCap or pages >= 1 or #nextCur == 0 then break end
                 pages = pages + 1
                 local more, nc, e2 = _searchIds(q, kw, nextCur)
@@ -5117,15 +5117,15 @@ local function _loadPage(cursor)
     end)
 end
 
--- ── NOVA ABA: Browse (separada do Catálogo, mais espaçosa) ───────────────────
+-- â”€â”€ NOVA ABA: Browse (separada do CatÃ¡logo, mais espaÃ§osa) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 CurTab = Tab("Browse", 0, true)
 Persist.Scope = "browse"
 
--- ── UI: seção browse ──────────────────────────────────────────────────────────
+-- â”€â”€ UI: seÃ§Ã£o browse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 do
     local row = Row(36)
     Button(row, "RECARREGAR", UDim2.fromOffset(8,3), UDim2.fromOffset(100,30), T.Accent, function()
-        _bLoading = false  -- força reset caso tenha travado
+        _bLoading = false  -- forÃ§a reset caso tenha travado
         _bFetchFailed = false
         _loadPage("")
     end)
@@ -5135,7 +5135,7 @@ Button(row, "TESTAR HTTP", UDim2.fromOffset(116,3), UDim2.fromOffset(90,30), T.C
             local n = (ids and #ids) or 0
             local d, e2 = nil, nil
             if n > 0 then d, e2 = _assetDetail(ids[1]) end
-            -- leitura única: a busca respondeu, veio id, o nome saiu?
+            -- leitura Ãºnica: a busca respondeu, veio id, o nome saiu?
             local msg = ("busca=%d %s  nome=%s  [%s]"):format(
                 n, e1 or "ok",
                 d and ("'" .. d.name .. "'") or (e2 or "-"),
@@ -5146,7 +5146,7 @@ Button(row, "TESTAR HTTP", UDim2.fromOffset(116,3), UDim2.fromOffset(90,30), T.C
     end)
 end
 
--- ── modo (itens / emotes) + categorias + busca ───────────────────────────────
+-- â”€â”€ modo (itens / emotes) + categorias + busca â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 do
     local catBtns = {}
     local function paintCats()
@@ -5192,10 +5192,10 @@ do
     local catBar = New("ScrollingFrame", {
         Size=UDim2.new(1,-16,0,34), Position=UDim2.fromOffset(8,8),
         BackgroundTransparency=1, BorderSizePixel=0,
-        -- ScrollBarThickness=0 deixava a barra sem alça. No desktop o Roblox não
-        -- rola horizontal no wheel sozinho, então não havia gesto nenhum: os
-        -- chips passavam da borda e ficavam inalcançáveis. Com alça de 4 px dá
-        -- pra arrastar, e o wheel na direção X também passa a funcionar.
+        -- ScrollBarThickness=0 deixava a barra sem alÃ§a. No desktop o Roblox nÃ£o
+        -- rola horizontal no wheel sozinho, entÃ£o nÃ£o havia gesto nenhum: os
+        -- chips passavam da borda e ficavam inalcanÃ§Ã¡veis. Com alÃ§a de 4 px dÃ¡
+        -- pra arrastar, e o wheel na direÃ§Ã£o X tambÃ©m passa a funcionar.
         ScrollBarThickness=4, ScrollBarImageColor3=T.Faint, ScrollBarImageTransparency=0.3,
         ScrollingDirection=Enum.ScrollingDirection.X, ScrollingEnabled=true,
         ElasticBehavior=Enum.ElasticBehavior.Never,
@@ -5207,9 +5207,9 @@ do
         SortOrder=Enum.SortOrder.LayoutOrder, VerticalAlignment=Enum.VerticalAlignment.Top,
     }, catBar)
 
-    -- Wheel explícito: o ScrollBarThickness resolve o arrasto, mas rolar no wheel
-    -- é o gesto que a mão já tenta. Sem isso, os últimos chips continuavam
-    -- dependendo de acertar uma alça de 4 px.
+    -- Wheel explÃ­cito: o ScrollBarThickness resolve o arrasto, mas rolar no wheel
+    -- Ã© o gesto que a mÃ£o jÃ¡ tenta. Sem isso, os Ãºltimos chips continuavam
+    -- dependendo de acertar uma alÃ§a de 4 px.
     catBar.InputChanged:Connect(function(input)
         if input.UserInputType ~= Enum.UserInputType.MouseWheel then return end
         local span = math.max(0, catBar.AbsoluteCanvasSize.X - catBar.AbsoluteSize.X)
@@ -5236,7 +5236,7 @@ do
     end
     paintCats()
 
-    local searchBox = Field(row, UDim2.fromOffset(8,48), UDim2.new(1,-112,0,30), "buscar no catálogo...", "")
+    local searchBox = Field(row, UDim2.fromOffset(8,48), UDim2.new(1,-112,0,30), "buscar no catÃ¡logo...", "")
     local function doSearch()
         _bKeyword = searchBox.Text
         for i, c in ipairs(_CATS) do if c.id == "search" then _bCatIdx = i end end
@@ -5254,10 +5254,10 @@ end
 do
     local msg, col
     if _VOLLEYBALL_IDS[_CUR_PLACE] then
-        msg = "Volleyball detectado — corpos slim bloqueados. Apenas roupas e acessórios permitidos."
+        msg = "Volleyball detectado â€” corpos slim bloqueados. Apenas roupas e acessÃ³rios permitidos."
         col = T.Bad
     elseif _HBG_IDS[_CUR_PLACE] then
-        msg = "HBG detectado — todos os tipos de corpo liberados."
+        msg = "HBG detectado â€” todos os tipos de corpo liberados."
         col = T.Good
     end
     if msg then
@@ -5282,11 +5282,11 @@ do
     }, _browseGrid)
 end
 
--- paginação
+-- paginaÃ§Ã£o
 do
     local row = Row(36)
     _bPrevBtn = Button(row, "< ANTERIOR", UDim2.fromOffset(8,3), UDim2.fromOffset(96,30), T.Card, function()
-        _loadPage("")  -- API Roblox não expõe cursor anterior; recomeça do início
+        _loadPage("")  -- API Roblox nÃ£o expÃµe cursor anterior; recomeÃ§a do inÃ­cio
     end)
     _bInfoLbl = Label(row, "0 itens", 10, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.new(0.3,0,0,3), UDim2.fromOffset(140,30))
@@ -5297,7 +5297,7 @@ do
     if _bNextBtn then _bNextBtn.Visible = false end
 end
 
--- botão parar emote (aparece só quando um emote está tocando)
+-- botÃ£o parar emote (aparece sÃ³ quando um emote estÃ¡ tocando)
 do
     local row = Row(36)
     Button(row, "PARAR EMOTE", UDim2.fromOffset(8,3), UDim2.fromOffset(120,30), T.Bad, function()
@@ -5320,14 +5320,14 @@ end
 end
 _buildBrowse()
 
--- ── volta para a aba Catálogo para as seções de ID e "No personagem" ──────────
-CurTab = tabs["Catálogo"]
+-- â”€â”€ volta para a aba CatÃ¡logo para as seÃ§Ãµes de ID e "No personagem" â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+CurTab = tabs["CatÃ¡logo"]
 Persist.Scope = "cat"
 
 Section("Adicionar por ID")
 do
     local row = Row(104)
-    local hint = Label(row, "Cole um ID ou vários (vírgula, espaço ou links). O tipo é detectado sozinho: acessório, roupa, rosto, tool, efeito ou parte do corpo.",
+    local hint = Label(row, "Cole um ID ou vÃ¡rios (vÃ­rgula, espaÃ§o ou links). O tipo Ã© detectado sozinho: acessÃ³rio, roupa, rosto, tool, efeito ou parte do corpo.",
         11, T.Sub, F.Body, nil, UDim2.fromOffset(16, 8), UDim2.new(1, -32, 0, 34))
     hint.TextWrapped = true
     hint.TextYAlignment = Enum.TextYAlignment.Top
@@ -5412,10 +5412,10 @@ refreshCatalog = function()
         c.rm.Visible = not e.pending
     end
     emptyCard.Visible = #State.Catalog == 0
-    SetBadge("Catálogo", #State.Catalog > 0 and tostring(#State.Catalog) or "")
-    if curName == "Catálogo" then SetInfo(#State.Catalog .. " item(ns)") end
+    SetBadge("CatÃ¡logo", #State.Catalog > 0 and tostring(#State.Catalog) or "")
+    if curName == "CatÃ¡logo" then SetInfo(#State.Catalog .. " item(ns)") end
 end
-tabHooks["Catálogo"] = function()
+tabHooks["CatÃ¡logo"] = function()
     SetInfo(#State.Catalog .. " item(ns)")
 end
 BtnRow("REMOVER TODOS OS ITENS", T.Bad, function()
@@ -5434,10 +5434,10 @@ CurTab = Tab("Efeitos", 0, true)
 Persist.Scope = "fx"
 FX = {On = {}, Part = Persist.Get("fx:part", "Torso"), Mult = 1, Objs = {}, Mode = Persist.Get("fx:mode", "theme")}
 local FX_TARGETS = {
-    {id = "Head", label = "Cabeça", parts = {"Head"}, r6 = {"Head"}},
+    {id = "Head", label = "CabeÃ§a", parts = {"Head"}, r6 = {"Head"}},
     {id = "Torso", label = "Tronco", parts = {"UpperTorso"}, r6 = {"Torso"}},
-    {id = "Hands", label = "Mãos", parts = {"LeftHand", "RightHand"}, r6 = {"Left Arm", "Right Arm"}},
-    {id = "Feet", label = "Pés", parts = {"LeftFoot", "RightFoot"}, r6 = {"Left Leg", "Right Leg"}},
+    {id = "Hands", label = "MÃ£os", parts = {"LeftHand", "RightHand"}, r6 = {"Left Arm", "Right Arm"}},
+    {id = "Feet", label = "PÃ©s", parts = {"LeftFoot", "RightFoot"}, r6 = {"Left Leg", "Right Leg"}},
     {id = "Root", label = "Corpo", parts = {"HumanoidRootPart"}, r6 = {"HumanoidRootPart"}},
 }
 local FX_BY = {}
@@ -5445,10 +5445,10 @@ for _, t in ipairs(FX_TARGETS) do FX_BY[t.id] = t end
 if not FX_BY[FX.Part] then FX.Part = "Torso" end
 local FX_PRESETS = {
     {id = "aura", name = "Aura", desc = "brasas subindo ao redor do corpo", rate = 22},
-    {id = "spark", name = "Faíscas", desc = "fagulhas rápidas que caem", rate = 40},
-    {id = "smoke", name = "Fumaça", desc = "fumaça escura e lenta", rate = 12},
+    {id = "spark", name = "FaÃ­scas", desc = "fagulhas rÃ¡pidas que caem", rate = 40},
+    {id = "smoke", name = "FumaÃ§a", desc = "fumaÃ§a escura e lenta", rate = 12},
     {id = "snow", name = "Neve", desc = "flocos caindo da parte escolhida", rate = 18},
-    {id = "trail", name = "Rastro", desc = "faixa de luz atrás do corpo", rate = 0},
+    {id = "trail", name = "Rastro", desc = "faixa de luz atrÃ¡s do corpo", rate = 0},
 }
 local function fxSeq(a, b)
     return NumberSequence.new({NumberSequenceKeypoint.new(0, a), NumberSequenceKeypoint.new(1, b)})
@@ -5661,7 +5661,7 @@ Section("Cor dos efeitos")
 do
     local row = Row(58)
     FX.ModeSeg = Segmented(row, {
-        {id = "theme", label = "Cor do tema"}, {id = "rainbow", label = "Arco-íris"}, {id = "white", label = "Branco"},
+        {id = "theme", label = "Cor do tema"}, {id = "rainbow", label = "Arco-Ã­ris"}, {id = "white", label = "Branco"},
     }, FX.Mode, function(id)
         FX.Mode = id
         Persist.Set("fx:mode", id)
@@ -5670,7 +5670,7 @@ do
 end
 Section("Efeitos")
 for _, p in ipairs(FX_PRESETS) do
-    fxHandles[p.id] = Toggle(p.name .. "  ·  " .. p.desc, false, function(v)
+    fxHandles[p.id] = Toggle(p.name .. "  Â·  " .. p.desc, false, function(v)
         FX.On[p.id] = v
         fxBadge()
         if not Persist.Loading then FX.Apply() end
@@ -5680,7 +5680,7 @@ fxIntens = Slider("Intensidade", 0.2, 3, 1, "%.1fx", function(v)
     FX.Mult = v
     FX.RateAll()
 end, "Intensidade")
-Note("Os efeitos aparecem só no seu cliente e voltam sozinhos quando você renasce.", 40)
+Note("Os efeitos aparecem sÃ³ no seu cliente e voltam sozinhos quando vocÃª renasce.", 40)
 fxBadge()
 end
 
@@ -5757,7 +5757,7 @@ local function summary(slot)
     if not slot then return "vazio" end
     local fxn = 0
     if slot.fx and type(slot.fx.on) == "table" then fxn = count(slot.fx.on) end
-    return string.format("partes %d · itens %d · cores %d · fx %d", count(slot.ward or {}), #(slot.cat or {}), count(slot.colors or {}), fxn)
+    return string.format("partes %d Â· itens %d Â· cores %d Â· fx %d", count(slot.ward or {}), #(slot.cat or {}), count(slot.colors or {}), fxn)
 end
 -- valida e normaliza qualquer slot (carregado do arquivo ou importado): so numeros e nomes conhecidos
 local function sanitize(t)
@@ -5803,13 +5803,13 @@ local function encode(slot)
 end
 local function decode(code)
     code = tostring(code or ""):gsub("%s", "")
-    if code:sub(1, 4) ~= "SC1:" then return nil, "código inválido (precisa começar com SC1:)" end
+    if code:sub(1, 4) ~= "SC1:" then return nil, "cÃ³digo invÃ¡lido (precisa comeÃ§ar com SC1:)" end
     local raw = b64dec(code:sub(5))
-    if not raw or #raw < 2 then return nil, "código corrompido" end
+    if not raw or #raw < 2 then return nil, "cÃ³digo corrompido" end
     local ok, t = pcall(function() return HttpS:JSONDecode(raw) end)
-    if not ok then return nil, "código corrompido" end
+    if not ok then return nil, "cÃ³digo corrompido" end
     local s = sanitize(t)
-    if not s then return nil, "código sem dados de look" end
+    if not s then return nil, "cÃ³digo sem dados de look" end
     return s
 end
 
@@ -5869,13 +5869,13 @@ end
 function Looks.ApplyIndex(i)
     local s = Looks.Slots[i]
     if not s then
-        Toast("o slot " .. i .. " está vazio", false)
+        Toast("o slot " .. i .. " estÃ¡ vazio", false)
         return
     end
     task.spawn(function()
         local ok, nW, nC = applySlot(s)
         if ok then Toast(string.format("look \"%s\" aplicado (%d partes, %d itens)", s.name, nW, nC), true)
-        else Toast("não consegui aplicar o look (veja o registro em Config)", false) end
+        else Toast("nÃ£o consegui aplicar o look (veja o registro em Config)", false) end
     end)
 end
 function Looks.Next()
@@ -5906,7 +5906,7 @@ Section("Importar")
 local importBox
 do
     local row = Row(112)
-    local hint = Label(row, "Cole um código SC1:... (do EXPORTAR de um look seu ou de um amigo). O look entra no primeiro slot livre. O código só carrega IDs e cores, nada mais.",
+    local hint = Label(row, "Cole um cÃ³digo SC1:... (do EXPORTAR de um look seu ou de um amigo). O look entra no primeiro slot livre. O cÃ³digo sÃ³ carrega IDs e cores, nada mais.",
         11, T.Sub, F.Body, nil, UDim2.fromOffset(16, 8), UDim2.new(1, -32, 0, 34))
     hint.TextWrapped = true
     hint.TextYAlignment = Enum.TextYAlignment.Top
@@ -5934,9 +5934,9 @@ end
 Section("Seus looks")
 do
     local card = Row(48)
-    Label(card, "Salve o que está no seu personagem agora em um slot, ou aplique um look salvo.", 11, T.Sub, F.Body, nil,
+    Label(card, "Salve o que estÃ¡ no seu personagem agora em um slot, ou aplique um look salvo.", 11, T.Sub, F.Body, nil,
         UDim2.fromOffset(16, 0), UDim2.new(1, -150, 1, 0)).TextWrapped = true
-    Button(card, "ALEATÓRIO", UDim2.new(1, -118, 0.5, -15), UDim2.fromOffset(104, 30), T.Card, function()
+    Button(card, "ALEATÃ“RIO", UDim2.new(1, -118, 0.5, -15), UDim2.fromOffset(104, 30), T.Card, function()
         local list = Looks.Names()
         if #list == 0 then
             Toast("nenhum look salvo ainda", false)
@@ -5972,9 +5972,9 @@ for i = 1, SLOTS do
         if not s then return end
         if setclipboard then
             pcall(setclipboard, encode(s))
-            Toast("código do look copiado (cole no IMPORTAR de um amigo)", true)
+            Toast("cÃ³digo do look copiado (cole no IMPORTAR de um amigo)", true)
         else
-            Toast("seu executor não tem setclipboard", false)
+            Toast("seu executor nÃ£o tem setclipboard", false)
         end
     end)
     local del = Button(card, "APAGAR", UDim2.new(0.5, 5, 0, 102), UDim2.new(0.5, -17, 0, 28), T.Bad, function()
@@ -6095,12 +6095,12 @@ function Env.Apply()
 end
 
 local PRESETS = {
-    {id = "off", name = "Padrão"},
+    {id = "off", name = "PadrÃ£o"},
     {id = "cinema", name = "Cinema", c = {sat = 0.12, con = 0.18, bloom = 0.35, rays = 0.05, bright = 2, expo = 0, tint = {255, 238, 218}}},
     {id = "neon", name = "Neon", c = {sat = 0.45, con = 0.25, bloom = 0.9, rays = 0, bright = 2, expo = 0.1, tint = {235, 220, 255}}},
     {id = "noir", name = "Noir", c = {sat = -1, con = 0.35, bloom = 0.15, rays = 0, bright = 1.6, expo = -0.1, tint = {255, 255, 255}}},
     {id = "sonho", name = "Sonho", c = {sat = 0.2, con = -0.05, bloom = 0.85, rays = 0.2, dof = true, bright = 2.4, expo = 0.2, tint = {255, 232, 244}}},
-    {id = "porsol", name = "Pôr do sol", c = {sat = 0.25, con = 0.12, bloom = 0.4, rays = 0.3, clock = 17.9, useClock = true, bright = 2, expo = 0, tint = {255, 214, 178}}},
+    {id = "porsol", name = "PÃ´r do sol", c = {sat = 0.25, con = 0.12, bloom = 0.4, rays = 0.3, clock = 17.9, useClock = true, bright = 2, expo = 0, tint = {255, 214, 178}}},
 }
 local segPreset
 local function loadPreset(p)
@@ -6151,7 +6151,7 @@ handles.clock = Slider("Hora do dia", 0, 24, 14, "%.1f h", function(v)
     cfgE.clock = v
     if cfgE.on then Env.Apply() end
 end, "env clock")
-handles.lock = Toggle("Travar a hora (o jogo não muda)", false, function(v)
+handles.lock = Toggle("Travar a hora (o jogo nÃ£o muda)", false, function(v)
     cfgE.lockClock = v
     if cfgE.on then Env.Apply() end
 end, "env lock")
@@ -6159,11 +6159,11 @@ handles.bright = Slider("Brilho", 0, 5, 2, "%.1f", function(v)
     cfgE.bright = v
     if cfgE.on then Env.Apply() end
 end, "env bright")
-handles.expo = Slider("Exposição", -2, 2, 0, "%.2f", function(v)
+handles.expo = Slider("ExposiÃ§Ã£o", -2, 2, 0, "%.2f", function(v)
     cfgE.expo = v
     if cfgE.on then Env.Apply() end
 end, "env expo")
-handles.sat = Slider("Saturação", -1, 1, 0, "%.2f", function(v)
+handles.sat = Slider("SaturaÃ§Ã£o", -1, 1, 0, "%.2f", function(v)
     cfgE.sat = v
     if cfgE.on then Env.Apply() end
 end, "env sat")
@@ -6237,7 +6237,7 @@ end
 Section("Modo foto")
 do
     local row = Row(64)
-    local hint = Label(row, "Esconde o menu e a interface do Roblox por 8 segundos pra você tirar print, e depois tudo volta sozinho.",
+    local hint = Label(row, "Esconde o menu e a interface do Roblox por 8 segundos pra vocÃª tirar print, e depois tudo volta sozinho.",
         11, T.Sub, F.Body, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -190, 1, 0))
     hint.TextWrapped = true
     Button(row, "ESCONDER 8s", UDim2.new(1, -150, 0.5, -17), UDim2.fromOffset(136, 34), T.Accent, function()
@@ -6283,7 +6283,7 @@ Toggle("Ativar aimlock", false, function(v)
     Aim.Enabled = v
     if not v and Aim.Holding then releaseAim() end
     refreshFov()
-    Toast(v and ("aimlock ligado · segure " .. keyName(Aim.Key)) or "aimlock desligado", v)
+    Toast(v and ("aimlock ligado Â· segure " .. keyName(Aim.Key)) or "aimlock desligado", v)
 end, "Enable aimlock")
 
 do
@@ -6309,7 +6309,7 @@ do
     local row = Row(44)
     Label(row, "Mirar em", 13, T.Text, F.Body, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -170, 1, 0))
     local order = {"Head", "UpperTorso", "HumanoidRootPart"}
-    local nice = {Head = "Cabeça", UpperTorso = "Tronco", HumanoidRootPart = "Raiz"}
+    local nice = {Head = "CabeÃ§a", UpperTorso = "Tronco", HumanoidRootPart = "Raiz"}
     local idx = 1
     local sp = Persist.Get("aim:part", nil)
     for i, n in ipairs(order) do
@@ -6326,25 +6326,25 @@ do
 end
 
 Section("Mira")
-Slider("FOV do alvo (só na 1ª escolha)", 40, 600, Aim.FOV, "%d px", function(v)
+Slider("FOV do alvo (sÃ³ na 1Âª escolha)", 40, 600, Aim.FOV, "%d px", function(v)
     Aim.FOV = math.floor(v)
     refreshFov()
 end, "Target FOV (first pick only)")
-Slider("Suavização (0 = trava seca)", 0, 0.9, Aim.Smooth, "%.2f", function(v) Aim.Smooth = v end, "Smoothness (0 = snap)")
-Slider("Previsão", 0, 0.3, Aim.Predict, "%.2f s", function(v) Aim.Predict = v end, "Prediction")
+Slider("SuavizaÃ§Ã£o (0 = trava seca)", 0, 0.9, Aim.Smooth, "%.2f", function(v) Aim.Smooth = v end, "Smoothness (0 = snap)")
+Slider("PrevisÃ£o", 0, 0.3, Aim.Predict, "%.2f s", function(v) Aim.Predict = v end, "Prediction")
 
 Section("Filtros")
 Toggle("Ignorar o seu time", Aim.TeamCheck, function(v) Aim.TeamCheck = v end, "Team check")
-Toggle("Só alvos visíveis (sem parede)", Aim.WallCheck, function(v) Aim.WallCheck = v end, "Wall check (pick visible only)")
-Toggle("Mostrar círculo do FOV", Aim.ShowFOV, function(v)
+Toggle("SÃ³ alvos visÃ­veis (sem parede)", Aim.WallCheck, function(v) Aim.WallCheck = v end, "Wall check (pick visible only)")
+Toggle("Mostrar cÃ­rculo do FOV", Aim.ShowFOV, function(v)
     Aim.ShowFOV = v
     refreshFov()
 end, "Show FOV ring")
-Note("Segure o bind: trava no jogador mais perto do cursor e fica nele até morrer. Solte pra escolher outro.", 46)
+Note("Segure o bind: trava no jogador mais perto do cursor e fica nele atÃ© morrer. Solte pra escolher outro.", 46)
 end
 
 --------------------------------------------------------------------------------
--- VOLEI — linha de mira dos adversarios
+-- VOLEI â€” linha de mira dos adversarios
 --------------------------------------------------------------------------------
 do
 CurTab = Tab("Volei", 0, true)
@@ -6352,13 +6352,13 @@ Persist.Scope = "volley"
 
 local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
--- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
--- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE04"
+-- carimbo de build: aparece na tela quando a linha estÃ¡ ligada. Se vocÃª carregar
+-- um arquivo velho, esse nÃºmero nÃ£o muda â€” Ã© o jeito de saber o que estÃ¡ rodando.
+local BUILD = "BE06"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
-    MinPx = 90, MaxPx = 340,
+    MinPx = 90, MaxPx = 340, PixLen = 110,
     pairs = {}, ballLine = nil, ballOl = nil, ballDot = nil, cache = nil, t = 0,
     ForceFrame = true,
     Enemy = Color3.fromRGB(255, 60, 60),
@@ -6377,19 +6377,19 @@ if env and env.SilkcoreVolley then
 end
 if env then env.SilkcoreVolley = VB.pairs end
 
--- ── linha: Frame de GUI, não Drawing ────────────────────────────────────────
--- A versão anterior criava Drawing.new("Line") DENTRO do passo de render. Isso
--- funciona em alguns executores e falha em outros — e quando falha o passo
--- inteiro morre, sem erro na tela, e não desenha nada. Aqui a linha é um Frame
--- girado: um ScreenGui próprio e três Frames por jogador. Nenhuma API de
--- executor envolvida, então funciona onde a interface funciona.
+-- â”€â”€ linha: Frame de GUI, nÃ£o Drawing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- A versÃ£o anterior criava Drawing.new("Line") DENTRO do passo de render. Isso
+-- funciona em alguns executores e falha em outros â€” e quando falha o passo
+-- inteiro morre, sem erro na tela, e nÃ£o desenha nada. Aqui a linha Ã© um Frame
+-- girado: um ScreenGui prÃ³prio e trÃªs Frames por jogador. Nenhuma API de
+-- executor envolvida, entÃ£o funciona onde a interface funciona.
 local VBGui = nil
 do
     local sg = Instance.new("ScreenGui")
     sg.Name = "SilkcoreVolleyLines"
     sg.ResetOnSpawn = false
-    -- false de propósito: WorldToViewportPoint devolve coordenada de viewport, que
-    -- já desconta a barra de topo. IgnoreGuiInset=true deslocaria tudo ~36 px.
+    -- false de propÃ³sito: WorldToViewportPoint devolve coordenada de viewport, que
+    -- jÃ¡ desconta a barra de topo. IgnoreGuiInset=true deslocaria tudo ~36 px.
     sg.IgnoreGuiInset = false
     sg.DisplayOrder = 0
     sg.Parent = guiParent
@@ -6406,7 +6406,7 @@ do
     VBGui = sg
     VB.layer = layer
 
-    -- leitura ao vivo para diagnóstico: build, backend, pares, visíveis, altura
+    -- leitura ao vivo para diagnÃ³stico: build, backend, pares, visÃ­veis, altura
     local dbg = Instance.new("TextLabel")
     dbg.Name = "Build"
     dbg.Position = UDim2.fromOffset(10, 10)
@@ -6426,11 +6426,11 @@ do
     VB.dbg = dbg
 end
 
--- ── backend do desenho ──────────────────────────────────────────────────────
--- Drawing escreve direto no compositor do executor: mudar .From/.To não passa
--- por layout nenhum, então acompanha o frame sem engasgo. Frame girado é o
--- plano B — aparece em qualquer executor, mas cada escrita de Position/Size/
--- Rotation dispara um passo de layout da interface, e é isso que fazia a linha
+-- â”€â”€ backend do desenho â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- Drawing escreve direto no compositor do executor: mudar .From/.To nÃ£o passa
+-- por layout nenhum, entÃ£o acompanha o frame sem engasgo. Frame girado Ã© o
+-- plano B â€” aparece em qualquer executor, mas cada escrita de Position/Size/
+-- Rotation dispara um passo de layout da interface, e Ã© isso que fazia a linha
 -- andar aos pulos. Aqui os dois caminhos existem; o Drawing tem prioridade.
 local HAS_DRAWING = false
 do
@@ -6460,8 +6460,8 @@ local function applyStyle(p)
         p.d.AnchorPoint  = Vector2.new(0.5, 0.5)
         p.d.Size         = UDim2.fromOffset(VB.Dot * 2, VB.Dot * 2)
         p.d.BackgroundTransparency  = 1 - VB.Alpha
-        -- altura guardada no par: ler Size.Y.Offset a cada quadro é uma travessia
-        -- de reflect por jogador, por quadro, à toa.
+        -- altura guardada no par: ler Size.Y.Offset a cada quadro Ã© uma travessia
+        -- de reflect por jogador, por quadro, Ã  toa.
         p.olH, p.lH = olT, VB.Thick
         p.last = nil
     end
@@ -6512,19 +6512,19 @@ local function restyleAll()
     end
 end
 
--- câmera resolvida uma vez por quadro: Workspace.CurrentCamera é travessia de
--- serviço, e proj é chamado 2x por jogador e 2x por segmento de trajetória.
+-- cÃ¢mera resolvida uma vez por quadro: Workspace.CurrentCamera Ã© travessia de
+-- serviÃ§o, e proj Ã© chamado 2x por jogador e 2x por segmento de trajetÃ³ria.
 local CAM = nil
 
 local function proj(pos)
     local cam = CAM or Workspace.CurrentCamera
     if not cam then return nil end
     local v = cam:WorldToViewportPoint(pos)
-    -- O segundo retorno do Roblox (onScreen) é falso sempre que o ponto sai do
+    -- O segundo retorno do Roblox (onScreen) Ã© falso sempre que o ponto sai do
     -- viewport. Para a linha de mira isso apagava a ponta perto da borda; para
-    -- a marca de queda apagava o chão INTEIRO quando a câmera subia atrás da
-    -- bola — o destino saía por baixo da tela e o Drawing sumia junto.
-    -- Drawing recorta sozinho: basta o ponto estar na frente da câmera.
+    -- a marca de queda apagava o chÃ£o INTEIRO quando a cÃ¢mera subia atrÃ¡s da
+    -- bola â€” o destino saÃ­a por baixo da tela e o Drawing sumia junto.
+    -- Drawing recorta sozinho: basta o ponto estar na frente da cÃ¢mera.
     if v.Z <= 0 then return nil end
     return Vector2.new(v.X, v.Y)
 end
@@ -6538,7 +6538,7 @@ local function lookVec(char, head)
 end
 
 -- O jogo marca a bola com a tag "Ball" e a rede com "Net" via CollectionService.
--- Achar por tag é uma consulta ao índice, não uma varredura: o Workspace tem
+-- Achar por tag Ã© uma consulta ao Ã­ndice, nÃ£o uma varredura: o Workspace tem
 -- milhares de partes e o find antigo percorria todas a cada 2 s.
 local function findBall()
     local ok, cs = pcall(game.GetService, game, "CollectionService")
@@ -6559,9 +6559,9 @@ end
 -- ============================================================
 -- PREVER QUEDA
 -- ============================================================
--- A aceleração é MEDIDA quadro a quadro — (v - v_anterior) / dt — não assumida.
--- Fórmula fechada com workspace.Gravity erraria: o dump mostra VectorForce
--- mexendo na bola durante habilidade. Medindo, eu não preciso saber que existe.
+-- A aceleraÃ§Ã£o Ã© MEDIDA quadro a quadro â€” (v - v_anterior) / dt â€” nÃ£o assumida.
+-- FÃ³rmula fechada com workspace.Gravity erraria: o dump mostra VectorForce
+-- mexendo na bola durante habilidade. Medindo, eu nÃ£o preciso saber que existe.
 local VBX = {
     cs = game:GetService("CollectionService"),
     Prev = nil, PrevT = 0, Accel = Vector3.new(0, -workspace.Gravity, 0), Settle = 0,
@@ -6571,9 +6571,9 @@ local VBX = {
     Txt = nil, Flare = nil, RingN = 3,
 }
 
--- Alguns executores não expõem todos os campos de Drawing (Thickness em Circle,
--- NumSides, Filled...). Escrever campo inexistente lança erro e mataria o passo
--- de render inteiro — nenhuma linha, nenhuma marca, nada. set isola cada escrita.
+-- Alguns executores nÃ£o expÃµem todos os campos de Drawing (Thickness em Circle,
+-- NumSides, Filled...). Escrever campo inexistente lanÃ§a erro e mataria o passo
+-- de render inteiro â€” nenhuma linha, nenhuma marca, nada. set isola cada escrita.
 function VBX.set(o, k, v)
     if not o then return end
     pcall(function() o[k] = v end)
@@ -6637,7 +6637,7 @@ function VBX.floor(pos)
     VBX.FloorT = os.clock()
 end
 
--- 0.5*a*t^2 + v*t + d = 0  →  menor raiz positiva
+-- 0.5*a*t^2 + v*t + d = 0  â†’  menor raiz positiva
 function VBX.solve(d, v, a)
     if math.abs(a) < 1e-4 then
         if math.abs(v) < 1e-4 then return nil end
@@ -6674,9 +6674,9 @@ function VBX.hideMark()
     VBX.Txt.Visible = false
 end
 
--- marca de impacto: três anéis + núcleo + contagem. O anel externo respira
--- enquanto falta tempo e fecha conforme o impacto chega — a animação carrega
--- informação, não só enfeite.
+-- marca de impacto: trÃªs anÃ©is + nÃºcleo + contagem. O anel externo respira
+-- enquanto falta tempo e fecha conforme o impacto chega â€” a animaÃ§Ã£o carrega
+-- informaÃ§Ã£o, nÃ£o sÃ³ enfeite.
 function VBX.drawMark(sp, col, urgent, scale, label)
     VBX.build()
     local pulse = 0.5 + 0.5 * math.sin(os.clock() * 6)
@@ -6723,9 +6723,9 @@ function VBX.step(ball)
     local now = os.clock()
     VBX.build()
 
-    -- FASE 1 — alguém está mirando o saque. O jogo calculou a queda e deixou o
-    -- Beam "Trajectory" dentro do launcher; Attachment1 dele É o ponto exato
-    -- (dump 37520-37539). Ler o Beam, e não o Terrain, evita pegar a mira de
+    -- FASE 1 â€” alguÃ©m estÃ¡ mirando o saque. O jogo calculou a queda e deixou o
+    -- Beam "Trajectory" dentro do launcher; Attachment1 dele Ã‰ o ponto exato
+    -- (dump 37520-37539). Ler o Beam, e nÃ£o o Terrain, evita pegar a mira de
     -- outro jogador quando duas pessoas miram ao mesmo tempo.
     local live = ball ~= nil and ball.Parent ~= nil
     local aimPos = nil
@@ -6765,8 +6765,8 @@ function VBX.step(ball)
 
     local p, v = ball.Position, ball.AssemblyLinearVelocity
 
-    -- aceleração medida na bola viva. O dump (54553) mostra que o jogo integra
-    -- pos(t) = p + v*t + accel*0.5*t² — aceleração constante por trecho. Medindo
+    -- aceleraÃ§Ã£o medida na bola viva. O dump (54553) mostra que o jogo integra
+    -- pos(t) = p + v*t + accel*0.5*tÂ² â€” aceleraÃ§Ã£o constante por trecho. Medindo
     -- accel eu cubro gravidade-base, GravityMultiplier de habilidade e drag sem
     -- precisar saber qual habilidade foi usada.
     if VBX.Prev and VBX.PrevT > 0 then
@@ -6795,16 +6795,16 @@ function VBX.step(ball)
     VBX.LastT = T
     if not T or T <= 0 or T > 15 then VBX.hide(); return end
 
-    -- amostra de tempo igual. Aceleração constante ⇒ parábola exata, então a
-    -- curva desenhada é a curva real, não uma aproximação por passos.
+    -- amostra de tempo igual. AceleraÃ§Ã£o constante â‡’ parÃ¡bola exata, entÃ£o a
+    -- curva desenhada Ã© a curva real, nÃ£o uma aproximaÃ§Ã£o por passos.
     local pts = {}
     for i = 0, VBX.Segs do
         local t = T * i / VBX.Segs
         pts[i + 1] = p + v * t + VBX.Accel * (0.5 * t * t)
     end
 
-    -- varredura segmento a segmento: a rede é parede fina, e um raio único
-    -- bola→destino tunnelaria por ela. Segmento não.
+    -- varredura segmento a segmento: a rede Ã© parede fina, e um raio Ãºnico
+    -- bolaâ†’destino tunnelaria por ela. Segmento nÃ£o.
     local rp = VBX.params()
     local cut, cutPos = nil, nil
     for i = 1, VBX.Segs do
@@ -6841,7 +6841,7 @@ function VBX.step(ball)
         end
     end
 
-    -- orbe fantasma percorrendo a trajetória: comunica ritmo, não só destino
+    -- orbe fantasma percorrendo a trajetÃ³ria: comunica ritmo, nÃ£o sÃ³ destino
     local tp = T * ((now * 0.9) % 1)
     local gs = proj(p + v * tp + VBX.Accel * (0.5 * tp * tp))
     if gs then
@@ -6863,9 +6863,9 @@ function VBX.step(ball)
 end
 
 
--- Roda fora do passo de render: criar Instance (ou Drawing) dentro do quadro é
--- o que fazia a interface engasgar. Aqui só a lista de pares é mantida, e a
--- altura da origem é medida uma vez por personagem.
+-- Roda fora do passo de render: criar Instance (ou Drawing) dentro do quadro Ã©
+-- o que fazia a interface engasgar. Aqui sÃ³ a lista de pares Ã© mantida, e a
+-- altura da origem Ã© medida uma vez por personagem.
 local function sync()
     local seen = {}
     local now = os.clock()
@@ -6882,16 +6882,16 @@ local function sync()
             end
             -- Mede a altura 3 vezes no primeiro ~3 s (tempo do rig carregar) e
             -- depois congela. Reamostrar sempre fazia a linha pular de altura a
-            -- cada ciclo, porque a cabeça sobe e desce com a animação parada.
+            -- cada ciclo, porque a cabeÃ§a sobe e desce com a animaÃ§Ã£o parada.
             if char and (p.yoffSettle or 0) > 0 and now - (p.yoffAt or -99) > 1.5 then
                 p.yoffAt = now
                 p.yoffSettle = p.yoffSettle - 1
-                -- Origem = cabeça. O rig deste jogo não expõe "Head" como filho direto
-                -- do modelo — daí a busca recursiva. Se a cabeça estiver no mesmo
-                -- nível do root (rig com as peças empilhadas na origem, comum em
-                -- personagem por SkinnedMesh), ela não serve de âncora: nesse caso
+                -- Origem = cabeÃ§a. O rig deste jogo nÃ£o expÃµe "Head" como filho direto
+                -- do modelo â€” daÃ­ a busca recursiva. Se a cabeÃ§a estiver no mesmo
+                -- nÃ­vel do root (rig com as peÃ§as empilhadas na origem, comum em
+                -- personagem por SkinnedMesh), ela nÃ£o serve de Ã¢ncora: nesse caso
                 -- usa o topo da caixa do modelo. E se nem isso der altura, cai em
-                -- 2,6 studs acima do root — o que nunca deixa a linha no chão.
+                -- 2,6 studs acima do root â€” o que nunca deixa a linha no chÃ£o.
                 local root = char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart
                 if root then
                     local head = char:FindFirstChild("Head", true)
@@ -6935,7 +6935,7 @@ local function stepRaw(dt)
         if char and not char.Parent then char = nil end
         local root = char and (char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart or char:FindFirstChild("Head"))
         -- O jogo usa Team real do Roblox (Red/Purple/White/Black/Orange Team),
-        -- então comparar o objeto Team é exato. Sem time (lobby), mostra todos.
+        -- entÃ£o comparar o objeto Team Ã© exato. Sem time (lobby), mostra todos.
         local ally = VB.OnlyEnemy and myTeam ~= nil and plr.Team == myTeam
         if VB.On and root and not ally then
             local o
@@ -6944,12 +6944,12 @@ local function stepRaw(dt)
             else
                 o = root.Position + Vector3.new(0, p.yoff or 0, 0)
             end
-            -- A direção sai do Neck, que replica a ~10-20 Hz e NÃO é interpolado
-            -- pelo cliente — era daí que vinha o pulo quadro a quadro. Suaviza
+            -- A direÃ§Ã£o sai do Neck, que replica a ~10-20 Hz e NÃƒO Ã© interpolado
+            -- pelo cliente â€” era daÃ­ que vinha o pulo quadro a quadro. Suaviza
             -- com lerp dependente de dt: mesma velocidade em qualquer FPS.
-            -- Só o plano horizontal. A animação de saque levanta a cabeça e o LookVector
-            -- do pescoço ia junto: a linha subia com o saque. Zerar o Y deixa a
-            -- linha deitada mesmo com o adversário olhando pra cima ou pra baixo.
+            -- SÃ³ o plano horizontal. A animaÃ§Ã£o de saque levanta a cabeÃ§a e o LookVector
+            -- do pescoÃ§o ia junto: a linha subia com o saque. Zerar o Y deixa a
+            -- linha deitada mesmo com o adversÃ¡rio olhando pra cima ou pra baixo.
             local lv = lookVec(char, root)
             local want = Vector3.new(lv.X, 0, lv.Z)
             if want.Magnitude > 0.05 then want = want.Unit else want = p.dir end
@@ -6966,27 +6966,49 @@ local function stepRaw(dt)
                 p.dir = (nd.Magnitude > 0.05) and nd.Unit or want
             end
             local a = proj(o)
-            local bt = proj(o + p.dir * VB.Len)
             local b = nil
-            if a and bt then
-                -- Comprimento em tela com piso e teto. Sem o piso a linha virava
-                -- um risco de 3 px quando o adversário olhava na direção da
-                -- câmera — e era isso que parecia um poste em pé em vez de uma
-                -- linha deitada. O piso mantém a leitura; o teto impede que ela
-                -- atravesse a tela inteira quando o alvo está perto.
-                local dxs, dys = bt.X - a.X, bt.Y - a.Y
-                local lenS = math.sqrt(dxs * dxs + dys * dys)
+            if a then
+                -- DireÃ§Ã£o em vista de cima, girada para a tela: direita da cÃ¢mera
+                -- no X, afastar-se da cÃ¢mera no Y. Sem isso, alvo longe com cÃ¢mera
+                -- alta projetava a direÃ§Ã£o horizontal pra BAIXO na tela e a linha
+                -- descia atÃ© o chÃ£o â€” era esse o "fica no chÃ£o quando tÃ¡ longe".
+                -- Comprimento fixo em pixel: nÃ£o encolhe, nÃ£o estica, nÃ£o some.
                 local angS
-                if lenS > 1 then
-                    angS = math.deg(math.atan2(dys, dxs))
-                    lenS = math.clamp(lenS, VB.MinPx, VB.MaxPx)
-                else
-                    angS = p.sang or 0
-                    lenS = VB.MinPx
+                local cf = CAM and CAM.CFrame
+                if cf then
+                    local R, Fw, U = cf.RightVector, cf.LookVector, cf.UpVector
+                    local r2 = Vector3.new(R.X, 0, R.Z)
+                    local f2 = Vector3.new(Fw.X, 0, Fw.Z)
+                    if r2.Magnitude < 0.05 then r2 = Vector3.new(U.X, 0, U.Z) end
+                    if f2.Magnitude < 0.2 then
+                        local u2 = Vector3.new(U.X, 0, U.Z)
+                        if u2.Magnitude > 0.05 then f2 = u2 end
+                    end
+                    if r2.Magnitude > 0.05 and f2.Magnitude > 0.05 then
+                        r2, f2 = r2.Unit, f2.Unit
+                        local sx = p.dir.X * r2.X + p.dir.Z * r2.Z
+                        local sy = -(p.dir.X * f2.X + p.dir.Z * f2.Z)
+                        if math.abs(sx) + math.abs(sy) > 0.15 then
+                            -- O problema nunca foi a âncora: era a direção. Alvo
+                            -- que olha na direção da câmera projeta quase reto
+                            -- pra BAIXO, e com comprimento fixo a linha descia
+                            -- pelo corpo inteiro. Aqui o desvio vertical é
+                            -- comprimido e travado em 25°: a linha fica deitada,
+                            -- no máximo inclinada, em qualquer distância.
+                            local ang0 = math.deg(math.atan2(sy, sx))
+                            local base = ((ang0 > 90) or (ang0 < -90)) and 180 or 0
+                            local off = ang0 - base
+                            if off > 90 then off = off - 360 elseif off < -90 then off = off + 360 end
+                            off = math.clamp(off * 0.35, -25, 25)
+                            angS = base + off
+                        end
+                    end
                 end
+                if not angS then angS = p.sang or 0 end
                 p.sang = angS
                 local rad = math.rad(angS)
-                b = Vector2.new(a.X + math.cos(rad) * lenS, a.Y + math.sin(rad) * lenS)
+                b = Vector2.new(a.X + math.cos(rad) * VB.PixLen,
+                                a.Y + math.sin(rad) * VB.PixLen)
             end
             if a and b then
                 if p.kind == "drawing" then
@@ -6994,9 +7016,9 @@ local function stepRaw(dt)
                     p.l.From,  p.l.To,  p.l.Visible  = a, b, true
                     p.d.Position, p.d.Visible = b, VB.ShowDot
                 else
-                    -- Cada escrita em Frame dispara layout de interface: só grava
+                    -- Cada escrita em Frame dispara layout de interface: sÃ³ grava
                     -- o que mudou de verdade. Abaixo de meio pixel e meio grau o
-                    -- olho não vê — e era esse excesso que travava a linha.
+                    -- olho nÃ£o vÃª â€” e era esse excesso que travava a linha.
                     local dx, dy = b.X - a.X, b.Y - a.Y
                     local len = math.sqrt(dx * dx + dy * dy)
                     local mid = (a + b) * 0.5
@@ -7067,14 +7089,14 @@ local function stepRaw(dt)
     end
 end
 
--- O passo nunca derruba o bind: erro vira texto no diagnóstico e o quadro
+-- O passo nunca derruba o bind: erro vira texto no diagnÃ³stico e o quadro
 -- seguinte tenta de novo. Antes, um erro de Drawing matava o passo pra sempre.
 local function step(dt)
     local ok, err = pcall(stepRaw, dt)
     if not ok then stepErr = tostring(err) end
 end
 
--- exporta o passo para o SilkGuard: ele estava fora de escopo lá embaixo e o
+-- exporta o passo para o SilkGuard: ele estava fora de escopo lÃ¡ embaixo e o
 -- vigia acabava guardando nil. Era esse nil que matava a linha de mira no
 -- primeiro travamento do frame.
 VOL_STEP = step
@@ -7148,16 +7170,16 @@ Toggle("Ativar linha de mira", false, function(v)
     end
 end, "Volley aim line")
 
-Toggle("Só inimigos (ignorar meu time)", true, function(v)
+Toggle("SÃ³ inimigos (ignorar meu time)", true, function(v)
     VB.OnlyEnemy = v
-    Toast(v and "só adversários" or "todos os jogadores", true)
+    Toast(v and "sÃ³ adversÃ¡rios" or "todos os jogadores", true)
 end, "Volley enemy only")
 
-Slider("Tamanho da linha", 4, 40, 14, "%d studs", function(v)
-    VB.Len = math.floor(v + 0.5)
-end, "Volley line length")
+Slider("Comprimento da linha (px)", 40, 260, 110, "%d px", function(v)
+    VB.PixLen = math.floor(v + 0.5)
+end, "Volley line px")
 
-Section("Aparência da linha")
+Section("AparÃªncia da linha")
 Slider("Espessura", 1, 14, 4, "%d px", function(v)
     VB.Thick = math.floor(v + 0.5)
     restyleAll()
@@ -7193,7 +7215,7 @@ BtnRow("DEIXAR BEM VISIVEL", T.Card, function()
     Toast("grossa, contorno forte, ponto ligado", true)
 end, 34)
 
-Toggle("Trajetória da bola", true, function(v) VB.Ball = v end, "Volley ball trajec")
+Toggle("TrajetÃ³ria da bola", true, function(v) VB.Ball = v end, "Volley ball trajec")
 
 Section("Prever queda")
 Toggle("Marcar onde a bola cai", false, function(v)
@@ -7209,8 +7231,8 @@ Toggle("Marcar onde a bola cai", false, function(v)
 end, "Volley predict")
 
 -- Persist devolve o desenho do switch, mas nunca chama o callback: depois de
--- re-executar, a linha ficava com "ON" na tela e VB.On em false — nada desenhado.
--- Aqui o estado real é relido do disco uma vez, com as mesmas chaves.
+-- re-executar, a linha ficava com "ON" na tela e VB.On em false â€” nada desenhado.
+-- Aqui o estado real Ã© relido do disco uma vez, com as mesmas chaves.
 VB.On        = Persist.Get("volley:Volley aim line", false) == true
 VB.OnlyEnemy = Persist.Get("volley:Volley enemy only", true) ~= false
 VB.Ball      = Persist.Get("volley:Volley ball trajec", true) ~= false
@@ -7227,7 +7249,7 @@ BtnRow("TESTAR PREVISAO", T.Card, function()
 end, 34)
 
 -- cria os Drawings agora, na thread principal. Criar dentro do passo de render
--- funciona em alguns executores e falha em outros — aqui não tem risco.
+-- funciona em alguns executores e falha em outros â€” aqui nÃ£o tem risco.
 if Drawing then
     local okB, errB = pcall(VBX.build)
     if not okB then VBX.Err = tostring(errB) end
@@ -7235,7 +7257,7 @@ end
 
 Note("Duas fases. Mirando o saque, a marca usa o destino que o proprio jogo ja calculou (attachment TrajectoryFinish no Terrain) e escreve MIRA. Com a bola no ar, a aceleracao e medida dela quadro a quadro e a queda sai da equacao exata de parabola que o jogo usa. Rede no caminho corta o arco e pinta de ambar. A contagem e o tempo real ate o impacto. Tudo leitura: nada sai daqui.", 76)
 
-Note("A linha sai do centro do corpo do adversário — medida pela caixa do modelo, não pelo nome da parte, porque neste jogo o HumanoidRootPart fica no chão — na direção em que ele está olhando. O Roblox replica a rotação do pescoço, então dá pra ler a intenção de ataque antes do toque. A direção é suavizada por lerp: o pescoço replica a 10-20 Hz e sem isso a linha andava aos pulos. É desenho de tela: nada é criado no jogo, nada replica pro servidor.", 58)
+Note("A linha sai do centro do corpo do adversÃ¡rio â€” medida pela caixa do modelo, nÃ£o pelo nome da parte, porque neste jogo o HumanoidRootPart fica no chÃ£o â€” na direÃ§Ã£o em que ele estÃ¡ olhando. O Roblox replica a rotaÃ§Ã£o do pescoÃ§o, entÃ£o dÃ¡ pra ler a intenÃ§Ã£o de ataque antes do toque. A direÃ§Ã£o Ã© suavizada por lerp: o pescoÃ§o replica a 10-20 Hz e sem isso a linha andava aos pulos. Ã‰ desenho de tela: nada Ã© criado no jogo, nada replica pro servidor.", 58)
 
 if HAS_DRAWING then
     Toggle("Desenho por Drawing (experimental)", false, function(v)
@@ -7263,11 +7285,11 @@ BtnRow("DIAGNOSTICO DA LINHA", T.Card, function()
     pcall(function() print("[SilkCore Volei]", msg) end)
 end, 34)
 
--- a linha não depende mais de Drawing: o passo é sempre amarrado. Se o executor
--- não tiver Drawing, só a trajetória da bola e a previsão de queda ficam fora.
+-- a linha nÃ£o depende mais de Drawing: o passo Ã© sempre amarrado. Se o executor
+-- nÃ£o tiver Drawing, sÃ³ a trajetÃ³ria da bola e a previsÃ£o de queda ficam fora.
 RunService:BindToRenderStep(VOL_BIND, Enum.RenderPriority.Camera.Value + 4, step)
 if not Drawing then
-    Note("Seu executor não expõe a Drawing API: a linha de mira funciona igual, mas a trajetória da bola e a previsão de queda não desenham.", 40)
+    Note("Seu executor nÃ£o expÃµe a Drawing API: a linha de mira funciona igual, mas a trajetÃ³ria da bola e a previsÃ£o de queda nÃ£o desenham.", 40)
 end
 end
 
@@ -7283,14 +7305,14 @@ Toggle("Tela esticada", false, function(v)
     Toast(v and "tela esticada ligada" or "tela esticada desligada", v)
 end, "Stretch screen")
 Slider("Quanto esticar (menor = mais largo)", 0.35, 1, Mods.Stretch.Y, "%.2f", function(v) Mods.Stretch.Y = v end, "Stretch amount (lower = wider)")
-Note("Achata a imagem na vertical e os jogadores parecem mais largos. É só visual; o aimlock continua usando a câmera real.", 46)
+Note("Achata a imagem na vertical e os jogadores parecem mais largos. Ã‰ sÃ³ visual; o aimlock continua usando a cÃ¢mera real.", 46)
 Section("Movimento")
 Toggle("Pulo duplo", false, function(v)
     Mods.DJ.Enabled, Mods.DJ.Used = v, 0
     Toast(v and "pulo duplo ligado" or "pulo duplo desligado", v)
 end, "Double jump")
 Slider("Pulos no ar", 1, 5, Mods.DJ.Max, "%.0f", function(v) Mods.DJ.Max = math.max(1, math.floor(v + 0.5)) end, "Air jumps")
-Note("Aperte pular de novo no ar. Zera quando você toca o chão. Se o jogo bloqueia pulo ou zera a velocidade, esse recurso não funciona nele.", 46)
+Note("Aperte pular de novo no ar. Zera quando vocÃª toca o chÃ£o. Se o jogo bloqueia pulo ou zera a velocidade, esse recurso nÃ£o funciona nele.", 46)
 end
 
 --------------------------------------------------------------------------------
@@ -7322,8 +7344,8 @@ local function Chart(title, color)
     return {bars = bars, val = val, foot = foot}
 end
 Section("Ao vivo")
-local cFps = Chart("FPS (últimos 30 s)", T.Accent)
-local cPing = Chart("PING (últimos 30 s)", T.Accent2)
+local cFps = Chart("FPS (Ãºltimos 30 s)", T.Accent)
+local cPing = Chart("PING (Ãºltimos 30 s)", T.Accent2)
 local function stats(list)
     local mn, mx, sum = math.huge, 0, 0
     for _, v in ipairs(list) do
@@ -7343,7 +7365,7 @@ local function draw(chart, list, floorMax, unit)
     end
     local mn = stats(list)
     chart.val.Text = string.format("%d %s", list[n] or 0, unit)
-    chart.foot.Text = string.format("mín %d   média %d   máx %d", mn == math.huge and 0 or mn, avg, mx)
+    chart.foot.Text = string.format("mÃ­n %d   mÃ©dia %d   mÃ¡x %d", mn == math.huge and 0 or mn, avg, mx)
 end
 LAY.PerfDraw = function()
     draw(cFps, P.fps, 60, "fps")
@@ -7354,7 +7376,7 @@ tabHooks["Desempenho"] = function()
 end
 do
     local row = Row(54)
-    local lbl = Label(row, "MEMÓRIA DO CLIENTE", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.fromOffset(160, 54))
+    local lbl = Label(row, "MEMÃ“RIA DO CLIENTE", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.fromOffset(160, 54))
     local memLbl = Label(row, "-", 15, T.Text, F.Mono, Enum.TextXAlignment.Right, UDim2.new(1, -216, 0, 0), UDim2.fromOffset(200, 54))
     task.spawn(function()
         while row.Parent do
@@ -7365,7 +7387,7 @@ do
     lbl.ZIndex = 2
 end
 
-Section("Ajustes de gráfico")
+Section("Ajustes de grÃ¡fico")
 local pendingCap = 144
 Slider("Limite de FPS", 30, 360, 144, "%d", function(v)
     pendingCap = math.floor(v + 0.5)
@@ -7375,19 +7397,19 @@ BtnRow("Aplicar o limite de FPS", T.Accent, function()
         setfpscap(pendingCap)
         Toast("limite de fps: " .. pendingCap, true)
     else
-        Toast("seu executor não tem setfpscap", false)
+        Toast("seu executor nÃ£o tem setfpscap", false)
     end
 end, 40)
 Toggle("Sombras do jogo", true, function(v)
     game:GetService("Lighting").GlobalShadows = v
 end, "shadows")
-Slider("Qualidade gráfica", 1, 10, 10, "%d", function(v)
+Slider("Qualidade grÃ¡fica", 1, 10, 10, "%d", function(v)
     local n = math.clamp(math.floor(v + 0.5), 1, 10)
     pcall(function()
         settings().Rendering.QualityLevel = Enum.QualityLevel["Level" .. string.format("%02d", n)]
     end)
 end, "quality")
-BtnRow("Liberar memória (coletar lixo)", T.Card, function()
+BtnRow("Liberar memÃ³ria (coletar lixo)", T.Card, function()
     local before = P.mem
     pcall(collectgarbage, "collect")
     Toast("coleta de lixo executada (era " .. math.floor(before) .. " MB)", true)
@@ -7401,7 +7423,7 @@ local MenuKeys = {Extra = nil, Look = nil, Binding = false, OnBind = function() 
 do
 CurTab = Tab("Config", 0, true)
 Persist.Scope = "cfg"
-Section("Aparência")
+Section("AparÃªncia")
 do
     local row = Row(114)
     Label(row, "Tema", 13, T.Text, F.Body, nil, UDim2.fromOffset(16, 10), UDim2.fromOffset(200, 18))
@@ -7444,21 +7466,21 @@ Toggle("Desfoque do fundo", true, function(v)
     setBlur(isOpen)
 end, "Blur")
 local scene3dOn = true
-Toggle("Cenário 3D no fundo", true, function(v)
+Toggle("CenÃ¡rio 3D no fundo", true, function(v)
     scene3dOn = v
     LAY.S3.enable(v and not ANIM.reduce)
 end, "Scene3D")
-Toggle("Animações reduzidas", false, function(v)
+Toggle("AnimaÃ§Ãµes reduzidas", false, function(v)
     ANIM.reduce = v
     ANIM.speed = v and 0.3 or 1
     LAY.S3.enable(scene3dOn and not v)
 end, "Reduce")
-Slider("Transparência dos painéis", 0, 0.6, 0.2, "%.2f", function(v)
+Slider("TransparÃªncia dos painÃ©is", 0, 0.6, 0.2, "%.2f", function(v)
     LAY.Rail.BackgroundTransparency = v
     LAY.Panel.BackgroundTransparency = v
 end, "PanelT")
 
-Section("Cor própria")
+Section("Cor prÃ³pria")
 do
     local ch, cs, cv = 0.97, 0.78, 1
     local swFrame, hexLbl
@@ -7472,11 +7494,11 @@ do
             hexLbl.Text = string.format("#%02X%02X%02X", math.floor(c.R * 255 + 0.5), math.floor(c.G * 255 + 0.5), math.floor(c.B * 255 + 0.5))
         end
     end
-    Slider("Matiz", 0, 360, ch * 360, "%d°", function(v)
+    Slider("Matiz", 0, 360, ch * 360, "%dÂ°", function(v)
         ch = v / 360
         refreshPick()
     end, "cuH")
-    Slider("Saturação", 0, 100, cs * 100, "%d%%", function(v)
+    Slider("SaturaÃ§Ã£o", 0, 100, cs * 100, "%d%%", function(v)
         cs = v / 100
         refreshPick()
     end, "cuS")
@@ -7534,7 +7556,7 @@ end
 do
     local row = Row(48)
     Label(row, "Tecla pra ciclar os looks", 13, T.Text, F.Body, nil, UDim2.fromOffset(16, 6), UDim2.new(1, -190, 0, 18))
-    Label(row, "aplica o próximo look salvo", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 26), UDim2.new(1, -190, 0, 14))
+    Label(row, "aplica o prÃ³ximo look salvo", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(16, 26), UDim2.new(1, -190, 0, 14))
     local saved = Persist.Get("cfg:lookkey", nil)
     if type(saved) == "string" then
         local ok, k = pcall(function() return Enum.KeyCode[saved] end)
@@ -7576,7 +7598,7 @@ do
             pcall(setclipboard, text)
             Toast("registro copiado (" .. #Log.lines .. " linhas)", true)
         else
-            Toast("seu executor não tem setclipboard", false)
+            Toast("seu executor nÃ£o tem setclipboard", false)
         end
     end)
     Button(row, "LIMPAR", UDim2.new(0.5, 5, 1, -40), UDim2.new(0.5, -17, 0, 30), T.Card, function()
@@ -7607,16 +7629,16 @@ BtnRow("Centralizar a janela", T.Card, function()
     Persist.Set("cfg:pos", nil)
     Toast("janela centralizada", true)
 end, 40)
-BtnRow("Apagar configurações salvas", T.Bad, function()
+BtnRow("Apagar configuraÃ§Ãµes salvas", T.Bad, function()
     Persist.Data = {}
     Persist.Dirty = true
     Persist.Flush()
-    Toast("configurações apagadas (rode o script de novo)", true)
+    Toast("configuraÃ§Ãµes apagadas (rode o script de novo)", true)
 end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.0  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.0  Â·  avatar, partes do corpo, catÃ¡logo e efeitos\nexecutor: " .. execName .. "   Â·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -7774,7 +7796,7 @@ function runLoader(onDone)
     logo.always = true
     local word = GlitchText(col, "SILK CORE", 28, UDim2.fromOffset(0, 188), UDim2.new(1, 0, 0, 36), Enum.TextXAlignment.Center)
     word.Intro(1.1)
-    local tag = Label(col, "inicializando módulos", 10, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    local tag = Label(col, "inicializando mÃ³dulos", 10, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 230), UDim2.new(1, 0, 0, 14))
     local bar = New("Frame", {
         Size = UDim2.fromOffset(440, 4), Position = UDim2.fromOffset(10, 258), BackgroundColor3 = T.Card3, BorderSizePixel = 0,
@@ -7801,7 +7823,7 @@ function runLoader(onDone)
                 local ok, v = pcall(function() return getfenv()[n] or genv[n] end)
                 if ok and v then have = have + 1 end
             end
-            return string.format("%s · %d/%d funções", execName, have, #want)
+            return string.format("%s Â· %d/%d funÃ§Ãµes", execName, have, #want)
         end},
         {name = "perfil", timeout = 12, fn = function()
             local url = Morph.Thumb(LocalPlayer.UserId)
@@ -7816,7 +7838,7 @@ function runLoader(onDone)
         end},
         {name = "rig base", timeout = 20, fn = function()
             DefaultRig = DefaultRig or makeRig(Instance.new("HumanoidDescription"))
-            if not DefaultRig then return "indisponível (usa o asset direto)" end
+            if not DefaultRig then return "indisponÃ­vel (usa o asset direto)" end
             return "ok"
         end},
         {name = "assets", timeout = 25, fn = function()
@@ -7830,7 +7852,7 @@ function runLoader(onDone)
             return #ids .. " assets"
         end},
         {name = "partes", timeout = 40, fn = function()
-            return Ward.RestoreAll() .. " peça(s)"
+            return Ward.RestoreAll() .. " peÃ§a(s)"
         end},
         {name = "itens", timeout = 40, fn = function()
             return Cat.RestoreAll() .. " item(ns)"
@@ -7840,7 +7862,7 @@ function runLoader(onDone)
         end},
         {name = "visual", timeout = 10, fn = function()
             Env.Apply()
-            return Env.Loaded() and "filtros ligados" or "padrão do jogo"
+            return Env.Loaded() and "filtros ligados" or "padrÃ£o do jogo"
         end},
         {name = "efeitos", timeout = 10, fn = function()
             return FX.Apply() .. " emissor(es)"
@@ -7858,7 +7880,7 @@ function runLoader(onDone)
             BorderSizePixel = 0, ZIndex = 4,
         }, bar)
         rows[i] = {
-            l = Label(col, "·  " .. st.name, 11, T.Faint, F.Mono, nil, UDim2.fromOffset(10, 292 + (i - 1) * 16), UDim2.fromOffset(340, 16)),
+            l = Label(col, "Â·  " .. st.name, 11, T.Faint, F.Mono, nil, UDim2.fromOffset(10, 292 + (i - 1) * 16), UDim2.fromOffset(340, 16)),
             r = Label(col, "", 10, T.Faint, F.Mono, Enum.TextXAlignment.Right, UDim2.fromOffset(350, 292 + (i - 1) * 16), UDim2.fromOffset(100, 16)),
         }
     end
@@ -7895,17 +7917,17 @@ function runLoader(onDone)
     task.spawn(function()
         local failed = {}
         for i, st in ipairs(steps) do
-            rows[i].l.Text = "›  " .. st.name
+            rows[i].l.Text = "â€º  " .. st.name
             rows[i].l.TextColor3 = T.Text
             local s0 = os.clock()
             local ok, res = runStep(st.fn, st.timeout)
             local ms = math.floor((os.clock() - s0) * 1000)
             if ok then
-                rows[i].l.Text = string.format("✓  %-9s %s", st.name, tostring(res))
+                rows[i].l.Text = string.format("âœ“  %-9s %s", st.name, tostring(res))
                 rows[i].l.TextColor3 = T.Good
             else
                 failed[#failed + 1] = st.name .. ": " .. tostring(res)
-                rows[i].l.Text = string.format("✕  %-9s %s", st.name, tostring(res))
+                rows[i].l.Text = string.format("âœ•  %-9s %s", st.name, tostring(res))
                 rows[i].l.TextColor3 = T.Bad
                 Log.add("ERRO", "loader " .. st.name .. ": " .. tostring(res))
             end
@@ -8001,16 +8023,16 @@ do
             end
         end
         for _, it in ipairs(Looks.Names()) do
-            add("Aplicar look " .. it[1] .. " · " .. it[2], "look", function() Looks.ApplyIndex(it[1]) end)
+            add("Aplicar look " .. it[1] .. " Â· " .. it[2], "look", function() Looks.ApplyIndex(it[1]) end)
         end
-        add("Próximo look salvo", "look", function() Looks.Next() end)
-        add("Korblox Deathwalker na cabeça", "partes", function()
+        add("PrÃ³ximo look salvo", "look", function() Looks.Next() end)
+        add("Korblox Deathwalker na cabeÃ§a", "partes", function()
             local ok, info = Ward.Apply("Head", 16580493236)
-            Toast(ok and ("cabeça aplicada · " .. tostring(info)) or tostring(info), ok)
+            Toast(ok and ("cabeÃ§a aplicada Â· " .. tostring(info)) or tostring(info), ok)
         end)
         add("Limpar todas as partes do corpo", "partes", function() Ward.ClearAll()
         Toast("partes do corpo restauradas", true) end)
-        add("Remover todos os itens do catálogo", "catálogo", function() Cat.ClearAll()
+        add("Remover todos os itens do catÃ¡logo", "catÃ¡logo", function() Cat.ClearAll()
         Toast("itens removidos", true) end)
         add("Resetar todas as cores do corpo", "cores", function() Colors.ResetAll()
         Toast("cores restauradas", true) end)
@@ -8032,7 +8054,7 @@ do
                 pcall(setclipboard, table.concat(Log.lines, "\n"))
                 Toast("registro copiado", true)
             else
-                Toast("seu executor não tem setclipboard", false)
+                Toast("seu executor nÃ£o tem setclipboard", false)
             end
         end)
         add("Fechar o menu", "sistema", function() SetOpen(false) end)
@@ -8383,13 +8405,13 @@ Toggle("Voar (WASD + Space/Shift)", false, function(v)
     if v then task.spawn(startFly) else stopFly() end
     Toast("fly "..(v and "ligado" or "desligado"), v)
 end, "hk_fly")
-Toggle("Noclip (sem colisão)", false, function(v)
+Toggle("Noclip (sem colisÃ£o)", false, function(v)
     HackState.noclip=v
     if v then task.spawn(startNoclip) end
     Toast("noclip "..(v and "ligado" or "desligado"), v)
 end, "hk_noclip")
 
-Section("Sobrevivência")
+Section("SobrevivÃªncia")
 Toggle("God Mode (HP sempre cheio)", false, function(v)
     HackState.godMode=v
     Toast("god mode "..(v and "ligado" or "desligado"), v)
@@ -8418,13 +8440,13 @@ Toggle("Full Bright", false, function(v)
     applyFB(v)
     Toast("full bright "..(v and "ligado" or "desligado"), v)
 end, "hk_fb")
-Toggle("Sem Névoa", false, function(v)
+Toggle("Sem NÃ©voa", false, function(v)
     HackState.noFog=v
     applyNoFog(v)
-    Toast("sem névoa "..(v and "ligado" or "desligado"), v)
+    Toast("sem nÃ©voa "..(v and "ligado" or "desligado"), v)
 end, "hk_nofog")
 
-Section("Utilitários")
+Section("UtilitÃ¡rios")
 Toggle("Anti-AFK", false, function(v)
     HackState.antiAfk=v
     if v then task.spawn(startAfk) end
@@ -8439,13 +8461,13 @@ end, "hk_rspy")
 do
     -- TP to player
     local row=Row(50)
-    Label(row,"Teleportar até jogador",12,T.Text,F.Bold,nil,UDim2.fromOffset(16,0),UDim2.new(0.55,0,1,0))
+    Label(row,"Teleportar atÃ© jogador",12,T.Text,F.Bold,nil,UDim2.fromOffset(16,0),UDim2.new(0.55,0,1,0))
     local pField=Field(row,UDim2.new(0.56,0,0.5,-15),UDim2.new(0.26,0,0,30),"nome...")
     Button(row,"IR",UDim2.new(0.84,0,0.5,-15),UDim2.fromOffset(52,30),T.Accent,function()
         local target=Players:FindFirstChild(pField.Text)
-        if not target or not target.Character then Toast("jogador não encontrado",false); return end
+        if not target or not target.Character then Toast("jogador nÃ£o encontrado",false); return end
         local r=hkRoot(); local tr=target.Character:FindFirstChild("HumanoidRootPart")
-        if r and tr then r.CFrame=tr.CFrame+Vector3.new(0,3,0); Toast("tp → "..target.Name,true)
+        if r and tr then r.CFrame=tr.CFrame+Vector3.new(0,3,0); Toast("tp â†’ "..target.Name,true)
         else Toast("sem root part",false) end
     end)
 end
@@ -8469,11 +8491,11 @@ do
 end
 
 Section("SilkCore Commands")
-Note("Carrega o motor de comandos completo (base Infinite Yield) rebatizado com a marca SilkCore — título da janela, créditos e textos trocados no momento do carregamento. O chat de comandos aparece no chat do jogo.", 52)
+Note("Carrega o motor de comandos completo (base Infinite Yield) rebatizado com a marca SilkCore â€” tÃ­tulo da janela, crÃ©ditos e textos trocados no momento do carregamento. O chat de comandos aparece no chat do jogo.", 52)
 
 -- troca literal e segura: escapa os caracteres especiais de pattern na busca,
--- escapa '%' na troca. Só mexe em texto visível (título/créditos/hint), nunca
--- em nomes de variável, pastas de asset ou lógica interna.
+-- escapa '%' na troca. SÃ³ mexe em texto visÃ­vel (tÃ­tulo/crÃ©ditos/hint), nunca
+-- em nomes de variÃ¡vel, pastas de asset ou lÃ³gica interna.
 local function bhPlainGsub(src, find, repl)
     local escFind = find:gsub("([%(%)%.%%%+%-%*%?%[%]%^%$])", "%%%1")
     local escRepl = repl:gsub("%%", "%%%%")
@@ -8499,21 +8521,21 @@ BtnRow("CARREGAR SILKCORE COMMANDS", T.Accent, function()
             fn()
         end)
         if ok then
-            Toast("✓ SilkCore Commands carregado · use ; no chat", true)
+            Toast("âœ“ SilkCore Commands carregado Â· use ; no chat", true)
         else
             Toast("falhou: "..(tostring(err):sub(1,60)), false)
             print("[SilkCore] Commands error:", err)
         end
     end)
 end)
-Note("Após carregar: ';cmds' lista todos os comandos. Ex: ';speed 100' ';fly' ';tp [player]'. Janela abre com título e créditos SilkCore.", 52)
+Note("ApÃ³s carregar: ';cmds' lista todos os comandos. Ex: ';speed 100' ';fly' ';tp [player]'. Janela abre com tÃ­tulo e crÃ©ditos SilkCore.", 52)
 
 end -- Hacks tab
 
 --------------------------------------------------------------------------------
 -- BROOKHAVEN
 --------------------------------------------------------------------------------
--- Mesmo motivo do HBG: corpo em função própria pra não consumir os 200
+-- Mesmo motivo do HBG: corpo em funÃ§Ã£o prÃ³pria pra nÃ£o consumir os 200
 -- registradores do chunk principal.
 local function buildBrookhaven()
 CurTab = Tab("Brookhaven", 0, true)
@@ -8543,10 +8565,10 @@ local function bhFireRemote(path, ...)
         local ok,e=pcall(r.InvokeServer,r,...)
         return ok, e
     end
-    return false,"remote não encontrado: "..path
+    return false,"remote nÃ£o encontrado: "..path
 end
 
--- nomes reais tirados do dump (obfuscação: 1s injetados nos nomes, ex. "1Pas1s" = "Pass")
+-- nomes reais tirados do dump (obfuscaÃ§Ã£o: 1s injetados nos nomes, ex. "1Pas1s" = "Pass")
 local BH_RE = {
     Pass   = "RE.1Pas1s",
     Flying = "RE.1Flyin1g",
@@ -8560,7 +8582,7 @@ local BH_GATE_NAMES = { GamepassNeeded=true, GamepassUnlock=true, ProductUnlock=
 function BH.Dump()
     local out={}
     local function add(s,...) out[#out+1]=(select("#",...)>0) and string.format(s,...) or s end
-    add("== BROOKHAVEN DUMP — SilkCore ==")
+    add("== BROOKHAVEN DUMP â€” SilkCore ==")
     add("Jogo: %s  PlaceId: %s", game.Name, tostring(game.PlaceId))
     add("")
 
@@ -8573,7 +8595,7 @@ function BH.Dump()
             end
         end
     else
-        add("  pasta de gamepasses não encontrada — tentando via player data")
+        add("  pasta de gamepasses nÃ£o encontrada â€” tentando via player data")
     end
     add("")
 
@@ -8628,13 +8650,13 @@ function BH.Dump()
     return txt, copied
 end
 
--- esconde UM gate/lock se o nó bater no padrão confirmado pelo dump
+-- esconde UM gate/lock se o nÃ³ bater no padrÃ£o confirmado pelo dump
 local function bhHideIfGate(inst)
     if (inst:IsA("Frame") or inst:IsA("ImageButton")) and BH_GATE_NAMES[inst.Name] then
         if inst.Visible then inst.Visible=false; return true end
     end
-    -- selo de cadeado "Gamepass" dentro de template de item de catálogo (pets etc.) — NÃO mexe
-    -- no filtro de catálogo (esse é TextButton, aqui só ImageLabel dentro de *Template.*)
+    -- selo de cadeado "Gamepass" dentro de template de item de catÃ¡logo (pets etc.) â€” NÃƒO mexe
+    -- no filtro de catÃ¡logo (esse Ã© TextButton, aqui sÃ³ ImageLabel dentro de *Template.*)
     if inst:IsA("ImageLabel") and inst.Name=="Gamepass" and inst.Parent and inst.Parent.Name:find("Template") then
         if inst.Visible then inst.Visible=false; return true end
     end
@@ -8645,9 +8667,9 @@ local function bhHideIfGate(inst)
     return false
 end
 
--- unlock client-side: alvo é a árvore real do dump (NoResetGUIHandler.GamepassNeeded /
--- GamepassUnlock / ProductUnlock + selos de cadeado nos templates), não heurística genérica.
--- Fica permanente: além de varrer uma vez, prende um watcher em DescendantAdded (preso em
+-- unlock client-side: alvo Ã© a Ã¡rvore real do dump (NoResetGUIHandler.GamepassNeeded /
+-- GamepassUnlock / ProductUnlock + selos de cadeado nos templates), nÃ£o heurÃ­stica genÃ©rica.
+-- Fica permanente: alÃ©m de varrer uma vez, prende um watcher em DescendantAdded (preso em
 -- conns, limpo no Destroy) pra pegar GUI que o jogo recria depois (troca de menu, respawn).
 local bhWatcherOn = false
 function BH.ClientUnlock()
@@ -8668,11 +8690,11 @@ function BH.ClientUnlock()
 end
 
 -- hook permanente: UserOwnsGamePassAsync volta true pro LocalPlayer em qualquer checagem
--- feita do lado do cliente (padrão comum pra liberar UI/cosmético). Não existe sem
--- hookfunction no executor, e não muda nada que o servidor valide por conta própria.
+-- feita do lado do cliente (padrÃ£o comum pra liberar UI/cosmÃ©tico). NÃ£o existe sem
+-- hookfunction no executor, e nÃ£o muda nada que o servidor valide por conta prÃ³pria.
 local bhHookInstalled = false
 function BH.HookMPS()
-    if bhHookInstalled then return true, "já instalado" end
+    if bhHookInstalled then return true, "jÃ¡ instalado" end
     if not hookfunction then return false, "executor sem hookfunction" end
     local ok, err = pcall(function()
         local old
@@ -8686,11 +8708,11 @@ function BH.HookMPS()
 end
 
 -- espiona (log-only, sem sobrescrever nada) toda chamada real de UserOwnsGamePassAsync
--- e PromptGamePassPurchase feita pelos SCRIPTS DO JOGO durante a janela. Isso é o jeito
--- de saber de verdade, não chutar: se um passId aparece aqui, a checagem roda no cliente
--- e o hook em BH.HookMPS cobre ela 100%. Se nunca aparece enquanto você abre a loja/item
--- travado, a checagem é só no servidor — e nenhum script de cliente, deste ou de qualquer
--- outro, consegue forjar isso. Não é limite deste build, é o modelo de segurança do Roblox.
+-- e PromptGamePassPurchase feita pelos SCRIPTS DO JOGO durante a janela. Isso Ã© o jeito
+-- de saber de verdade, nÃ£o chutar: se um passId aparece aqui, a checagem roda no cliente
+-- e o hook em BH.HookMPS cobre ela 100%. Se nunca aparece enquanto vocÃª abre a loja/item
+-- travado, a checagem Ã© sÃ³ no servidor â€” e nenhum script de cliente, deste ou de qualquer
+-- outro, consegue forjar isso. NÃ£o Ã© limite deste build, Ã© o modelo de seguranÃ§a do Roblox.
 function BH.SpyGamepasses(seconds)
     if not hookfunction then return nil, "executor sem hookfunction" end
     local hits = {}
@@ -8717,12 +8739,12 @@ function BH.SpyGamepasses(seconds)
 
     local txt
     if #hits > 0 then
-        txt = "== SPY GAMEPASS — chamadas reais capturadas ==\n" .. table.concat(hits, "\n")
-            .. "\n\nesses passId's rodam checagem no cliente — BH.HookMPS() cobre 100%."
+        txt = "== SPY GAMEPASS â€” chamadas reais capturadas ==\n" .. table.concat(hits, "\n")
+            .. "\n\nesses passId's rodam checagem no cliente â€” BH.HookMPS() cobre 100%."
     else
-        txt = "== SPY GAMEPASS — nada capturado em " .. seconds .. "s ==\n"
-            .. "ou a tela do item/loja travado não foi aberta durante a janela,\n"
-            .. "ou esse gate é validado só no servidor — nesse caso não existe\n"
+        txt = "== SPY GAMEPASS â€” nada capturado em " .. seconds .. "s ==\n"
+            .. "ou a tela do item/loja travado nÃ£o foi aberta durante a janela,\n"
+            .. "ou esse gate Ã© validado sÃ³ no servidor â€” nesse caso nÃ£o existe\n"
             .. "forma client-side de contornar, de nenhum script."
     end
     if writefile then pcall(writefile, "SilkcoreGamepassSpy.txt", txt) end
@@ -8730,9 +8752,9 @@ function BH.SpyGamepasses(seconds)
     return hits, txt
 end
 
--- dispara a remota real de Pass (RE.1Pas1s) com algumas assinaturas plausíveis.
--- experimental: o servidor valida a posse de verdade, então isso só ajuda se o jogo
--- confiar no client pra alguma parte do fluxo (ex. sync de UI pós-compra).
+-- dispara a remota real de Pass (RE.1Pas1s) com algumas assinaturas plausÃ­veis.
+-- experimental: o servidor valida a posse de verdade, entÃ£o isso sÃ³ ajuda se o jogo
+-- confiar no client pra alguma parte do fluxo (ex. sync de UI pÃ³s-compra).
 function BH.ProbePass(gpId)
     local attempts = {
         function() return bhFireRemote(BH_RE.Pass, gpId, true) end,
@@ -8748,7 +8770,7 @@ function BH.ProbePass(gpId)
 end
 
 Section("Dump")
-Note("Escaneia remotes, gamepasses, PlayerData e loja do Brookhaven. Salva em SilkcoreBrookhavenDump.txt e copia para a área de transferência.", 68)
+Note("Escaneia remotes, gamepasses, PlayerData e loja do Brookhaven. Salva em SilkcoreBrookhavenDump.txt e copia para a Ã¡rea de transferÃªncia.", 68)
 do
     local busy=false
     BtnRow("DUMP BROOKHAVEN", T.Accent, function()
@@ -8757,17 +8779,17 @@ do
         Toast("fazendo dump...", true)
         task.spawn(function()
             local txt,copied=BH.Dump()
-            Toast(string.format("dump pronto · %d chars · %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
+            Toast(string.format("dump pronto Â· %d chars Â· %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
             busy=false
         end)
     end)
 end
 
 Section("Desbloqueio")
-Note("Alvo é a árvore real do dump: NoResetGUIHandler.GamepassNeeded/GamepassUnlock/ProductUnlock + selos de cadeado nos templates de catálogo. Fica permanente — um watcher pega GUI nova depois do primeiro clique. Não altera dados no servidor.", 68)
+Note("Alvo Ã© a Ã¡rvore real do dump: NoResetGUIHandler.GamepassNeeded/GamepassUnlock/ProductUnlock + selos de cadeado nos templates de catÃ¡logo. Fica permanente â€” um watcher pega GUI nova depois do primeiro clique. NÃ£o altera dados no servidor.", 68)
 BtnRow("DESBLOQUEAR GATES (cliente, permanente)", T.Good, function()
     local n=BH.ClientUnlock()
-    Toast(string.format("unlock: %d gates fechados · watcher ativo", n), true)
+    Toast(string.format("unlock: %d gates fechados Â· watcher ativo", n), true)
 end)
 
 BtnRow("HOOK MarketplaceService (permanente)", T.Accent, function()
@@ -8778,20 +8800,20 @@ BtnRow("HOOK MarketplaceService (permanente)", T.Accent, function()
         Toast("hook falhou: "..tostring(err), false)
     end
 end)
-Note("O hook intercepta toda checagem de posse de gamepass feita no cliente. Precisa de hookfunction no executor. Não afeta checagem feita só no servidor.", 68)
+Note("O hook intercepta toda checagem de posse de gamepass feita no cliente. Precisa de hookfunction no executor. NÃ£o afeta checagem feita sÃ³ no servidor.", 68)
 
 BtnRow("ESPIONAR GAMEPASS (10s)", T.Card, function()
-    Toast("abra agora a loja/item travado — espionando 10s...", true)
+    Toast("abra agora a loja/item travado â€” espionando 10s...", true)
     task.spawn(function()
         local hits, txt = BH.SpyGamepasses(10)
         if hits == nil then
             Toast("falhou: "..tostring(txt), false)
             return
         end
-        Toast(string.format("spy: %d chamada(s) capturada(s) · salvo em SilkcoreGamepassSpy.txt", #hits), #hits>0)
+        Toast(string.format("spy: %d chamada(s) capturada(s) Â· salvo em SilkcoreGamepassSpy.txt", #hits), #hits>0)
     end)
 end)
-Note("Isso é o jeito de saber garantido, não chutado: abre a loja ou o item travado enquanto o spy roda. Se o passId aparecer no log, o hook acima cobre 100%. Se nunca aparecer, a checagem é só do servidor e nenhum script de cliente contorna isso — não dá pra fingir que dá.", 68)
+Note("Isso Ã© o jeito de saber garantido, nÃ£o chutado: abre a loja ou o item travado enquanto o spy roda. Se o passId aparecer no log, o hook acima cobre 100%. Se nunca aparecer, a checagem Ã© sÃ³ do servidor e nenhum script de cliente contorna isso â€” nÃ£o dÃ¡ pra fingir que dÃ¡.", 68)
 
 do
     local row=Row(50)
@@ -8799,13 +8821,13 @@ do
     local gpField=Field(row,UDim2.new(0.5,4,0.5,-15),UDim2.new(0.28,0,0,30),"gamepassId...")
     Button(row,"FIRE",UDim2.new(0.8,4,0.5,-15),UDim2.fromOffset(60,30),T.Card,function()
         local id=tonumber(gpField.Text)
-        if not id then Toast("ID inválido",false); return end
+        if not id then Toast("ID invÃ¡lido",false); return end
         local worked=BH.ProbePass(id)
         Toast(string.format("RE.1Pas1s disparada: %d tentativas", worked), worked>0)
     end)
 end
 
-Note("Experimental: dispara a remota real de Pass encontrada no dump. O servidor valida posse de verdade — isso só ajuda se o jogo confiar no client pra sincronizar UI pós-compra.", 68)
+Note("Experimental: dispara a remota real de Pass encontrada no dump. O servidor valida posse de verdade â€” isso sÃ³ ajuda se o jogo confiar no client pra sincronizar UI pÃ³s-compra.", 68)
 
 Section("Teleporte Brookhaven")
 do
@@ -8825,7 +8847,7 @@ do
             local r=hkRoot()
             if r then
                 r.CFrame=CFrame.new(loc.p)
-                Toast("tp → "..loc.n, true)
+                Toast("tp â†’ "..loc.n, true)
             else
                 Toast("sem personagem",false)
             end
@@ -8844,7 +8866,7 @@ Toggle("Speed (carro / personagem)", false, function(v)
     applySpeed(HackState.speedVal)
     Toast("speed hack "..(v and "ligado" or "desligado"), v)
 end, "bh_speed")
-Toggle("Invisível (transparência 1)", false, function(v)
+Toggle("InvisÃ­vel (transparÃªncia 1)", false, function(v)
     local char=hkChar()
     if not char then Toast("sem personagem",false); return end
     for _,p in ipairs(char:GetDescendants()) do
@@ -8852,7 +8874,7 @@ Toggle("Invisível (transparência 1)", false, function(v)
             p.Transparency = v and 1 or 0
         end
     end
-    Toast("invisível "..(v and "ligado" or "desligado"), v)
+    Toast("invisÃ­vel "..(v and "ligado" or "desligado"), v)
 end, "bh_invis")
 Toggle("Congelar NPCs (Anchored)", false, function(v)
     for _,p in ipairs(workspace:GetDescendants()) do
@@ -8879,10 +8901,10 @@ BtnRow("DAR DINHEIRO (local)", T.Good, function()
     end
     trySet(LocalPlayer); trySet(LocalPlayer:FindFirstChild("Data"))
     trySet(LocalPlayer:FindFirstChild("leaderstats"))
-    Toast(n>0 and ("dinheiro: "..n.." valores → 999999") or "sem valores de dinheiro encontrados", n>0)
+    Toast(n>0 and ("dinheiro: "..n.." valores â†’ 999999") or "sem valores de dinheiro encontrados", n>0)
 end)
 
-BtnRow("FORÇAR PERSONAGEM PADRÃO", T.Card, function()
+BtnRow("FORÃ‡AR PERSONAGEM PADRÃƒO", T.Card, function()
     task.spawn(function()
         local h=hkHum()
         if h then
@@ -8899,8 +8921,8 @@ buildBrookhaven()
 --------------------------------------------------------------------------------
 -- HBG
 --------------------------------------------------------------------------------
--- Corpo da aba em função própria: os locals daqui ficam no orçamento de
--- registradores desta função, não no do chunk principal (limite de 200).
+-- Corpo da aba em funÃ§Ã£o prÃ³pria: os locals daqui ficam no orÃ§amento de
+-- registradores desta funÃ§Ã£o, nÃ£o no do chunk principal (limite de 200).
 local function buildHBG()
 CurTab = Tab("HBG", 0, true)
 Persist.Scope = "hbg"
@@ -8915,13 +8937,13 @@ local HG_MPS  = game:GetService("MarketplaceService")
 local HGState = {
     -- auto-block
     autoBlock     = false,
-    blockRange    = 22,         -- studs até ameaça ativar o block
-    blockHold     = 0.18,       -- segundos de hold após ativar
+    blockRange    = 22,         -- studs atÃ© ameaÃ§a ativar o block
+    blockHold     = 0.18,       -- segundos de hold apÃ³s ativar
     blockDebounce = false,
     blockConn     = nil,
     comboActive   = false,
     lastAttack    = 0,
-    comboWindow   = 0.55,       -- janela que conta como "em combo" (não bloqueia)
+    comboWindow   = 0.55,       -- janela que conta como "em combo" (nÃ£o bloqueia)
     -- anti-cheat bypass
     acBypass      = false,
     acHooks       = {},
@@ -8943,7 +8965,7 @@ local function hgHum()
     return c and c:FindFirstChildOfClass("Humanoid")
 end
 
--- Varredura de remotes no jogo inteiro (usa cache por sessão)
+-- Varredura de remotes no jogo inteiro (usa cache por sessÃ£o)
 local hgRemoteCache = nil
 local function hgScanRemotes(force)
     if hgRemoteCache and not force then return hgRemoteCache end
@@ -8980,11 +9002,11 @@ function HG.Dump()
     local out = {}
     local function add(s, ...) out[#out+1] = (select("#",...) > 0) and string.format(s,...) or s end
 
-    add("== HBG DUMP — SilkCore ==")
+    add("== HBG DUMP â€” SilkCore ==")
     add("Jogo: %s  PlaceId: %s", game.Name, tostring(game.PlaceId))
     add("")
 
-    -- remotes categorizadas por intenção
+    -- remotes categorizadas por intenÃ§Ã£o
     add("== REMOTES (jogo inteiro) ==")
     local remotes = hgScanRemotes(true)
     local cats = {
@@ -9059,7 +9081,7 @@ function HG.Dump()
             end
         end
     end
-    if acFound == 0 then add("  nenhum script AC com nome óbvio — pode ser ofuscado") end
+    if acFound == 0 then add("  nenhum script AC com nome Ã³bvio â€” pode ser ofuscado") end
     add("")
 
     -- player data
@@ -9079,7 +9101,7 @@ function HG.Dump()
     add("")
 
     -- hitboxes ativas agora
-    add("== HITBOXES ATIVAS (BasePart sem CanCollide, dono ≠ local) ==")
+    add("== HITBOXES ATIVAS (BasePart sem CanCollide, dono â‰  local) ==")
     local hbCount = 0
     for _, d in ipairs(workspace:GetDescendants()) do
         if d:IsA("BasePart") and not d.CanCollide then
@@ -9106,9 +9128,9 @@ end
 -- BYPASS DE ANTI-CHEAT
 -- ============================================================
 
--- 1. Fake-speed: em vez de alterar WalkSpeed diretamente (o que ACs lêem),
---    usa um CFrame loop pra mover o character enquanto mantém WalkSpeed original.
---    Só ativa se Speed Hack do tab Hacks estiver desligado (não duplica).
+-- 1. Fake-speed: em vez de alterar WalkSpeed diretamente (o que ACs lÃªem),
+--    usa um CFrame loop pra mover o character enquanto mantÃ©m WalkSpeed original.
+--    SÃ³ ativa se Speed Hack do tab Hacks estiver desligado (nÃ£o duplica).
 local hgFakespeedConn = nil
 local hgFakespeedTarget = 60
 
@@ -9134,22 +9156,22 @@ local function hgStartFakeSpeed(spd)
     end)
 end
 
--- 2. Hook remotes de verificação: intercepta chamadas de anti-cheat conhecidas
+-- 2. Hook remotes de verificaÃ§Ã£o: intercepta chamadas de anti-cheat conhecidas
 --    (speed check, position check) e responde com valores dentro do range normal.
 local hgHookActive = false
 function HG.InstallACHooks()
-    if hgHookActive then return true, "já instalado" end
+    if hgHookActive then return true, "jÃ¡ instalado" end
     if SilkGuard.Ghost then
-        return false, "modo fantasma ligado — o hook deixa rastro de C-closure trocada, mais visível que o truque"
+        return false, "modo fantasma ligado â€” o hook deixa rastro de C-closure trocada, mais visÃ­vel que o truque"
     end
     if not hookfunction then return false, "executor sem hookfunction" end
 
     local hooked = 0
 
     -- Targets confirmados pelo dump do HBG:
-    -- ReplicateStep  → sync de estado de movimento/posição por frame (principal candidato de speed-check)
-    -- ClientBodyVelocityEvent → replica velocidade do corpo pro servidor
-    -- RemoteEvent / RemoteEvent1 → remotes genéricas que podem carregar qualquer payload de combate
+    -- ReplicateStep  â†’ sync de estado de movimento/posiÃ§Ã£o por frame (principal candidato de speed-check)
+    -- ClientBodyVelocityEvent â†’ replica velocidade do corpo pro servidor
+    -- RemoteEvent / RemoteEvent1 â†’ remotes genÃ©ricas que podem carregar qualquer payload de combate
     local HBG_AC_PATHS = {
         "ReplicatedStorage.Remotes.ReplicateStep",
         "ReplicatedStorage.Remotes.ClientBodyVelocityEvent",
@@ -9169,9 +9191,9 @@ function HG.InstallACHooks()
             old = hookfunction(cur.FireServer, function(self, ...)
                 local args = {...}
                 for i, v in ipairs(args) do
-                    -- normaliza qualquer número que pareça velocidade fora do range legítimo
+                    -- normaliza qualquer nÃºmero que pareÃ§a velocidade fora do range legÃ­timo
                     if type(v) == "number" and math.abs(v) > 24 and math.abs(v) < 5000 then
-                        -- preserva sinal, substitui por valor com ruído natural
+                        -- preserva sinal, substitui por valor com ruÃ­do natural
                         args[i] = (v > 0 and 1 or -1) * (16 + math.random() * 3)
                     end
                     -- Vector3 com magnitude de velocidade suspeita
@@ -9199,7 +9221,7 @@ function HG.InstallACHooks()
         hookRemoteByPath(path)
     end
 
-    -- também tenta por nome genérico pra cobrir possíveis renomeações
+    -- tambÃ©m tenta por nome genÃ©rico pra cobrir possÃ­veis renomeaÃ§Ãµes
     local remotes = hgScanRemotes()
     for _, r in ipairs(remotes) do
         local n = r.name
@@ -9251,22 +9273,22 @@ function HG.InstallACHooks()
     return true, string.format("%d remote(s) hookada(s)", hooked)
 end
 
--- 3. Randomização de timing: adiciona jitter às ações pra não parecer bot
+-- 3. RandomizaÃ§Ã£o de timing: adiciona jitter Ã s aÃ§Ãµes pra nÃ£o parecer bot
 function HG.Jitter(base, variance)
     variance = variance or 0.05
     return base + (math.random() * variance * 2 - variance)
 end
 
 -- ============================================================
--- 4. DUMP PROFUNDO (GC + SCRIPTS) E NEUTRALIZAÇÃO DE DETECÇÃO
+-- 4. DUMP PROFUNDO (GC + SCRIPTS) E NEUTRALIZAÃ‡ÃƒO DE DETECÃ‡ÃƒO
 -- ============================================================
--- Superfície real de um anti-cheat de Roblox. Do lado do servidor ele vê:
---   (a) tudo que replica — posição, velocity, WalkSpeed, atributos de Humanoid
---   (b) instâncias que VOCÊ criou dentro do DataModel
---   (c) o ritmo e o formato dos argumentos que você manda nas remotes
--- Ele não chama getgc, getgenv ou hookfunction: isso só existe no executor.
--- Um anti-cheat client-side é um LocalScript comum, e o que ele consegue
--- checar é instância, nome, propriedade e callback. É isso que o dump
+-- SuperfÃ­cie real de um anti-cheat de Roblox. Do lado do servidor ele vÃª:
+--   (a) tudo que replica â€” posiÃ§Ã£o, velocity, WalkSpeed, atributos de Humanoid
+--   (b) instÃ¢ncias que VOCÃŠ criou dentro do DataModel
+--   (c) o ritmo e o formato dos argumentos que vocÃª manda nas remotes
+-- Ele nÃ£o chama getgc, getgenv ou hookfunction: isso sÃ³ existe no executor.
+-- Um anti-cheat client-side Ã© um LocalScript comum, e o que ele consegue
+-- checar Ã© instÃ¢ncia, nome, propriedade e callback. Ã‰ isso que o dump
 -- abaixo mapeia e que o report killer corta.
 
 local HG_AC_WORDS = {
@@ -9312,7 +9334,7 @@ function HG.DumpScripts()
 
     add("== GC: funcoes com cara de anti-cheat ==")
     if type(getgc) ~= "function" then
-        add("  executor sem getgc — sem dump de funcoes")
+        add("  executor sem getgc â€” sem dump de funcoes")
     else
         local seen, hits = {}, 0
         for _, v in ipairs(getgc(true)) do
@@ -9407,11 +9429,11 @@ end
 -- DUMP TOTAL
 -- ============================================================
 -- Puxa tudo que o cliente consegue ler: remotes, fonte de todos os scripts,
--- instâncias suspeitas, dados do player, atributos e o trace.
--- Não usa hook nenhum, não escreve nada no DataModel, não cria instância.
--- Só leitura + arquivo no executor. O jogo não tem como ver isso.
--- Roda em fatias (task.wait a cada N itens) pra não travar o frame — travada
--- de 2s é o único rastro comportamental que um dump deixa.
+-- instÃ¢ncias suspeitas, dados do player, atributos e o trace.
+-- NÃ£o usa hook nenhum, nÃ£o escreve nada no DataModel, nÃ£o cria instÃ¢ncia.
+-- SÃ³ leitura + arquivo no executor. O jogo nÃ£o tem como ver isso.
+-- Roda em fatias (task.wait a cada N itens) pra nÃ£o travar o frame â€” travada
+-- de 2s Ã© o Ãºnico rastro comportamental que um dump deixa.
 function HG.DumpAll()
     local t0 = os.clock()
     local out, n = {}, 0
@@ -9420,7 +9442,7 @@ function HG.DumpAll()
         out[n] = string.format(fmt, ...)
     end
 
-    add("== SILK CORE · DUMP TOTAL ==")
+    add("== SILK CORE Â· DUMP TOTAL ==")
     add("place=%s  job=%s", tostring(game.PlaceId), tostring(game.JobId))
     add("executor=%s", tostring(execName))
     add("api: getgc=%s getinstances=%s decompile=%s getconnections=%s",
@@ -9436,7 +9458,7 @@ function HG.DumpAll()
         if i % 40 == 0 then task.wait() end
     end
 
-    -- instâncias com nome suspeito
+    -- instÃ¢ncias com nome suspeito
     add("")
     add("== INSTANCIAS SUSPEITAS ==")
     local hits = 0
@@ -9523,9 +9545,9 @@ function HG.DumpAll()
         end
     end
     add("")
-    add("  scripts com fonte: %d · %d bytes", dumped, budget)
+    add("  scripts com fonte: %d Â· %d bytes", dumped, budget)
 
-    -- gc: só o índice das funções
+    -- gc: sÃ³ o Ã­ndice das funÃ§Ãµes
     add("")
     add("== GC: FUNCOES DE AC ==")
     if type(getgc) == "function" then
@@ -9570,7 +9592,7 @@ end
 -- DUMP DO JOGO (sem o lixo da engine)
 -- ============================================================
 -- O filtro por palavra-chave pega 40 mil linhas de CorePackages e quase nada
--- do jogo. O filtro certo é por caminho: joga fora a engine, fica com o que
+-- do jogo. O filtro certo Ã© por caminho: joga fora a engine, fica com o que
 -- o dev do jogo escreveu.
 local HG_SKIP_PATH = {"CorePackages", "CoreGui", "RobloxGui", "RobloxReplicatedStorage", "CoreScripts"}
 
@@ -9588,7 +9610,7 @@ function HG.DumpGame()
     local out, n = {}, 0
     local function add(fmt, ...) n = n + 1; out[n] = string.format(fmt, ...) end
 
-    add("== SILK CORE · DUMP DO JOGO ==")
+    add("== SILK CORE Â· DUMP DO JOGO ==")
     add("place=%s  job=%s  executor=%s",
         tostring(game.PlaceId), tostring(game.JobId), tostring(execName))
     add("")
@@ -9610,7 +9632,7 @@ function HG.DumpGame()
         end
     end
 
-    -- fonte de tudo que é do jogo
+    -- fonte de tudo que Ã© do jogo
     add("")
     add("== FONTE DOS SCRIPTS DO JOGO ==")
     local inst
@@ -9643,7 +9665,7 @@ function HG.DumpGame()
         end
     end
     add("")
-    add("  scripts do jogo com fonte: %d · %d bytes", dumped, bytes)
+    add("  scripts do jogo com fonte: %d Â· %d bytes", dumped, bytes)
 
     local txt = table.concat(out, "\n")
     if writefile then pcall(writefile, "SilkcoreGameDump.txt", txt) end
@@ -9653,8 +9675,8 @@ function HG.DumpGame()
     return txt, copied, os.clock() - t0
 end
 
--- Trace de __namecall: mostra toda remote que o JOGO dispara e toda que NÓS
--- disparamos, com o payload. É esse log que revela qual remote o anti-cheat
+-- Trace de __namecall: mostra toda remote que o JOGO dispara e toda que NÃ“S
+-- disparamos, com o payload. Ã‰ esse log que revela qual remote o anti-cheat
 -- usa pra avisar o servidor.
 local hgTrace = { active = false, old = nil, log = {}, max = 400, dropped = {} }
 
@@ -9673,13 +9695,13 @@ function HG.TraceRemotes(on)
         end
         return true, string.format("%d eventos no log", #hgTrace.log)
     end
-    if hgTrace.active then return true, "trace já ativo" end
+    if hgTrace.active then return true, "trace jÃ¡ ativo" end
 
     hgTrace.old = mt.__namecall
     setreadonly(mt, false)
     mt.__namecall = newcclosure(function(self, ...)
         -- todo o log dentro de pcall: se der erro aqui, ele morre aqui.
-        -- erro vazando pro namecall do jogo é a única forma de um hook ser notado.
+        -- erro vazando pro namecall do jogo Ã© a Ãºnica forma de um hook ser notado.
         local m
         pcall(function() m = getnamecallmethod() end)
         if m == "FireServer" or m == "InvokeServer" then
@@ -9711,8 +9733,8 @@ function HG.TraceClear()
 end
 
 -- Report killer: dropa o FireServer da remote que o anti-cheat usa pra avisar
--- o servidor. Não destrói o script deles — se ele sumir, o próprio heartbeat
--- de integridade acusa. Só corta a saída.
+-- o servidor. NÃ£o destrÃ³i o script deles â€” se ele sumir, o prÃ³prio heartbeat
+-- de integridade acusa. SÃ³ corta a saÃ­da.
 function HG.KillReport(on)
     if not (getrawmetatable and getnamecallmethod and newcclosure) then
         return false, "executor sem getrawmetatable/newcclosure"
@@ -9728,7 +9750,7 @@ function HG.KillReport(on)
         end
         return true, "report killer desligado"
     end
-    if hgTrace.reportOld then return true, "já instalado" end
+    if hgTrace.reportOld then return true, "jÃ¡ instalado" end
 
     hgTrace.reportOld = mt.__namecall
     setreadonly(mt, false)
@@ -9757,7 +9779,7 @@ function HG.KillReport(on)
     return true, "report killer instalado"
 end
 
--- Tira a GUI do PlayerGui (se ainda estiver lá) e protege contra enumeração.
+-- Tira a GUI do PlayerGui (se ainda estiver lÃ¡) e protege contra enumeraÃ§Ã£o.
 function HG.Evade()
     local done = {}
     local gui = (guiParent and guiParent:FindFirstChild(GUI_NAME)) or PlayerGui:FindFirstChild(GUI_NAME)
@@ -9775,16 +9797,16 @@ function HG.Evade()
             if pcall(protectgui, gui) then done[#done + 1] = "protectgui" end
         end
     end
-    if #done == 0 then return false, "nenhum método de proteção disponível" end
-    return true, table.concat(done, " · ")
+    if #done == 0 then return false, "nenhum mÃ©todo de proteÃ§Ã£o disponÃ­vel" end
+    return true, table.concat(done, " Â· ")
 end
 
 -- ============================================================
 -- AUTO-BLOCK
 -- ============================================================
 
--- Remote de ação do player: Workspace.Live.[nome].Main.RemoteEvent
--- (confirmado no dump — é o canal por onde todas as ações do combate passam)
+-- Remote de aÃ§Ã£o do player: Workspace.Live.[nome].Main.RemoteEvent
+-- (confirmado no dump â€” Ã© o canal por onde todas as aÃ§Ãµes do combate passam)
 local hgBlockRemote = nil
 local function hgFindBlockRemote()
     if hgBlockRemote and hgBlockRemote.Parent then return hgBlockRemote end
@@ -9803,7 +9825,7 @@ local function hgFindBlockRemote()
             end
         end
     end
-    -- fallback: varredura genérica por "block"/"guard" no RS
+    -- fallback: varredura genÃ©rica por "block"/"guard" no RS
     local r = hgFindRemote({"block","guard","parry","defend","shield"})
     hgBlockRemote = r
     return r
@@ -9812,7 +9834,7 @@ end
 -- ============================================================
 -- PAYLOAD SPY via __namecall
 -- Intercepta TODOS os FireServer do jogo via metamethod.
--- Captura o payload de qualquer ação do player (incluindo block).
+-- Captura o payload de qualquer aÃ§Ã£o do player (incluindo block).
 -- Funciona em qualquer executor que tenha getrawmetatable + setreadonly.
 -- ============================================================
 local hgCapturedPayload = nil  -- {remote=ref, args={...}} capturado
@@ -9864,7 +9886,7 @@ end
 
 local function hgStartSpy()
     if not getrawmetatable then return false, "executor sem getrawmetatable" end
-    if hgSpyActive then return false, "spy já ativo" end
+    if hgSpyActive then return false, "spy jÃ¡ ativo" end
     hgBuildSpyWhitelist()
     local ok, err = pcall(function()
         local mt = getrawmetatable(game)
@@ -9877,7 +9899,7 @@ local function hgStartSpy()
                 if label then
                     local args = {...}
                     local str = hgSerializeArgs(args)
-                    print("[HBG SPY] " .. label .. " → " .. str)
+                    print("[HBG SPY] " .. label .. " â†’ " .. str)
                     if #args > 0 then
                         hgCapturedPayload = {remote = self, args = args}
                         Toast(label .. ": " .. str:sub(1,60), true)
@@ -9892,7 +9914,7 @@ local function hgStartSpy()
                 if label then
                     local args = {...}
                     local str = hgSerializeArgs(args)
-                    print("[HBG SPY] " .. label .. " → " .. str)
+                    print("[HBG SPY] " .. label .. " â†’ " .. str)
                     if #args > 0 then
                         hgCapturedPayload = {remote = self, args = args}
                         Toast(label .. ": " .. str:sub(1,60), true)
@@ -9905,12 +9927,12 @@ local function hgStartSpy()
         hgSpyOldNC = old
         hgSpyActive = true
     end)
-    if ok then return true, "spy ativo — aperta block uma vez no jogo"
+    if ok then return true, "spy ativo â€” aperta block uma vez no jogo"
     else return false, tostring(err) end
 end
 
 local function hgStopSpy()
-    -- restaura __namecall original se tiver referência
+    -- restaura __namecall original se tiver referÃªncia
     if hgSpyOldNC and getrawmetatable then
         pcall(function()
             local mt = getrawmetatable(game)
@@ -9926,12 +9948,12 @@ end
 -- ============================================================
 -- HOLD BLOCK
 -- Usa o payload capturado pelo spy e fica disparando via :FireServer()
--- Intervalo base configurável + jitter humano.
+-- Intervalo base configurÃ¡vel + jitter humano.
 -- ============================================================
 local hgHoldConn = nil
 
 local function hgFireBlock(remote, args)
-    -- sintaxe correta: remote:FireServer(...) via pcall anônimo
+    -- sintaxe correta: remote:FireServer(...) via pcall anÃ´nimo
     pcall(function() remote:FireServer(table.unpack(args)) end)
 end
 
@@ -9940,7 +9962,7 @@ local function hgStartHoldBlock()
     local interval = HGState.holdInterval or 0.08
     local lastFire  = 0
 
-    -- remotes e payloads genéricos de fallback (usados quando spy não capturou nada)
+    -- remotes e payloads genÃ©ricos de fallback (usados quando spy nÃ£o capturou nada)
     local function fireFallback()
         -- tenta na remote do workspace do player
         local remote = hgFindBlockRemote()
@@ -9989,10 +10011,10 @@ local function hgStopHoldBlock()
 end
 
 -- ============================================================
--- UI — DUMP
+-- UI â€” DUMP
 -- ============================================================
 Section("Dump HBG")
-Note("Escaneia todas as remotes do jogo, categoriza por intenção (ataque, block, status, anti-cheat), mapeia hitboxes e pasta de combate. Salva em SilkcoreHBGDump.txt.", 68)
+Note("Escaneia todas as remotes do jogo, categoriza por intenÃ§Ã£o (ataque, block, status, anti-cheat), mapeia hitboxes e pasta de combate. Salva em SilkcoreHBGDump.txt.", 68)
 do
     local busy = false
     BtnRow("DUMP HBG", T.Accent, function()
@@ -10001,7 +10023,7 @@ do
         Toast("fazendo dump HBG...", true)
         task.spawn(function()
             local txt, copied = HG.Dump()
-            Toast(string.format("dump pronto · %d chars · %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
+            Toast(string.format("dump pronto Â· %d chars Â· %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
             busy = false
         end)
     end)
@@ -10009,48 +10031,48 @@ end
 BtnRow("RESETAR CACHE DE REMOTES", T.Card, function()
     hgRemoteCache = nil
     hgBlockRemote = nil
-    Toast("cache limpo — próximo dump re-escaneia tudo", true)
+    Toast("cache limpo â€” prÃ³ximo dump re-escaneia tudo", true)
 end)
 
 -- ============================================================
--- UI — ANTI-CHEAT BYPASS
+-- UI â€” ANTI-CHEAT BYPASS
 -- ============================================================
 Section("Anti-Cheat Bypass")
-Note("Hook de remotes de verificação: intercepta chamadas de speed/position check e normaliza os valores antes de enviarem ao servidor. Requer executor com hookfunction (ex: Synapse X, KRNL, AWP).", 68)
+Note("Hook de remotes de verificaÃ§Ã£o: intercepta chamadas de speed/position check e normaliza os valores antes de enviarem ao servidor. Requer executor com hookfunction (ex: Synapse X, KRNL, AWP).", 68)
 
 Section("Silk Guard")
-Toggle("Silk Guard (proteção do script)", true, function(v)
+Toggle("Silk Guard (proteÃ§Ã£o do script)", true, function(v)
     SilkGuard.On = v
-    Toast(v and "guarda armada" or "guarda desarmada — nada é reposto se cair", v)
+    Toast(v and "guarda armada" or "guarda desarmada â€” nada Ã© reposto se cair", v)
 end, "hg_silkguard")
 
 Toggle("Modo fantasma (GUI em gethui)", false, function(v)
     local on = SilkGuard.ghost(v)
-    Toast(on and "GUI movida pro container oculto do executor" or "GUI de volta à árvore normal", true)
+    Toast(on and "GUI movida pro container oculto do executor" or "GUI de volta Ã  Ã¡rvore normal", true)
 end, "hg_ghost")
 
 BtnRow("AUDITORIA DE PEGADA", T.Card, function()
     Toast(SilkGuard.audit(), true)
 end, 34)
-Note("A guarda conta os frames do loop de render: se o bind cair, ela re-arma. Não é mágica contra servidor — é contra script de terceiro mexendo na tua mesa.", 52)
+Note("A guarda conta os frames do loop de render: se o bind cair, ela re-arma. NÃ£o Ã© mÃ¡gica contra servidor â€” Ã© contra script de terceiro mexendo na tua mesa.", 52)
 
 BtnRow("INSTALAR HOOKS DE AC", T.Good, function()
     task.spawn(function()
         local ok, msg = HG.InstallACHooks()
-        Toast((ok and "✓ " or "✗ ") .. tostring(msg), ok)
+        Toast((ok and "âœ“ " or "âœ— ") .. tostring(msg), ok)
         if ok and #HGState.acHooks > 0 then
             Toast("remotes hookadas: " .. table.concat(HGState.acHooks, ", "):sub(1, 80), true)
         end
     end)
 end)
-Note("Execute DUMP primeiro para mapear as remotes — o hook fica mais preciso com o cache populado.", 52)
+Note("Execute DUMP primeiro para mapear as remotes â€” o hook fica mais preciso com o cache populado.", 52)
 
 Toggle("Fake Speed (bypassa speed-check)", false, function(v)
     HGState.acFakeSpeed = v
     if v then
         local spd = HGState.fakeSpeedVal or 60
         hgStartFakeSpeed(spd)
-        Toast("fake speed ligado · WalkSpeed real mantido em 16", true)
+        Toast("fake speed ligado Â· WalkSpeed real mantido em 16", true)
     else
         Toast("fake speed desligado", false)
     end
@@ -10061,56 +10083,56 @@ do
     local sField = Field(row, UDim2.new(0.56,0,0.5,-15), UDim2.new(0.22,0,0,30), "60")
     Button(row, "SET", UDim2.new(0.8,0,0.5,-15), UDim2.fromOffset(52,30), T.Card, function()
         local v = tonumber(sField.Text)
-        if not v or v < 1 or v > 500 then Toast("valor inválido (1-500)", false); return end
+        if not v or v < 1 or v > 500 then Toast("valor invÃ¡lido (1-500)", false); return end
         HGState.fakeSpeedVal = v
         if HGState.acFakeSpeed then hgStartFakeSpeed(v) end
-        Toast("fake speed → " .. v, true)
+        Toast("fake speed â†’ " .. v, true)
     end)
 end
 
 -- ============================================================
--- UI — DUMP PROFUNDO / NEUTRALIZACAO
+-- UI â€” DUMP PROFUNDO / NEUTRALIZACAO
 -- ============================================================
 Section("Dump profundo")
-Note("Lê o GC atrás das funções de anti-cheat, lista os scripts do jogo e tenta descompilar os suspeitos. Salva em SilkcoreACDump.txt e copia pra área de transferência.", 60)
+Note("LÃª o GC atrÃ¡s das funÃ§Ãµes de anti-cheat, lista os scripts do jogo e tenta descompilar os suspeitos. Salva em SilkcoreACDump.txt e copia pra Ã¡rea de transferÃªncia.", 60)
 
 BtnRow("DUMP DE SCRIPTS / AC", T.Accent, function()
     task.spawn(function()
         local txt, copied = HG.DumpScripts()
-        Toast(string.format("dump AC · %d chars · %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
+        Toast(string.format("dump AC Â· %d chars Â· %s", #txt, copied and "copiado!" or "salvo em arquivo"), true)
     end)
 end)
 
 BtnRow("DUMP DO JOGO (sem CorePackages)", T.Accent, function()
     task.spawn(function()
-        Toast("dump do jogo rodando — só o que é do dev", true)
+        Toast("dump do jogo rodando â€” sÃ³ o que Ã© do dev", true)
         local txt, copied, secs = HG.DumpGame()
-        Toast(string.format("dump do jogo · %d chars · %.1fs · %s", #txt, secs, copied and "copiado!" or "salvo em arquivo"), true)
+        Toast(string.format("dump do jogo Â· %d chars Â· %.1fs Â· %s", #txt, secs, copied and "copiado!" or "salvo em arquivo"), true)
     end)
 end)
 
 BtnRow("DUMP TOTAL (tudo)", T.Good, function()
     task.spawn(function()
-        Toast("dump total rodando em segundo plano — pode jogar", true)
+        Toast("dump total rodando em segundo plano â€” pode jogar", true)
         local txt, copied, secs = HG.DumpAll()
-        Toast(string.format("dump total · %d chars · %.1fs · %s", #txt, secs, copied and "copiado!" or "salvo em arquivo"), true)
+        Toast(string.format("dump total Â· %d chars Â· %.1fs Â· %s", #txt, secs, copied and "copiado!" or "salvo em arquivo"), true)
     end)
 end)
 
-BtnRow("COPIAR ÚLTIMO DUMP", T.Card, function()
-    if not HG.LastDump then Toast("nenhum dump ainda — roda o DUMP TOTAL primeiro", false); return end
+BtnRow("COPIAR ÃšLTIMO DUMP", T.Card, function()
+    if not HG.LastDump then Toast("nenhum dump ainda â€” roda o DUMP TOTAL primeiro", false); return end
     if setclipboard then pcall(setclipboard, HG.LastDump) end
     Toast(string.format("%d chars copiados pro clipboard", #HG.LastDump), true)
 end, 34)
 
 Toggle("Trace de remotes", false, function(v)
     local ok, msg = HG.TraceRemotes(v)
-    Toast((ok and "" or "✗ ") .. msg, ok)
+    Toast((ok and "" or "âœ— ") .. msg, ok)
 end, "hg_trace")
 
 BtnRow("VER TRACE CAPTURADO", T.Card, function()
     local txt = HG.TraceText()
-    if txt == "" then Toast("trace vazio — liga o trace e joga um round", false); return end
+    if txt == "" then Toast("trace vazio â€” liga o trace e joga um round", false); return end
     if setclipboard then pcall(setclipboard, txt) end
     print("[SilkCore] trace:\n" .. txt)
     Toast(string.format("%d linhas copiadas", select(2, txt:gsub("\n", "")) + 1), true)
@@ -10121,21 +10143,21 @@ BtnRow("LIMPAR TRACE", T.Card, function()
     Toast("trace limpo", true)
 end, 34)
 
-Section("Neutralizar detecção")
-Note("O servidor não vê o teu executor — vê o que replica e o que você manda pra ele. O report killer corta a remote que o anti-cheat usa pra avisar. Não apague o script deles: se ele sumir, o heartbeat de integridade acusa na hora.", 60)
+Section("Neutralizar detecÃ§Ã£o")
+Note("O servidor nÃ£o vÃª o teu executor â€” vÃª o que replica e o que vocÃª manda pra ele. O report killer corta a remote que o anti-cheat usa pra avisar. NÃ£o apague o script deles: se ele sumir, o heartbeat de integridade acusa na hora.", 60)
 
 Toggle("Report killer (dropa flag/ban)", false, function(v)
     local ok, msg = HG.KillReport(v)
-    Toast((ok and "" or "✗ ") .. msg, ok)
+    Toast((ok and "" or "âœ— ") .. msg, ok)
 end, "hg_reportkill")
 
 BtnRow("PROTEGER A GUI", T.Good, function()
     local ok, msg = HG.Evade()
-    Toast((ok and "" or "✗ ") .. msg, ok)
+    Toast((ok and "" or "âœ— ") .. msg, ok)
 end, 34)
 
 -- ============================================================
--- UI — AUTO-BLOCK (HOLD BLOCK)
+-- UI â€” AUTO-BLOCK (HOLD BLOCK)
 -- ============================================================
 Section("Auto-Block")
 Note("Segura o block ativo em loop via FireServer direto. Passo 1: ativa o Spy e aperta block uma vez no jogo pra capturar o payload real. Passo 2: liga o Hold Block.", 68)
@@ -10144,14 +10166,14 @@ Note("Segura o block ativo em loop via FireServer direto. Passo 1: ativa o Spy e
 BtnRow("ATIVAR SPY (captura payload de block)", T.Accent, function()
     task.spawn(function()
         local ok, msg = hgStartSpy()
-        Toast((ok and "✓ " or "✗ ") .. msg, ok)
+        Toast((ok and "âœ“ " or "âœ— ") .. msg, ok)
     end)
 end)
-Note("Com o spy ativo: aperta o botão de block do jogo UMA VEZ. O payload aparece no output e na notificação. Depois pode ligar o Hold Block.", 52)
+Note("Com o spy ativo: aperta o botÃ£o de block do jogo UMA VEZ. O payload aparece no output e na notificaÃ§Ã£o. Depois pode ligar o Hold Block.", 52)
 
 BtnRow("VER PAYLOAD CAPTURADO", T.Card, function()
     if not hgCapturedPayload then
-        Toast("nenhum payload capturado ainda — use o spy primeiro", false); return
+        Toast("nenhum payload capturado ainda â€” use o spy primeiro", false); return
     end
     local parts = {}
     for i, v in ipairs(hgCapturedPayload) do
@@ -10163,7 +10185,7 @@ end)
 
 BtnRow("LIMPAR PAYLOAD (volta pra fallback)", T.Card, function()
     hgCapturedPayload = nil
-    Toast("payload limpo — hold block vai usar argumentos genéricos", true)
+    Toast("payload limpo â€” hold block vai usar argumentos genÃ©ricos", true)
 end)
 
 -- Hold block
@@ -10171,8 +10193,8 @@ Toggle("Hold Block", false, function(v)
     HGState.autoBlock = v
     if v then
         hgStartHoldBlock()
-        local modo = hgCapturedPayload and "payload capturado" or "argumentos genéricos"
-        Toast("hold block ligado · " .. modo, true)
+        local modo = hgCapturedPayload and "payload capturado" or "argumentos genÃ©ricos"
+        Toast("hold block ligado Â· " .. modo, true)
     else
         hgStopHoldBlock()
         Toast("hold block desligado", false)
@@ -10181,16 +10203,16 @@ end, "hg_holdblock")
 
 do
     local row = Row(50)
-    Label(row, "Intervalo de fire (s) — menor = mais agressivo", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16,0), UDim2.new(0.6,0,1,0))
+    Label(row, "Intervalo de fire (s) â€” menor = mais agressivo", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16,0), UDim2.new(0.6,0,1,0))
 end
 do
     local row = Row(50)
     local iField = Field(row, UDim2.new(0.04,0,0.5,-15), UDim2.new(0.22,0,0,30), "0.08")
     Button(row, "SET", UDim2.new(0.28,0,0.5,-15), UDim2.fromOffset(52,30), T.Card, function()
         local v = tonumber(iField.Text)
-        if not v or v < 0.02 or v > 2 then Toast("valor inválido (0.02-2)", false); return end
+        if not v or v < 0.02 or v > 2 then Toast("valor invÃ¡lido (0.02-2)", false); return end
         HGState.holdInterval = v
-        Toast("intervalo → " .. v .. "s", true)
+        Toast("intervalo â†’ " .. v .. "s", true)
         -- reinicia o loop se estiver ativo
         if HGState.autoBlock then hgStartHoldBlock() end
     end)
@@ -10198,10 +10220,10 @@ do
         hgBlockRemote = nil
         local r = hgFindBlockRemote()
         if r then Toast("remote: " .. r:GetFullName(), true)
-        else Toast("remote não encontrada — entre no jogo primeiro", false) end
+        else Toast("remote nÃ£o encontrada â€” entre no jogo primeiro", false) end
     end)
 end
-Note("Se o hold block não funcionar com payload genérico: ativa o spy → aperta block manual uma vez → o payload é capturado → o hold block passa a usar ele.", 68)
+Note("Se o hold block nÃ£o funcionar com payload genÃ©rico: ativa o spy â†’ aperta block manual uma vez â†’ o payload Ã© capturado â†’ o hold block passa a usar ele.", 68)
 
 end -- HBG tab
 buildHBG()
@@ -10224,7 +10246,7 @@ track(UserInputService.InputBegan:Connect(function(i, processed)
             local key = nil
             if i.KeyCode ~= Enum.KeyCode.Escape then key = i.KeyCode end
             if key == Enum.KeyCode.RightControl or key == Enum.KeyCode.RightShift or key == Enum.KeyCode.LeftControl then
-                Toast("essa tecla é reservada do menu, escolha outra", false)
+                Toast("essa tecla Ã© reservada do menu, escolha outra", false)
                 return
             end
             if target == "look" then
@@ -10288,7 +10310,7 @@ if env then
     end
 end
 
--- Silk Guard: registra o que tem que continuar de pé, e liga a vigilância
+-- Silk Guard: registra o que tem que continuar de pÃ©, e liga a vigilÃ¢ncia
 if SilkGuard then
     pcall(SilkGuard.track, Gui)
     if FovGui then pcall(SilkGuard.track, FovGui) end
@@ -10302,6 +10324,6 @@ runLoader(function(failed)
     if #failed > 0 then
         Toast("loader: " .. failed[1], false)
     else
-        Toast("Silk Core pronto · RControl abre e fecha", true)
+        Toast("Silk Core pronto Â· RControl abre e fecha", true)
     end
 end)
