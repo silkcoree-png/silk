@@ -36,11 +36,34 @@ pcall(RunService.UnbindFromRenderStep, RunService, FOV_BIND)
 pcall(RunService.UnbindFromRenderStep, RunService, VOL_BIND)
 
 local guiParent = (gethui and gethui()) or PlayerGui
-for _, parent in ipairs({PlayerGui, guiParent}) do
-    for _, n in ipairs({GUI_NAME, FOV_NAME, ESP_NAME, "SilkcoreVolleyLines", "SilkcoreToasts", "SilkcoreLoader"}) do
-        local old = parent:FindFirstChild(n)
-        if old then old:Destroy() end
+
+-- INSTANCIA UNICA. Se sobrar um menu vivo de um reload anterior, a tecla vira cabo
+-- de guerra: um handler abre, o outro fecha, e o resultado e "aperto e nada acontece".
+-- O clique tambem cai na instancia errada. Por isso a varredura e ampla e assinada.
+do
+    local vistos = {}
+    local function matar(c)
+        if not c or vistos[c] then return end
+        vistos[c] = true
+        for _, nome in ipairs({GUI_NAME, FOV_NAME, ESP_NAME, "SilkcoreVolleyLines",
+                               "SilkcoreToasts", "SilkcoreLoader", "SilkcoreMenu", "SilkCore"}) do
+            local ok, velho = pcall(function() return c:FindFirstChild(nome) end)
+            if ok and velho then pcall(function() velho:Destroy() end) end
+        end
+        local okLista, filhos = pcall(function() return c:GetChildren() end)
+        if okLista and filhos then
+            for _, f in ipairs(filhos) do
+                local okGui, eh = pcall(function() return f:IsA("ScreenGui") end)
+                if okGui and eh then
+                    local nome = tostring(f.Name or ""):lower()
+                    if nome:find("silk", 1, true) then pcall(function() f:Destroy() end) end
+                end
+            end
+        end
     end
+    matar(PlayerGui)
+    matar(guiParent)
+    pcall(function() matar(game:GetService("CoreGui")) end)
 end
 local oldBlur = game:GetService("Lighting"):FindFirstChild("SilkcoreBlur")
 if oldBlur then oldBlur:Destroy() end
@@ -3059,17 +3082,22 @@ do
             return dentro(m)
         end
 
-        UserInputService.InputBegan:Connect(function(input)
+        -- tudo aqui e rastreado: sem track() sobrava um listener global por reload,
+        -- cada um rodando em cima de um NavArea ja morto. era o "mal otimizado".
+        track(UserInputService.InputBegan:Connect(function(input)
+            if not NavArea.Parent then return end
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                if dentro(input.Position) then
+                local p = UserInputService:GetMouseLocation() + guiInset
+                if dentro(p) then
                     arrastando = true
-                    inicioY = input.Position.Y
+                    inicioY = p.Y
                     canvasY = NavArea.CanvasPosition.Y
                 end
             end
-        end)
+        end))
 
-        UserInputService.InputChanged:Connect(function(input)
+        track(UserInputService.InputChanged:Connect(function(input)
+            if not NavArea.Parent then return end
             if input.UserInputType == Enum.UserInputType.MouseWheel then
                 if mouseDentro() then
                     local passo = (input.Position.Z or 0) * 60
@@ -3079,15 +3107,16 @@ do
                 return
             end
             if arrastando and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                NavArea.CanvasPosition = Vector2.new(0, math.clamp(canvasY - (input.Position.Y - inicioY), 0, limite()))
+                local p = UserInputService:GetMouseLocation() + guiInset
+                NavArea.CanvasPosition = Vector2.new(0, math.clamp(canvasY - (p.Y - inicioY), 0, limite()))
             end
-        end)
+        end))
 
-        UserInputService.InputEnded:Connect(function(input)
+        track(UserInputService.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 arrastando = false
             end
-        end)
+        end))
     end
 end
 function SetBadge(name, text)
@@ -3794,10 +3823,14 @@ do
 local function PaintNav()
     for n, e in pairs(NAVB) do
         local on = (n == curName)
-        Tween(e.lbl, 0.2, {TextColor3 = on and T.Text or T.Sub})
-        for _, it in ipairs(e.icon) do
-            local col = on and T.Accent or T.Sub
-            if it.st then Tween(it.st, 0.2, {Color = col}) else Tween(it.f, 0.2, {BackgroundColor3 = col}) end
+        -- so anima quem realmente mudou: 70 tweens por clique viraram 2
+        if e.pintado ~= on then
+            e.pintado = on
+            Tween(e.lbl, 0.2, {TextColor3 = on and T.Text or T.Sub})
+            for _, it in ipairs(e.icon) do
+                local col = on and T.Accent or T.Sub
+                if it.st then Tween(it.st, 0.2, {Color = col}) else Tween(it.f, 0.2, {BackgroundColor3 = col}) end
+            end
         end
     end
 end
@@ -11164,12 +11197,38 @@ end -- Admin tab
 do
 CurTab = Tab("Scripts", 0, false)
 Persist.Scope = "scripts"
+SetBadge("Scripts", "SC")
+
+-- marca Silk Core: quem abre Scripts sabe de quem e
+do
+    local marca = New("Frame", {
+        Size = UDim2.new(1, 0, 0, 60), BackgroundColor3 = T.Card, BorderSizePixel = 0,
+    }, CurTab)
+    Round(marca, 8)
+    Stroke(marca, T.Accent, 1)
+    local brilho = New("Frame", {
+        Size = UDim2.new(1, -24, 0, 1), Position = UDim2.fromOffset(12, 47),
+        BackgroundColor3 = T.Stroke, BorderSizePixel = 0,
+    }, marca)
+    local selo = New("Frame", {
+        Size = UDim2.fromOffset(34, 34), Position = UDim2.fromOffset(12, 7),
+        BackgroundColor3 = T.Accent, BorderSizePixel = 0,
+    }, marca)
+    Round(selo, 8)
+    Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
+    Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
+        UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
+    Label(marca, "script hub · silkcoree-png · v2.1", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+        UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
+    Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
+        UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
+end
 
 Section("Scripts Populares")
 Note("Scripts de terceiros carregados por loadstring.", 52)
 
 BtnRow("Infinite Yield", T.Accent, function()
-    Toast("carregando Infinite Yield...", true)
+    Toast("Silk Core · carregando Infinite Yield...", true)
     task.spawn(function()
         local ok = pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
@@ -11183,7 +11242,7 @@ BtnRow("Infinite Yield", T.Accent, function()
 end)
 
 BtnRow("Dex Explorer V4", T.Card, function()
-    Toast("carregando Dex...", true)
+    Toast("Silk Core · carregando Dex...", true)
     task.spawn(function()
         local ok = pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
@@ -11197,7 +11256,7 @@ BtnRow("Dex Explorer V4", T.Card, function()
 end)
 
 BtnRow("Remote Spy", T.Card, function()
-    Toast("carregando Remote Spy...", true)
+    Toast("Silk Core · carregando Remote Spy...", true)
     task.spawn(function()
         local ok = pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpySource.lua"))()
@@ -11211,7 +11270,7 @@ BtnRow("Remote Spy", T.Card, function()
 end)
 
 BtnRow("Hydroxide", T.Accent, function()
-    Toast("carregando Hydroxide...", true)
+    Toast("Silk Core · carregando Hydroxide...", true)
     task.spawn(function()
         local ok = pcall(function()
             local owner = "Upbolt"
@@ -11233,7 +11292,7 @@ end)
 Section("Scripts por Jogo")
 
 BtnRow("Arsenal Script", T.Accent, function()
-    Toast("carregando Arsenal script...", true)
+    Toast("Silk Core · carregando Arsenal script...", true)
     task.spawn(function()
         pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/thaibao/main/ArsenalSientc"))()
@@ -11242,7 +11301,7 @@ BtnRow("Arsenal Script", T.Accent, function()
 end)
 
 BtnRow("Blox Fruits Script", T.Card, function()
-    Toast("carregando Blox Fruits script...", true)
+    Toast("Silk Core · carregando Blox Fruits script...", true)
     task.spawn(function()
         pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/zReal-King/Blox-Fruits-Script/main/README.md"))()
@@ -11251,7 +11310,7 @@ BtnRow("Blox Fruits Script", T.Card, function()
 end)
 
 BtnRow("Jailbreak Script", T.Card, function()
-    Toast("carregando Jailbreak script...", true)
+    Toast("Silk Core · carregando Jailbreak script...", true)
     task.spawn(function()
         pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Vynixius/main/Jailbreak/Script.lua"))()
@@ -11260,7 +11319,7 @@ BtnRow("Jailbreak Script", T.Card, function()
 end)
 
 BtnRow("Pet Simulator X", T.Accent, function()
-    Toast("carregando PSX script...", true)
+    Toast("Silk Core · carregando PSX script...", true)
     task.spawn(function()
         pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/Muhammad6196/Project-WD/main/Main.lua"))()
@@ -11269,7 +11328,7 @@ BtnRow("Pet Simulator X", T.Accent, function()
 end)
 
 BtnRow("Adopt Me Script", T.Card, function()
-    Toast("carregando Adopt Me script...", true)
+    Toast("Silk Core · carregando Adopt Me script...", true)
     task.spawn(function()
         pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Adopt-Me-Script/main/README.md"))()
@@ -11278,7 +11337,7 @@ BtnRow("Adopt Me Script", T.Card, function()
 end)
 
 BtnRow("Phantom Forces", T.Card, function()
-    Toast("carregando PF script...", true)
+    Toast("Silk Core · carregando PF script...", true)
     task.spawn(function()
         pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/Mana42138/Phantom-Forces-ESP/main/main.lua"))()
@@ -11289,7 +11348,7 @@ end)
 Section("Scripts Utilitários")
 
 BtnRow("FPS Booster", T.Accent, function()
-    Toast("aplicando FPS boost...", true)
+    Toast("Silk Core · otimizando o cliente...", true)
     local decalsyeeted = true
     local g = game
     local w = g.Workspace
@@ -11336,7 +11395,7 @@ BtnRow("Unlock FPS", T.Card, function()
 end)
 
 BtnRow("Dark Dex", T.Accent, function()
-    Toast("carregando Dark Dex...", true)
+    Toast("Silk Core · carregando Dark Dex...", true)
     task.spawn(function()
         pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua"))()
@@ -11389,7 +11448,7 @@ do
             end
             
             if ok then
-                Toast("script executado com sucesso", true)
+                Toast("Silk Core · script executado", true)
             else
                 Toast("erro: "..(tostring(err):sub(1, 40)), false)
                 print("[SILK CORE] Script error:", err)
@@ -11399,6 +11458,25 @@ do
 end
 
 Note("Roda na sua sessao. O que o servidor valida, o script nao contorna.", 68)
+
+-- assinatura: o que sai daqui carrega a marca
+do
+    local fim = New("Frame", {
+        Size = UDim2.new(1, 0, 0, 46), BackgroundColor3 = T.Card, BorderSizePixel = 0,
+    }, CurTab)
+    Round(fim, 8)
+    Stroke(fim, T.Stroke, 1)
+    local selo = New("Frame", {
+        Size = UDim2.fromOffset(26, 26), Position = UDim2.fromOffset(12, 10),
+        BackgroundColor3 = T.Accent, BorderSizePixel = 0,
+    }, fim)
+    Round(selo, 7)
+    Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
+    Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
+        UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
+    Label(fim, "menu, scripts e hacks · v2.1 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+        Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
+end
 
 end -- Scripts
 
@@ -15687,7 +15765,15 @@ BtnRow("FORÇAR PERSONAGEM PADRÃO", T.Card, function()
 end)
 
 end -- Brookhaven tab
-buildBrookhaven()
+-- uma aba que estoura na montagem nao pode derrubar o menu inteiro:
+-- antes, o erro aqui matava o HBG e a tecla de fechar junto (ela e registrada depois).
+do
+    local ok, e = pcall(buildBrookhaven)
+    if not ok then
+        if env then env.SilkcoreBuildErr = "Brookhaven: " .. tostring(e) end
+        warn("[SilkCore] Brookhaven falhou na montagem: " .. tostring(e))
+    end
+end
 
 --------------------------------------------------------------------------------
 -- HBG
@@ -16997,7 +17083,13 @@ end
 Note("Se o hold block não funcionar com payload genérico: ativa o spy → aperta block manual uma vez → o payload é capturado → o hold block passa a usar ele.", 68)
 
 end -- HBG tab
-buildHBG()
+do
+    local ok, e = pcall(buildHBG)
+    if not ok then
+        if env then env.SilkcoreBuildErr = ((env.SilkcoreBuildErr and (env.SilkcoreBuildErr .. " | ")) or "") .. "HBG: " .. tostring(e) end
+        warn("[SilkCore] HBG falhou na montagem: " .. tostring(e))
+    end
+end
 
 --------------------------------------------------------------------------------
 -- ATALHOS + LIMPEZA + BOOT
@@ -17005,8 +17097,19 @@ buildHBG()
 do
     local origSetOpen = SetOpen
     SetOpen = function(v)
-        if not v then Palette.Close() end
-        origSetOpen(v)
+        if not v and Palette and Palette.Close then pcall(Palette.Close) end
+        local ok = pcall(origSetOpen, v)
+        if not ok then
+            -- ultimo recurso: o menu nunca fica preso na tela
+            isOpen = v
+            if Gui then Gui.Enabled = v end
+            if not v then
+                if Shell then Shell.Size = LAY.BASE end
+                task.delay(0.06, function()
+                    if not isOpen and Gui then Gui.Enabled = false end
+                end)
+            end
+        end
     end
 end
 track(UserInputService.InputBegan:Connect(function(i, processed)
@@ -17042,16 +17145,27 @@ track(UserInputService.InputBegan:Connect(function(i, processed)
         end
         return
     end
+    -- a tecla do menu e tratada ANTES do filtro "processed". se um campo de texto
+    -- estiver em foco (busca de aba, caixa de script), o keypress chega marcado como
+    -- consumido e o menu ficava preso aberto pra sempre. agora ela solta o foco e fecha.
+    local tecla = i.KeyCode
+    local ehMenu = (tecla == Enum.KeyCode.RightControl or tecla == Enum.KeyCode.RightShift
+        or (MenuKeys.Extra ~= nil and tecla == MenuKeys.Extra))
+    if ehMenu then
+        local foco = UserInputService.GetFocusedTextBox and UserInputService:GetFocusedTextBox()
+        if foco then pcall(function() foco:ReleaseFocus() end) end
+        -- decide pelo que esta na tela, nao pela variavel: se o estado desincronizar,
+        -- a tecla ainda faz alguma coisa visivel em vez de morrer num toque perdido
+        SetOpen(not (isOpen and Gui.Enabled))
+        return
+    end
     if processed then return end
     local ctrl = UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
-    if isOpen and ((i.KeyCode == Enum.KeyCode.K and ctrl) or i.KeyCode == Enum.KeyCode.Slash) then
+    if isOpen and ((tecla == Enum.KeyCode.K and ctrl) or tecla == Enum.KeyCode.Slash) then
         Palette.Open()
         return
     end
-    if i.KeyCode == Enum.KeyCode.RightControl or i.KeyCode == Enum.KeyCode.RightShift
-        or (MenuKeys.Extra ~= nil and i.KeyCode == MenuKeys.Extra) then
-        SetOpen(not isOpen)
-    elseif MenuKeys.Look ~= nil and i.KeyCode == MenuKeys.Look then
+    if MenuKeys.Look ~= nil and tecla == MenuKeys.Look then
         Looks.Next()
     end
 end))
@@ -17088,12 +17202,37 @@ if SilkGuard then
     if Drawing and VOL_STEP then pcall(SilkGuard.hold, VOL_BIND, Enum.RenderPriority.Camera.Value + 4, VOL_STEP) end
 end
 
+-- conferencia de mesa: cada aba do trilho precisa existir E ter conteudo
+if env then
+    local faltando, vazias = {}, {}
+    for nome in pairs(NAVB) do
+        local f = tabs[nome]
+        if not f then
+            faltando[#faltando + 1] = nome
+        else
+            local okc, filhos = pcall(function() return f:GetChildren() end)
+            local n = 0
+            if okc and filhos then for _ in ipairs(filhos) do n = n + 1 end end
+            if n <= 2 then vazias[#vazias + 1] = nome end
+        end
+    end
+    env.SilkcoreCheck = {faltando = faltando, vazias = vazias}
+end
+
 ShowTab("Clonar")
 Gui.Enabled = false
 runLoader(function(failed)
     SetOpen(true)
+    local chk = env and env.SilkcoreCheck or nil
+    local erro = env and env.SilkcoreBuildErr or nil
     if #failed > 0 then
         Toast("loader: " .. failed[1], false)
+    elseif chk and #chk.faltando > 0 then
+        Toast("aba sem quadro: " .. table.concat(chk.faltando, ", "), false)
+    elseif chk and #chk.vazias > 0 then
+        Toast("aba vazia: " .. table.concat(chk.vazias, ", "), false)
+    elseif erro then
+        Toast("aviso: " .. tostring(erro):sub(1, 70), false)
     else
         Toast("Silk Core pronto · RControl abre e fecha", true)
     end
