@@ -6351,6 +6351,10 @@ CurTab = Tab("Volei", 0, true)
 Persist.Scope = "volley"
 
 local Drawing = Drawing or (getgenv and getgenv().Drawing)
+
+-- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
+-- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
+local BUILD = "BE04"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -6401,6 +6405,25 @@ do
 
     VBGui = sg
     VB.layer = layer
+
+    -- leitura ao vivo para diagnóstico: build, backend, pares, visíveis, altura
+    local dbg = Instance.new("TextLabel")
+    dbg.Name = "Build"
+    dbg.Position = UDim2.fromOffset(10, 10)
+    dbg.Size = UDim2.fromOffset(300, 62)
+    dbg.BackgroundColor3 = Color3.new(0, 0, 0)
+    dbg.BackgroundTransparency = 0.45
+    dbg.BorderSizePixel = 0
+    dbg.Font = Enum.Font.Code
+    dbg.TextSize = 14
+    dbg.TextXAlignment = Enum.TextXAlignment.Left
+    dbg.TextYAlignment = Enum.TextYAlignment.Top
+    dbg.TextColor3 = Color3.fromRGB(255, 255, 255)
+    dbg.Text = ""
+    dbg.Visible = false
+    dbg.ZIndex = 10
+    dbg.Parent = layer
+    VB.dbg = dbg
 end
 
 -- ── backend do desenho ──────────────────────────────────────────────────────
@@ -6854,7 +6877,7 @@ local function sync()
             local char = plr.Character
             if char and not char.Parent then char = nil end
             if char ~= p.char then
-                p.char, p.yoffAt, p.yoff = char, 0, 0
+                p.char, p.yoffAt, p.yoff, p.head = char, 0, 0, nil
                 p.dir, p.sang, p.yoffSettle = nil, nil, 3
             end
             -- Mede a altura 3 vezes no primeiro ~3 s (tempo do rig carregar) e
@@ -6863,26 +6886,31 @@ local function sync()
             if char and (p.yoffSettle or 0) > 0 and now - (p.yoffAt or -99) > 1.5 then
                 p.yoffAt = now
                 p.yoffSettle = p.yoffSettle - 1
-                -- Origem = cabeça. O rig deste jogo não expõe "Head" como filho
-                -- direto do modelo — por isso a busca é recursiva. Se ainda
-                -- assim não achar, cai no topo da caixa do modelo. O que não dá
-                -- mais é origem no HumanoidRootPart puro: nele a linha nascia
-                -- no chão.
+                -- Origem = cabeça. O rig deste jogo não expõe "Head" como filho direto
+                -- do modelo — daí a busca recursiva. Se a cabeça estiver no mesmo
+                -- nível do root (rig com as peças empilhadas na origem, comum em
+                -- personagem por SkinnedMesh), ela não serve de âncora: nesse caso
+                -- usa o topo da caixa do modelo. E se nem isso der altura, cai em
+                -- 2,6 studs acima do root — o que nunca deixa a linha no chão.
                 local root = char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart
                 if root then
                     local head = char:FindFirstChild("Head", true)
-                    if head then
-                        p.yoff = head.Position.Y - root.Position.Y
+                    local relH = head and (head.Position.Y - root.Position.Y) or nil
+                    local okB, box, size = pcall(function()
+                        local c, s = char:GetBoundingBox()
+                        return c, s
+                    end)
+                    local relT = (okB and box and size)
+                        and ((box.Position.Y + size.Y * 0.5) - root.Position.Y) or nil
+
+                    if relH and relH > 0.5 then
+                        p.head, p.yoff = head, relH
+                    elseif relT and relT > 0.5 then
+                        p.head, p.yoff = nil, relT - 0.35
                     else
-                        local okB, box, size = pcall(function()
-                            local c, s = char:GetBoundingBox()
-                            return c, s
-                        end)
-                        if okB and box and size then
-                            p.yoff = (box.Position.Y + size.Y * 0.5) - root.Position.Y - 0.4
-                        end
+                        p.head, p.yoff = nil, 2.6
                     end
-                    p.yoff = math.clamp(p.yoff, -2, 12)
+                    p.yoff = math.clamp(p.yoff, 0.8, 12)
                 end
             end
         end
@@ -6910,7 +6938,12 @@ local function stepRaw(dt)
         -- então comparar o objeto Team é exato. Sem time (lobby), mostra todos.
         local ally = VB.OnlyEnemy and myTeam ~= nil and plr.Team == myTeam
         if VB.On and root and not ally then
-            local o = root.Position + Vector3.new(0, p.yoff or 0, 0)
+            local o
+            if p.head and p.head.Parent then
+                o = p.head.Position
+            else
+                o = root.Position + Vector3.new(0, p.yoff or 0, 0)
+            end
             -- A direção sai do Neck, que replica a ~10-20 Hz e NÃO é interpolado
             -- pelo cliente — era daí que vinha o pulo quadro a quadro. Suaviza
             -- com lerp dependente de dt: mesma velocidade em qualquer FPS.
@@ -7057,6 +7090,21 @@ task.spawn(function()
     while (not env) or (env.SilkcoreVolley == VB.pairs) do
         local ok, err = pcall(sync)
         if not ok and not stepErr then stepErr = "sync: " .. tostring(err) end
+        if VB.dbg then
+            VB.dbg.Visible = VB.On == true
+            if VB.On then
+                local n, vis, sum = 0, 0, 0
+                for _, q in pairs(VB.pairs) do
+                    n = n + 1
+                    if q.l and q.l.Visible then vis = vis + 1 end
+                    sum = sum + (q.yoff or 0)
+                end
+                VB.dbg.Text = ("build %s  bk=%s\npairs=%d  vis=%d  yoff=%.1f\nbeats=%d  err=%s"):format(
+                    BUILD, (HAS_DRAWING and not VB.ForceFrame) and "drawing" or "frame",
+                    n, vis, (n > 0) and (sum / n) or 0,
+                    SilkGuard.Beats, tostring(stepErr or "-"))
+            end
+        end
         task.wait(0.35)
     end
 end)
