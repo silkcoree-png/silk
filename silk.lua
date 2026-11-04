@@ -2837,7 +2837,8 @@ Round(Rail, 8)
 Stroke(Rail, T.Stroke, 1)
 NavArea = New("ScrollingFrame", {
     Name = "NavArea",
-    Size = UDim2.new(1, 0, 1, -66), BackgroundTransparency = 1, BorderSizePixel = 0,
+    Size = UDim2.new(1, 0, 1, -92), Position = UDim2.fromOffset(0, 26),
+    BackgroundTransparency = 1, BorderSizePixel = 0,
     ScrollBarThickness = 4, ScrollBarImageColor3 = T.Stroke2,
     CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y,
     ScrollingDirection = Enum.ScrollingDirection.Y, ScrollingEnabled = true, ClipsDescendants = true,
@@ -3124,6 +3125,68 @@ do
         end
     end))
 end
+
+
+    -- atalho fixo: mostra TODAS as abas numa grade, sem precisar rolar o trilho
+    do
+        local pW, pH = LAY.W - LAY.PANEL_X - 12, LAY.BODY_H
+
+        local grade = New("Frame", {
+            Name = "TodasAsAbas", Size = UDim2.fromOffset(pW, pH), Position = UDim2.fromOffset(LAY.PANEL_X, LAY.BODY_Y),
+            BackgroundColor3 = T.Panel, BackgroundTransparency = 0.02, BorderSizePixel = 0, Visible = false, ZIndex = 80,
+        }, Main)
+        Round(grade, 8)
+        Stroke(grade, T.Accent, 1)
+
+        local gtit = New("TextLabel", {
+            Text = "TODAS AS ABAS", Font = F.Bold, TextSize = 14, TextColor3 = T.Text, BackgroundTransparency = 1,
+            TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(16, 10), Size = UDim2.new(1, -120, 0, 20), ZIndex = 81,
+        }, grade)
+        local gsub = New("TextLabel", {
+            Text = "clique numa aba pra abrir", Font = F.Body, TextSize = 10, TextColor3 = T.Faint, BackgroundTransparency = 1,
+            TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(16, 26), Size = UDim2.new(1, -120, 0, 14), ZIndex = 81,
+        }, grade)
+
+        local gfechar = New("TextButton", {
+            Text = "FECHAR", Font = F.Bold, TextSize = 11, TextColor3 = T.Sub, BackgroundColor3 = T.Card2,
+            AutoButtonColor = false, BorderSizePixel = 0, Position = UDim2.new(1, -88, 0, 10), Size = UDim2.fromOffset(72, 24), ZIndex = 82,
+        }, grade)
+        Round(gfechar, 6)
+        gfechar.MouseButton1Click:Connect(Safe(function() grade.Visible = false end, "fechar grade"))
+
+        local GC, GW, GH = 5, 106, 54
+        local n = 0
+        for _, grp in ipairs(NAV) do
+            for _, it in ipairs(grp.items) do
+                local id = it.id
+                local col = n % GC
+                local lin = math.floor(n / GC)
+                local gb = New("TextButton", {
+                    Text = id, Font = F.Bold, TextSize = 10, TextColor3 = T.Text, BackgroundColor3 = T.Card,
+                    AutoButtonColor = false, BorderSizePixel = 0, ZIndex = 82,
+                    Position = UDim2.fromOffset(14 + col * (GW + 6), 44 + lin * (GH + 6)),
+                    Size = UDim2.fromOffset(GW, GH),
+                }, grade)
+                Round(gb, 6)
+                Stroke(gb, T.Stroke, 1)
+                gb.MouseButton1Click:Connect(Safe(function()
+                    grade.Visible = false
+                    ShowTab(id)
+                end, "grade " .. id))
+                n = n + 1
+            end
+        end
+        gtit.Text = "TODAS AS ABAS (" .. n .. ")"
+
+        local gabrir = New("TextButton", {
+            Text = "TODAS AS ABAS (" .. n .. ")", Font = F.Bold, TextSize = 10, TextColor3 = T.Text,
+            BackgroundColor3 = T.Card2, AutoButtonColor = false, BorderSizePixel = 0,
+            Position = UDim2.fromOffset(8, 3), Size = UDim2.new(1, -16, 0, 20), ZIndex = 4,
+        }, Rail)
+        Round(gabrir, 6)
+        Stroke(gabrir, T.Accent, 1)
+        gabrir.MouseButton1Click:Connect(Safe(function() grade.Visible = not grade.Visible end, "grade de abas"))
+    end
 
 end
 
