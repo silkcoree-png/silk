@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.1  (Roblox / executor, Luau)
+    SILK CORE v2.2 · fix07  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2766,7 +2766,10 @@ do
         LAY.S3.kick(1.3)
     end, "logo"))
 end
-Label(Top, "avatar suite  ·  v2.0", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(200, 14))
+-- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
+SILK_VER = "v2.2 · fix07"
+TAB_FEITAS = 0
+local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
 do
     local chip = New("TextButton", {
@@ -3027,7 +3030,9 @@ do
                 TweenService:Create(lbl, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {TextSize = 12}):Play()
             end)
             btn.MouseButton1Click:Connect(Safe(function()
-                if ShowTab then 
+                if ShowTab then
+                    -- abre PRIMEIRO: se o flash do icone falhar, a aba abre mesmo assim
+                    ShowTab(name)
                     -- Flash no ícone ao clicar
                     for _, ico in ipairs(icon) do
                         local element = ico.st or ico.f
@@ -3044,7 +3049,6 @@ do
                             end)
                         end
                     end
-                    ShowTab(name) 
                 end
             end, "nav " .. name))
             NAVB[name] = {btn = btn, icon = icon, lbl = lbl, badge = badge, y = navY, meta = it}
@@ -3816,6 +3820,8 @@ local function Tab(name, _y, _scroll)
         PaddingLeft = UDim.new(0, 14), PaddingRight = UDim.new(0, 16),
     }, f)
     tabs[name] = f
+    TAB_FEITAS = (TAB_FEITAS or 0) + 1
+    if VerTag then VerTag.Text = SILK_VER .. "  ·  " .. TAB_FEITAS .. "/35  ·  " .. name end
     return f
 end
 
@@ -3838,7 +3844,13 @@ onTheme(PaintNav)
 
 function ShowTab(name)
     local e, frame = NAVB[name], tabs[name]
-    if not (e and frame) then return end
+    if not (e and frame) then
+        -- fim do clique mudo: se a aba nao existe, avisa na tela
+        local falta = (not frame) and "sem quadro (o script parou antes de montar ela)" or "sem botao no trilho"
+        if Toast then Toast("aba " .. tostring(name) .. ": " .. falta, false) end
+        if Log and Log.add then Log.add("AVISO", "ShowTab " .. tostring(name) .. ": " .. falta) end
+        return
+    end
     curName, curFrame = name, frame
     for n, f in pairs(tabs) do f.Visible = (n == name) end
     PaintNav()
@@ -6590,7 +6602,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE06"
+local BUILD = "BE07"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -7874,7 +7886,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.1  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.2 · fix07  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -8126,7 +8138,7 @@ function runLoader(onDone)
     end
     local corners = {
         {"SILK CORE // BOOT", UDim2.fromOffset(20, 16), Enum.TextXAlignment.Left},
-        {"v2.0", UDim2.new(1, -220, 0, 16), Enum.TextXAlignment.Right},
+        {"v2.2", UDim2.new(1, -220, 0, 16), Enum.TextXAlignment.Right},
         {"executor: " .. execName, UDim2.new(0, 20, 1, -30), Enum.TextXAlignment.Left},
         {"place " .. tostring(game.PlaceId), UDim2.new(1, -220, 1, -30), Enum.TextXAlignment.Right},
     }
@@ -11218,7 +11230,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.1", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.2 fix07", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11474,7 +11486,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.1 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.2 fix07 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11658,7 +11670,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.1", 48)
+Note("SILK CORE v2.2 · fix07", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -17217,6 +17229,18 @@ if env then
         end
     end
     env.SilkcoreCheck = {faltando = faltando, vazias = vazias}
+end
+
+-- selo de build na barra de cima: se o script parar no meio, ele congela no ultimo lugar que chegou
+if VerTag then
+    local chk = env and env.SilkcoreCheck or nil
+    if chk and #chk.faltando > 0 then
+        VerTag.Text = SILK_VER .. "  ·  FALTA: " .. table.concat(chk.faltando, ", ")
+    elseif chk and #chk.vazias > 0 then
+        VerTag.Text = SILK_VER .. "  ·  VAZIAS: " .. table.concat(chk.vazias, ", ")
+    else
+        VerTag.Text = SILK_VER .. "  ·  35/35 abas ok"
+    end
 end
 
 ShowTab("Clonar")
