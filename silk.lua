@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.6 · fix11  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix12  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.6 · fix11", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix12", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.6 · fix11"
+SILK_VER = "v2.6 · fix12"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -6834,7 +6834,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE11"
+local BUILD = "BE12"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8118,7 +8118,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.6 · fix11  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix12  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -11485,7 +11485,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.6 fix11", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix12", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11741,7 +11741,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.6 fix11 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix12 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11925,7 +11925,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.6 · fix11", 48)
+Note("SILK CORE v2.6 · fix12", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -15510,9 +15510,13 @@ local FLN = {
     tempo = 0.55,    -- duracao do giro
     ocupado = false,
     hud = nil,
-    hudOn = true,
+    hudOn = false,   -- a barra nao nasce na tela; se voce ligar, fica salvo
     teclas = {},
 }
+
+-- respeita a ultima escolha: quem desligou nao ve a barra aparecer de novo no
+-- proximo carregamento (era isso que enchia a tela toda vez que iniciava)
+FLN.hudOn = Persist.Get("fling:hud", false) == true
 
 local function flCorpo()
     local c = LocalPlayer.Character
@@ -15709,8 +15713,13 @@ end
 -- ------------------------------------------------------ botoes + teclas na tela
 BtnRow("Mostrar / Esconder os botoes na tela", T.Accent, function()
     FLN.hudOn = not FLN.hudOn
-    flHud().Visible = FLN.hudOn
-    Toast("botoes na tela: " .. (FLN.hudOn and "ligados" or "desligados"), true)
+    if FLN.hudOn then
+        flHud().Visible = true
+    elseif FLN.hud then
+        FLN.hud.Visible = false
+    end
+    Persist.Set("fling:hud", FLN.hudOn)
+    Toast("botoes na tela: " .. (FLN.hudOn and "ligados" or "desligados") .. " (fica salvo)", true)
 end)
 
 Note("A barra fica fora do menu: continua na tela com o menu fechado. Arrasta ela pela barra de cima.", 54)
@@ -15753,7 +15762,12 @@ UserInputService.InputBegan:Connect(Safe(function(input, processado)
         flBate(nil, "chute")
     elseif t.hud and k == t.hud then
         FLN.hudOn = not FLN.hudOn
-        flHud().Visible = FLN.hudOn
+        if FLN.hudOn then
+            flHud().Visible = true
+        elseif FLN.hud then
+            FLN.hud.Visible = false
+        end
+        Persist.Set("fling:hud", FLN.hudOn)
     end
 end, "fling tecla"))
 
