@@ -6353,7 +6353,8 @@ Persist.Scope = "volley"
 local Drawing = Drawing or (getgenv and getgenv().Drawing)
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
-    Thick = 4, Outline = 2, Alpha = 1, Dot = 5, ShowDot = true,
+    Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
+    MinPx = 90, MaxPx = 340,
     pairs = {}, ballLine = nil, ballOl = nil, ballDot = nil, cache = nil, t = 0,
     ForceFrame = true,
     Enemy = Color3.fromRGB(255, 60, 60),
@@ -6852,17 +6853,36 @@ local function sync()
             if not p then p = mkpair(); VB.pairs[plr] = p end
             local char = plr.Character
             if char and not char.Parent then char = nil end
-            if char ~= p.char or (char and now - (p.yoffAt or 0) > 4) then
-                p.char, p.yoffAt, p.yoff, p.dir = char, now, 0, nil
-                if char then
-                    -- Origem = centro do corpo. O HumanoidRootPart deste jogo fica
-                    -- no chão, e era por isso que a linha nascia no pé. A caixa do
-                    -- modelo não depende de nome de parte nem do rig que ele usa.
-                    local ok, box = pcall(function() return char:GetBoundingBox() end)
-                    local root = char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart
-                    if ok and box and root then
-                        p.yoff = math.clamp(box.Position.Y - root.Position.Y, -2, 7)
+            if char ~= p.char then
+                p.char, p.yoffAt, p.yoff = char, 0, 0
+                p.dir, p.sang, p.yoffSettle = nil, nil, 3
+            end
+            -- Mede a altura 3 vezes no primeiro ~3 s (tempo do rig carregar) e
+            -- depois congela. Reamostrar sempre fazia a linha pular de altura a
+            -- cada ciclo, porque a cabeça sobe e desce com a animação parada.
+            if char and (p.yoffSettle or 0) > 0 and now - (p.yoffAt or -99) > 1.5 then
+                p.yoffAt = now
+                p.yoffSettle = p.yoffSettle - 1
+                -- Origem = cabeça. O rig deste jogo não expõe "Head" como filho
+                -- direto do modelo — por isso a busca é recursiva. Se ainda
+                -- assim não achar, cai no topo da caixa do modelo. O que não dá
+                -- mais é origem no HumanoidRootPart puro: nele a linha nascia
+                -- no chão.
+                local root = char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart
+                if root then
+                    local head = char:FindFirstChild("Head", true)
+                    if head then
+                        p.yoff = head.Position.Y - root.Position.Y
+                    else
+                        local okB, box, size = pcall(function()
+                            local c, s = char:GetBoundingBox()
+                            return c, s
+                        end)
+                        if okB and box and size then
+                            p.yoff = (box.Position.Y + size.Y * 0.5) - root.Position.Y - 0.4
+                        end
                     end
+                    p.yoff = math.clamp(p.yoff, -2, 12)
                 end
             end
         end
@@ -6894,7 +6914,17 @@ local function stepRaw(dt)
             -- A direção sai do Neck, que replica a ~10-20 Hz e NÃO é interpolado
             -- pelo cliente — era daí que vinha o pulo quadro a quadro. Suaviza
             -- com lerp dependente de dt: mesma velocidade em qualquer FPS.
-            local want = lookVec(char, root)
+            -- Só o plano horizontal. A animação de saque levanta a cabeça e o LookVector
+            -- do pescoço ia junto: a linha subia com o saque. Zerar o Y deixa a
+            -- linha deitada mesmo com o adversário olhando pra cima ou pra baixo.
+            local lv = lookVec(char, root)
+            local want = Vector3.new(lv.X, 0, lv.Z)
+            if want.Magnitude > 0.05 then want = want.Unit else want = p.dir end
+            if not want then
+                local lv2 = root.CFrame.LookVector
+                want = Vector3.new(lv2.X, 0, lv2.Z)
+                if want.Magnitude > 0.05 then want = want.Unit else want = Vector3.new(0, 0, -1) end
+            end
             local d = p.dir
             if not d then
                 p.dir = want
@@ -6903,7 +6933,28 @@ local function stepRaw(dt)
                 p.dir = (nd.Magnitude > 0.05) and nd.Unit or want
             end
             local a = proj(o)
-            local b = proj(o + p.dir * VB.Len)
+            local bt = proj(o + p.dir * VB.Len)
+            local b = nil
+            if a and bt then
+                -- Comprimento em tela com piso e teto. Sem o piso a linha virava
+                -- um risco de 3 px quando o adversário olhava na direção da
+                -- câmera — e era isso que parecia um poste em pé em vez de uma
+                -- linha deitada. O piso mantém a leitura; o teto impede que ela
+                -- atravesse a tela inteira quando o alvo está perto.
+                local dxs, dys = bt.X - a.X, bt.Y - a.Y
+                local lenS = math.sqrt(dxs * dxs + dys * dys)
+                local angS
+                if lenS > 1 then
+                    angS = math.deg(math.atan2(dys, dxs))
+                    lenS = math.clamp(lenS, VB.MinPx, VB.MaxPx)
+                else
+                    angS = p.sang or 0
+                    lenS = VB.MinPx
+                end
+                p.sang = angS
+                local rad = math.rad(angS)
+                b = Vector2.new(a.X + math.cos(rad) * lenS, a.Y + math.sin(rad) * lenS)
+            end
             if a and b then
                 if p.kind == "drawing" then
                     p.ol.From, p.ol.To, p.ol.Visible = a, b, true
@@ -7086,6 +7137,12 @@ BtnRow("TROCAR COR DA LINHA", T.Card, function()
     VB.Enemy = COLORS[colorIdx].c
     restyleAll()
     Toast("cor: " .. COLORS[colorIdx].n, true)
+end, 34)
+
+BtnRow("DEIXAR BEM VISIVEL", T.Card, function()
+    VB.Thick, VB.Outline, VB.Alpha, VB.Dot, VB.ShowDot = 7, 3, 1, 8, true
+    restyleAll()
+    Toast("grossa, contorno forte, ponto ligado", true)
 end, 34)
 
 Toggle("Trajetória da bola", true, function(v) VB.Ball = v end, "Volley ball trajec")
