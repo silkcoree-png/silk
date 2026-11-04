@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.5 · fix10  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix11  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.5 · fix10", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix11", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.5 · fix10"
+SILK_VER = "v2.6 · fix11"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -5318,9 +5318,24 @@ local function _stopEmotes(animator)
         end
     end)
     _activeEmote = nil
+    SilkAnimDesejada = nil
 end
 
-local function _playEmote(id)
+-- Normaliza um id de animacao. Aceita numero, "rbxassetid://123", "123" e ate
+-- link de catalogo (pega o id= ou o ultimo numero). Global de proposito: nao
+-- gasta registrador do chunk principal.
+function SilkAnimId(id)
+    if type(id) == "number" then return "rbxassetid://" .. tostring(math.floor(id)) end
+    local s = tostring(id or ""):gsub("%s", "")
+    if s == "" then return "" end
+    if s:match("^rbxassetid://%d+$") then return s end
+    local d = s:match("[%?&]id=(%d+)") or s:match("(%d+)$") or s:match("(%d+)")
+    if not d then return s end
+    return "rbxassetid://" .. d
+end
+
+local function _playEmote(id, opts)
+    opts = opts or {}
     local char = Morph.Char()
     local hum  = char and char:FindFirstChildOfClass("Humanoid")
     if not hum then return false, "sem personagem" end
@@ -5332,28 +5347,39 @@ local function _playEmote(id)
     if not animator then
         animator = hum:WaitForChild("Animator", 3)
     end
+    if not animator then
+        -- ultimo recurso: cria um aqui. Serve pra voce ver; pra replicar de
+        -- verdade o certo e o Animator que nasce com o personagem.
+        local okNew, novo = pcall(function() return Instance.new("Animator", hum) end)
+        animator = okNew and novo or nil
+    end
     if not animator then return false, "sem Animator (recarrega o script)" end
+
+    local asset = SilkAnimId(id)
+    if asset == "" then return false, "id vazio" end
 
     _stopEmotes(animator)
 
     local anim = Instance.new("Animation")
-    anim.AnimationId = "rbxassetid://" .. tostring(id)
+    anim.AnimationId = asset
 
     -- Sem preload o Play sai antes do asset chegar e nao toca nada. Preload e o
-    -- motivo numero 1 de emote "nao funcionar" sem erro nenhum.
+    -- motivo numero 1 de animacao "nao funcionar" sem erro nenhum.
     pcall(function()
         game:GetService("ContentProvider"):PreloadAsync({ anim })
     end)
 
     local ok, track = pcall(function() return animator:LoadAnimation(anim) end)
-    if not ok or not track then return false, "falha ao carregar emote" end
+    if not ok or not track then return false, "falha ao carregar animacao" end
 
-    -- Action4 ganha de qualquer animacao do jogo. Looped porque emote de catálogo
-    -- e ciclado: com Looped=false ele some no meio do gesto e parece quebrado.
+    -- Action4 e o teto de prioridade. Em Core (o padrao de Humanoid:LoadAnimation)
+    -- qualquer animacao do jogo passa por cima, inclusive o idle — era por isso
+    -- que a aba Animações nao aparecia nem pra quem clicou.
     pcall(function() track.Priority = Enum.AnimationPriority.Action4 end)
-    pcall(function() track.Looped = true end)
-    pcall(function() track:Play(0.1) end)
+    pcall(function() track.Looped = (opts.looped ~= false) end)
+    pcall(function() track:Play(0.1, 1, 1) end)
     _activeEmote = track
+    SilkAnimDesejada = anim
 
     pcall(function()
         track.Stopped:Connect(function()
@@ -5364,11 +5390,11 @@ local function _playEmote(id)
     -- Confere de verdade se tocou, em vez de dizer "tocando" e nao ter tocado nada.
     task.delay(0.4, function()
         if _activeEmote == track and not track.IsPlaying then
-            Toast("esse emote foi bloqueado (anima so no dono ou nao existe)", false)
+            Toast("essa animacao foi bloqueada (asset privado, rig diferente ou o jogo derrubou)", false)
         end
     end)
 
-    return true, "emote tocando"
+    return true, "tocando"
 end
 
 -- ── card factory ──────────────────────────────────────────────────────────────
@@ -5757,6 +5783,7 @@ do
         if _activeEmote then
             pcall(function() _activeEmote:Stop() end)
             _activeEmote = nil
+            SilkAnimDesejada = nil
             Toast("emote parado", true)
         else
             Toast("nenhum emote ativo", false)
@@ -6807,7 +6834,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE10"
+local BUILD = "BE11"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8091,7 +8118,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.5 · fix10  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix11  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -8366,7 +8393,7 @@ function runLoader(onDone)
     end
     local corners = {
         {"SILK CORE // BOOT", UDim2.fromOffset(20, 16), Enum.TextXAlignment.Left},
-        {"v2.5", UDim2.new(1, -220, 0, 16), Enum.TextXAlignment.Right},
+        {"v2.6", UDim2.new(1, -220, 0, 16), Enum.TextXAlignment.Right},
         {"executor: " .. execName, UDim2.new(0, 20, 1, -30), Enum.TextXAlignment.Left},
         {"place " .. tostring(game.PlaceId), UDim2.new(1, -220, 1, -30), Enum.TextXAlignment.Right},
     }
@@ -11458,7 +11485,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.5 fix10", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix11", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11714,7 +11741,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.5 fix10 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix11 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11898,7 +11925,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.5 · fix10", 48)
+Note("SILK CORE v2.6 · fix11", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -12528,23 +12555,129 @@ local customAnims = {
     {name = "Werewolf", id = "rbxassetid://1083216690"},
 }
 
-for _, animData in ipairs(customAnims) do
-    BtnRow("Play: "..animData.name, T.Accent, function()
-        local char = LocalPlayer.Character
-        if char then
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum then
-                local anim = Instance.new("Animation")
-                anim.AnimationId = animData.id
-                local track = hum:LoadAnimation(anim)
-                track:Play()
-                Toast("animacao "..animData.name.." tocando", true)
+-- Pack de animação: em vez de tocar um clipe por cima de tudo (Action4), troca
+-- os IDs dentro do Animate do personagem e troca o script por uma copia. O
+-- proprio jogo entao toca o clipe em cada estado — parado, andando, correndo,
+-- pulando — e isso replica pros outros igual o idle normal. O original fica
+-- guardado pra voltar com um botao.
+function SilkPackAplicar(id)
+    local char = Morph.Char()
+    if not char then Toast("sem personagem", false) return end
+
+    local velho = char:FindFirstChild("Animate")
+    if not velho then
+        Toast("esse jogo não usa o Animate padrão — aqui usa TOCAR (clipe)", false)
+        return
+    end
+
+    local asset = SilkAnimId(id)
+    if asset == "" then Toast("id vazio", false) return end
+
+    if not SilkPackOriginal then
+        local okC, copia = pcall(function() return velho:Clone() end)
+        if okC then SilkPackOriginal = copia end
+    end
+
+    local novo = velho:Clone()
+    if not novo then Toast("não consegui copiar o Animate", false) return end
+
+    local alvo = {idle = true, walk = true, run = true}
+    local tudo = not (HackState and HackState.animPackTudo == false)
+    if tudo then
+        alvo.jump, alvo.fall, alvo.climb, alvo.swim, alvo.swimidle = true, true, true, true, true
+    end
+
+    local n = 0
+    for _, d in ipairs(novo:GetDescendants()) do
+        if d:IsA("Animation") then
+            local pai = d.Parent and tostring(d.Parent.Name) or ""
+            local nome = d.Name
+            if nome == "Animation1" or nome == "Animation2" then nome = pai end
+            if alvo[tostring(nome):lower()] then
+                pcall(function() d.AnimationId = asset end)
+                n = n + 1
             end
         end
+    end
+    if n == 0 then
+        Toast("esse Animate não tem os estados esperados", false)
+        return
+    end
+
+    pcall(function() velho:Destroy() end)
+    novo.Parent = char
+    Toast("pack aplicado em " .. n .. " estado(s) — anda/pula com ele e todo mundo vê", true)
+end
+
+function SilkPackRestaurar()
+    local char = Morph.Char()
+    if not char then return end
+    local atual = char:FindFirstChild("Animate")
+    if SilkPackOriginal then
+        local ok, copia = pcall(function() return SilkPackOriginal:Clone() end)
+        if ok and copia then
+            if atual then pcall(function() atual:Destroy() end) end
+            copia.Parent = char
+            Toast("animações originais de volta", true)
+            return
+        end
+    end
+    Toast("não tenho o original salvo (recarrega o personagem)", false)
+end
+
+-- Antes daqui saia Humanoid:LoadAnimation + Play() cru: prioridade Core, sem
+-- preload e sem travar. Core perde ate pro idle do jogo (o idle e Movement),
+-- entao na pratica nao aparecia nem pra quem clicou. Agora tudo entra no mesmo
+-- motor do navegador de emotes: Action4, preload e rearme.
+function SilkTocaAnim(nome, id, loopado)
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not hum then
+        Toast("sem personagem", false)
+        return
+    end
+    if HackState and HackState.animPack then
+        SilkPackAplicar(id)
+        return
+    end
+    local ok, msg = _playEmote(id, {looped = loopado})
+    if not ok then
+        Toast("nao deu: " .. tostring(msg), false)
+        return
+    end
+    local rig = (hum.RigType == Enum.HumanoidRigType.R6) and "R6" or "R15"
+    Toast(nome .. " tocando [" .. rig .. "] — todo mundo ve se o asset for publico", true)
+end
+
+for _, animData in ipairs(customAnims) do
+    BtnRow("Play: "..animData.name, T.Accent, function()
+        SilkTocaAnim(animData.name, animData.id, true)
     end)
 end
 
+Section("Pack (parado / andando / pulando)")
+Note("Aqui a animação não toca por cima: ela entra no lugar do idle/walk/run/jump. Você anda e o personagem anda com ela, pula e ela toca no pulo. Replica pra quem estiver olhando igual o idle normal do jogo.", 52)
+do
+    local row = Row(46)
+    Label(row, "Animation ID", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.3, 0, 1, 0))
+    local packField = Field(row, UDim2.new(0.32, 0, 0.5, -15), UDim2.new(0.30, 0, 0, 30), "rbxassetid://...")
+    Button(row, "APLICAR", UDim2.new(0.63, 0, 0.5, -15), UDim2.fromOffset(74, 30), T.Accent, function()
+        SilkPackAplicar(packField.Text)
+    end)
+    Button(row, "ORIGINAL", UDim2.new(0.63, 80, 0.5, -15), UDim2.fromOffset(90, 30), T.Card, function()
+        SilkPackRestaurar()
+    end)
+end
+Toggle("Os botões Play acima viram PACK", false, function(v)
+    HackState.animPack = v
+    Toast(v and "Play agora aplica como pack (andar/pular)" or "Play voltou a tocar clipe", v)
+end, "anim_pack")
+Toggle("Pack inclui pulo, queda, nadar e subir", true, function(v)
+    HackState.animPackTudo = v
+end, "anim_pack_tudo")
+
 Section("Controle de Animacoes")
+Note("Quem ve: todo mundo. A animacao roda no Animator do SEU personagem e o Roblox replica igual ao idle/vitoria — nao existe animacao 'so local' quando ela sai pelo Animator do personagem. As duas unicas coisas que barram: asset privado (o cliente do outro nao carrega) e rig diferente (animacao R15 em corpo R6 nao tem osso pra deformar).", 72)
 
 Toggle("Stop All Animations", false, function(v)
     HackState.noAnims = v
@@ -12556,7 +12689,10 @@ Toggle("Stop All Animations", false, function(v)
                     local hum = char:FindFirstChildOfClass("Humanoid")
                     if hum then
                         for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
-                            track:Stop()
+                            -- com "travar" ligado, nao derruba a que voce escolheu
+                            if not (HackState.animLock and track == _activeEmote) then
+                                track:Stop()
+                            end
                         end
                     end
                 end
@@ -12594,25 +12730,65 @@ Toggle("Freeze Animation", false, function(v)
     Toast("freeze animation "..(v and "ligado" or "desligado"), v)
 end, "anim_freeze")
 
-Section("Emotes Customizados")
+Toggle("Travar animação (o jogo não derruba)", false, function(v)
+    HackState.animLock = v
+    if not v then
+        Toast("travar animação desligado", false)
+        return
+    end
+    Toast("travada: se o jogo derrubar, ela volta sozinha", true)
+    task.spawn(function()
+        while HackState.animLock do
+            local char = LocalPlayer.Character
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            local animator = hum and hum:FindFirstChildOfClass("Animator")
+            if animator and SilkAnimDesejada then
+                local tocando = false
+                pcall(function()
+                    for _, t in ipairs(animator:GetPlayingAnimationTracks()) do
+                        if t == _activeEmote and t.IsPlaying then tocando = true end
+                    end
+                end)
+                if not tocando then
+                    local ok, novo = pcall(function() return animator:LoadAnimation(SilkAnimDesejada) end)
+                    if ok and novo then
+                        pcall(function() novo.Priority = Enum.AnimationPriority.Action4 end)
+                        pcall(function() novo.Looped = true end)
+                        pcall(function() novo:Play(0.1, 1, 1) end)
+                        if HackState.animSpeed then
+                            pcall(function() novo:AdjustSpeed(HackState.animSpeed) end)
+                        end
+                        _activeEmote = novo
+                    end
+                end
+            end
+            task.wait(0.25)
+        end
+    end)
+end, "anim_lock")
 
+BtnRow("Parar animação atual", T.Card, function()
+    if _activeEmote then
+        pcall(function() _activeEmote:Stop() end)
+        _activeEmote = nil
+        SilkAnimDesejada = nil
+        Toast("animação parada", true)
+    else
+        Toast("nenhuma animação ativa", false)
+    end
+end)
+
+Section("Emotes Customizados")
 do
     local row = Row(50)
     Label(row, "Animation ID", 12, T.Text, F.Bold, nil, UDim2.fromOffset(16, 0), UDim2.new(0.3, 0, 1, 0))
     local animIdField = Field(row, UDim2.new(0.32, 0, 0.5, -15), UDim2.new(0.4, 0, 0, 30), "rbxassetid://...")
     Button(row, "PLAY", UDim2.new(0.74, 0, 0.5, -15), UDim2.fromOffset(80, 30), T.Accent, function()
-        local animId = animIdField.Text
-        local char = LocalPlayer.Character
-        if char then
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum then
-                local anim = Instance.new("Animation")
-                anim.AnimationId = animId
-                local track = hum:LoadAnimation(anim)
-                track:Play()
-                Toast("tocando animacao customizada", true)
-            end
+        if (animIdField.Text or "") == "" then
+            Toast("cola um id primeiro", false)
+            return
         end
+        SilkTocaAnim("animacao", animIdField.Text, false)
     end)
 end
 
