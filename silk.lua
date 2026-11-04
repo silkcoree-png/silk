@@ -24,6 +24,7 @@ local AIM_BIND    = "SilkcoreAimlock"
 local STRETCH_BIND = "SilkcoreStretch"
 local FOV_BIND     = "SilkcoreFovMod"
 local VOL_BIND     = "SilkcoreVolley"
+local VOL_STEP     = nil   -- o passo de render da aba Vôlei, exportado do bloco
 local ESP_NAME     = "SilkcoreESP"
 
 -- clean previous run (gui, render step, old connections)
@@ -87,14 +88,22 @@ local SilkGuard = { On = true, Beats = 0, Ghost = false } do
         return G.Ghost
     end
 
+    local stalls = 0
     task.spawn(function()
         while G.On do
             task.wait(1)
-            if G.Beats == lastBeats then
-                -- o loop de render parou: alguém desamarrou, ou o pcall engoliu um erro
+            if G.Beats == lastBeats then stalls = stalls + 1 else stalls = 0 end
+            -- Dois segundos parado, não um. Um request() do catálogo segura o frame
+            -- por mais de um segundo e isso NÃO é bind morto. Antes o vigia agia no
+            -- primeiro tique e remarranhava o passo com um callback nil (a função
+            -- estava fora de escopo naquele ponto), matando a linha de mira de vez.
+            if stalls >= 2 then
                 for i = 1, #binds do
-                    pcall(RunService.UnbindFromRenderStep, RunService, binds[i].name)
-                    pcall(RunService.BindToRenderStep, RunService, binds[i].name, binds[i].priority, binds[i].fn)
+                    local b = binds[i]
+                    if type(b.fn) == "function" then
+                        pcall(RunService.UnbindFromRenderStep, RunService, b.name)
+                        pcall(RunService.BindToRenderStep, RunService, b.name, b.priority, b.fn)
+                    end
                 end
                 for i = 1, #roots do
                     pcall(function()
@@ -103,6 +112,7 @@ local SilkGuard = { On = true, Beats = 0, Ghost = false } do
                         if r and r.Enabled == false then r.Enabled = true end
                     end)
                 end
+                stalls = 0
             end
             lastBeats = G.Beats
         end
@@ -4461,15 +4471,24 @@ function Cat.ClearAll(keepSaved)
 end
 
 -- sincrono (usa yields): devolve ok, mensagem
-local function doAdd(id, quiet)
+-- detail (opcional) vem do browse: {name, assetType}. Sem ele, cada APLICAR
+-- gastava uma requisição bloqueante só pra descobrir o tipo de um item que a
+-- grade já tinha na mão — era boa parte do lag no clique.
+local function doAdd(id, quiet, detail)
     if catFind(id) then return false, "já adicionado: " .. tostring(id) end
     local entry = {id = id, pending = true, name = "carregando...", meta = "id " .. tostring(id)}
     State.Catalog[#State.Catalog + 1] = entry
     refreshCatalog()
     local char = Morph.Char()
-    local info = productInfo(id)
-    local tid = info and tonumber(info.AssetTypeId) or nil
-    if info and info.Name then entry.name = tostring(info.Name) end
+    local tid, nm
+    if detail and detail.assetType and detail.name then
+        tid, nm = tonumber(detail.assetType), tostring(detail.name)
+    else
+        local info = productInfo(id)
+        tid = info and tonumber(info.AssetTypeId) or nil
+        nm  = info and info.Name or nil
+    end
+    if nm then entry.name = tostring(nm) end
     entry.meta = (tid and assetTypeName(tid) or "Asset") .. " · " .. tostring(id)
     local field = tid and ASSET_BODY[tid] or nil
     if field then
@@ -4498,9 +4517,9 @@ local function doAdd(id, quiet)
     State.Touch()
     return true, "adicionado: " .. entry.name
 end
-local function catAdd(id, cb, quiet)
+local function catAdd(id, cb, quiet, detail)
     task.spawn(function()
-        local okc, ok, msg = pcall(doAdd, id, quiet)
+        local okc, ok, msg = pcall(doAdd, id, quiet, detail)
         if not okc then
             Log.add("ERRO", "catálogo " .. tostring(id) .. ": " .. tostring(ok))
             ok, msg = false, "erro interno (veja o registro em Config)"
@@ -4759,24 +4778,33 @@ end
 --   · category e keyword PODEM ir juntos aqui — era o /details que dava 400
 --   · devolve só {id, itemType}; nome e tipo vêm do economy/v2 por id
 local _CATS = {
-    {id="featured", label="Em Alta",    category=1},
-    {id="emotes",   label="Emotes",     category=12},
-    {id="clothes",  label="Roupas",     category=3},
-    {id="acc",      label="Acessórios", category=11},
-    {id="hats",     label="Chapéu",     category=11, kw="hat"},
-    {id="hair",     label="Cabelo",     category=11, kw="hair"},
-    {id="face",     label="Rosto",      category=11, kw="face"},
-    {id="shirt",    label="Camisa",     category=3,  kw="shirt"},
-    {id="pants",    label="Calça",      category=3,  kw="pants"},
-    {id="search",   label="Busca"},
+    {id="featured", label="Em Alta",    category=1,  mode="avatar"},
+    {id="clothes",  label="Roupas",     category=3,  mode="avatar"},
+    {id="acc",      label="Acessórios", category=11, mode="avatar"},
+    {id="hats",     label="Chapéu",     category=11, kw="hat",   mode="avatar"},
+    {id="hair",     label="Cabelo",     category=11, kw="hair",  mode="avatar"},
+    {id="face",     label="Rosto",      category=11, kw="face",  mode="avatar"},
+    {id="shirt",    label="Camisa",     category=3,  kw="shirt", mode="avatar"},
+    {id="pants",    label="Calça",      category=3,  kw="pants", mode="avatar"},
+    {id="emotes",   label="Emotes",     category=12, mode="emotes"},
+    {id="dance",    label="Dança",      category=12, kw="dance", mode="emotes"},
+    {id="wave",     label="Aceno",      category=12, kw="wave",  mode="emotes"},
+    {id="laugh",    label="Rir",        category=12, kw="laugh", mode="emotes"},
+    {id="search",   label="Busca",                   mode="both"},
 }
 
--- Ids da página. Só Asset entra: Bundle não abre no economy/v2 e sairia sem nome.
+-- Cache de lista de ids: voltar numa aba já vista não gasta chamada de busca. Os
+-- detalhes já são cacheados por id — juntos, revisitar uma aba sai de graça.
+local _idsCache = {}
+
 local function _searchIds(cat, kw, cursor)
     local u = _API .. "/search/items?limit=28&sortOrder=Desc"
     if cat.category then u = u .. "&category=" .. tostring(cat.category) end
     if kw and #kw > 0 then u = u .. "&keyword=" .. _urlEnc(kw) end
     if cursor and #cursor > 0 then u = u .. "&cursor=" .. _urlEnc(cursor) end
+
+    local hit = _idsCache[u]
+    if hit then return hit[1], hit[2], nil end
 
     local data, status = _get2(u, "busca")
     if type(data) ~= "table" or type(data.data) ~= "table" then
@@ -4788,7 +4816,9 @@ local function _searchIds(cat, kw, cursor)
         local id = tonumber(it.id)
         if it.itemType == "Asset" and id then ids[#ids + 1] = id end
     end
-    return ids, tostring(data.nextPageCursor or ""), nil
+    local nc = tostring(data.nextPageCursor or "")
+    if #ids > 0 then _idsCache[u] = { ids, nc } end
+    return ids, nc, nil
 end
 
 -- Nome, tipo e preço por id. 28 chamadas por página é o custo real do browse, e
@@ -4825,6 +4855,8 @@ local _bItems   = {}
 local _bCursor  = ""
 local _bCatIdx  = 1
 local _bKeyword = ""
+local _bMode    = "avatar"   -- "avatar" mostra itens, "emotes" mostra os emotes
+local _bPageCap = 15         -- cards por página: cada um custa uma requisição bloqueante
 local _bLoading = false
 local _browseGrid    = nil
 local _browseCards   = {}
@@ -4949,7 +4981,7 @@ local function _makeBrowseCard(parent, item)
                     Toast("corpo slim incompatível — disponível só no HBG", false)
                     return
                 end
-                catAdd(id, function(a, b) Toast(b, a) end)
+                catAdd(id, function(a, b) Toast(b, a) end, nil, item)
             end
         )
     end
@@ -5015,9 +5047,15 @@ local function _loadPage(cursor)
         local ok, err0 = pcall(function()
             local cat = _CATS[_bCatIdx] or _CATS[1]
             local kw  = cat.kw or ""
-            if cat.id == "search" then kw = _bKeyword or "" end
+            local q   = cat
+            if cat.id == "search" then
+                kw = _bKeyword or ""
+                -- busca dentro do modo emotes continua sendo emote: category=12
+                -- junto com a palavra. O /search/items aceita as duas juntas.
+                if _bMode == "emotes" then q = { category = 12 } end
+            end
 
-            local ids, nextCur, err = _searchIds(cat, kw, cursor or "")
+            local ids, nextCur, err = _searchIds(q, kw, cursor or "")
             if gen ~= _bGen then return end
             if not ids then
                 _bFetchFailed, _bFetchReason = true, err
@@ -5029,7 +5067,7 @@ local function _loadPage(cursor)
             while gen == _bGen do
                 for _, id in ipairs(pool) do
                     if gen ~= _bGen then return end
-                    if shown >= 28 then break end
+                    if shown >= _bPageCap then break end
                     local d, derr = _assetDetail(id)
                     if d then
                         local okc, card = pcall(_makeBrowseCard, _browseGrid, d)
@@ -5049,12 +5087,12 @@ local function _loadPage(cursor)
                     task.wait()
                 end
 
-                -- Grade magra: busca outra página. Duas extras cobrem as abas por
-                -- palavra, que trazem coisa fora do tipo pedido (o id listado é
-                -- só {id, itemType} — o tipo real só aparece no economy/v2).
-                if shown >= 20 or pages >= 2 or #nextCur == 0 then break end
+                -- Grade magra: busca outra página. Uma extra cobre as abas por palavra, que
+                -- trazem coisa fora do tipo pedido (a busca lista só {id, itemType};
+                -- o tipo real só aparece no economy/v2).
+                if shown >= _bPageCap or pages >= 1 or #nextCur == 0 then break end
                 pages = pages + 1
-                local more, nc, e2 = _searchIds(cat, kw, nextCur)
+                local more, nc, e2 = _searchIds(q, kw, nextCur)
                 if not more or #more == 0 then break end
                 pool, nextCur, err = more, nc, e2 or err
             end
@@ -5073,7 +5111,7 @@ local function _loadPage(cursor)
         _bLoading = false
         if statusLbl and statusLbl.Parent then statusLbl:Destroy() end
         if _bInfoLbl then _bInfoLbl.Text = #_bItems .. " itens" end
-        if _bNextBtn then _bNextBtn.Visible = (#_bItems >= 20 and #_bCursor > 0) end
+        if _bNextBtn then _bNextBtn.Visible = (#_bItems >= _bPageCap and #_bCursor > 0) end
         if _bPrevBtn then _bPrevBtn.Visible = (cursor ~= nil and #tostring(cursor) > 0) end
         if #_bItems == 0 then pcall(_renderEmpty) end
     end)
@@ -5108,34 +5146,83 @@ Button(row, "TESTAR HTTP", UDim2.fromOffset(116,3), UDim2.fromOffset(90,30), T.C
     end)
 end
 
--- barra de categorias
+-- ── modo (itens / emotes) + categorias + busca ───────────────────────────────
 do
+    local catBtns = {}
+    local function paintCats()
+        for i, b in ipairs(catBtns) do
+            local c = _CATS[i]
+            -- chips de outro modo somem em vez de ficarem na fila
+            b.Visible = (c ~= nil) and (c.mode == _bMode or c.mode == "both")
+            local on = (i == _bCatIdx)
+            if on then bindAcc(b,"BackgroundColor3","Accent",true) else unbindAcc(b,"BackgroundColor3") end
+            Tween(b,0.14,{BackgroundColor3=on and T.Accent or T.Card3,
+                          TextColor3=on and textOn(T.Accent) or T.Sub})
+        end
+    end
+
+    local modeBtns = {}
+    local function paintMode()
+        for m, b in pairs(modeBtns) do
+            local on = (m == _bMode)
+            if on then bindAcc(b,"BackgroundColor3","Accent",true) else unbindAcc(b,"BackgroundColor3") end
+            Tween(b,0.14,{BackgroundColor3=on and T.Accent or T.Card3,
+                          TextColor3=on and textOn(T.Accent) or T.Sub})
+        end
+    end
+
+    local function pickMode(m)
+        if _bMode == m then return end
+        _bMode, _bKeyword = m, ""
+        for i, c in ipairs(_CATS) do
+            if c.mode == m then _bCatIdx = i; break end
+        end
+        paintMode(); paintCats()
+        _loadPage("")
+    end
+
+    local modeRow = Row(40)
+    local mdefs = {{"avatar","ITENS"}, {"emotes","EMOTES"}}
+    for k, def in ipairs(mdefs) do
+        modeBtns[def[1]] = Button(modeRow, def[2], UDim2.fromOffset(8 + (k-1)*92, 4),
+            UDim2.fromOffset(84,30), T.Card3, function() pickMode(def[1]) end)
+    end
+
     local row = Row(84)
     local catBar = New("ScrollingFrame", {
-        Size=UDim2.new(1,-16,0,32), Position=UDim2.fromOffset(8,8),
+        Size=UDim2.new(1,-16,0,34), Position=UDim2.fromOffset(8,8),
         BackgroundTransparency=1, BorderSizePixel=0,
-        ScrollBarThickness=0, ScrollingDirection=Enum.ScrollingDirection.X,
+        -- ScrollBarThickness=0 deixava a barra sem alça. No desktop o Roblox não
+        -- rola horizontal no wheel sozinho, então não havia gesto nenhum: os
+        -- chips passavam da borda e ficavam inalcançáveis. Com alça de 4 px dá
+        -- pra arrastar, e o wheel na direção X também passa a funcionar.
+        ScrollBarThickness=4, ScrollBarImageColor3=T.Faint, ScrollBarImageTransparency=0.3,
+        ScrollingDirection=Enum.ScrollingDirection.X, ScrollingEnabled=true,
+        ElasticBehavior=Enum.ElasticBehavior.Never,
         CanvasSize=UDim2.new(), AutomaticCanvasSize=Enum.AutomaticSize.X,
         ClipsDescendants=true,
     }, row)
     New("UIListLayout", {
         FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,6),
-        SortOrder=Enum.SortOrder.LayoutOrder, VerticalAlignment=Enum.VerticalAlignment.Center,
+        SortOrder=Enum.SortOrder.LayoutOrder, VerticalAlignment=Enum.VerticalAlignment.Top,
     }, catBar)
 
-    local catBtns = {}
-    local function paintCats()
-        for i, b in ipairs(catBtns) do
-            local on = (i == _bCatIdx)
-            if on then bindAcc(b,"BackgroundColor3","Accent",true) else unbindAcc(b,"BackgroundColor3") end
-            Tween(b,0.18,{BackgroundColor3=on and T.Accent or T.Card3, TextColor3=on and textOn(T.Accent) or T.Sub})
-        end
-    end
+    -- Wheel explícito: o ScrollBarThickness resolve o arrasto, mas rolar no wheel
+    -- é o gesto que a mão já tenta. Sem isso, os últimos chips continuavam
+    -- dependendo de acertar uma alça de 4 px.
+    catBar.InputChanged:Connect(function(input)
+        if input.UserInputType ~= Enum.UserInputType.MouseWheel then return end
+        local span = math.max(0, catBar.AbsoluteCanvasSize.X - catBar.AbsoluteSize.X)
+        local x = catBar.CanvasPosition.X - input.Position.Z * 60
+        catBar.CanvasPosition = Vector2.new(math.clamp(x, 0, span), 0)
+    end)
+
     for i, cat in ipairs(_CATS) do
         local b = New("TextButton", {
             Text=cat.label, Font=F.Bold, TextSize=10, AutoButtonColor=false,
             BackgroundColor3=T.Card3, TextColor3=T.Sub, BorderSizePixel=0,
-            Size=UDim2.fromOffset(0,24), AutomaticSize=Enum.AutomaticSize.X, LayoutOrder=i,
+            Size=UDim2.fromOffset(0,24), AutomaticSize=Enum.AutomaticSize.X,
+            LayoutOrder=i, Visible=false,
         }, catBar)
         New("UIPadding", {PaddingLeft=UDim.new(0,8), PaddingRight=UDim.new(0,8)}, b)
         Round(b, 5)
@@ -5148,24 +5235,19 @@ do
         end, "bcat"..i))
     end
     paintCats()
-    onTheme(paintCats)
 
-    -- campo de busca
-    local searchBox = Field(row, UDim2.fromOffset(8,46), UDim2.new(1,-112,0,30), "buscar no catálogo...", "")
-    Button(row, "BUSCAR", UDim2.new(1,-96,0,46), UDim2.fromOffset(84,30), T.Accent, function()
+    local searchBox = Field(row, UDim2.fromOffset(8,48), UDim2.new(1,-112,0,30), "buscar no catálogo...", "")
+    local function doSearch()
         _bKeyword = searchBox.Text
-        for i, c in ipairs(_CATS) do if c.id=="search" then _bCatIdx=i end end
+        for i, c in ipairs(_CATS) do if c.id == "search" then _bCatIdx = i end end
         paintCats()
         _loadPage("")
-    end)
-    searchBox.FocusLost:Connect(function(enter)
-        if enter then
-            _bKeyword = searchBox.Text
-            for i, c in ipairs(_CATS) do if c.id=="search" then _bCatIdx=i end end
-            paintCats()
-            _loadPage("")
-        end
-    end)
+    end
+    Button(row, "BUSCAR", UDim2.new(1,-96,0,48), UDim2.fromOffset(84,30), T.Accent, doSearch)
+    searchBox.FocusLost:Connect(function(enter) if enter then doSearch() end end)
+
+    paintMode()
+    onTheme(function() paintCats(); paintMode() end)
 end
 
 -- aviso de compatibilidade de corpo
@@ -6765,6 +6847,11 @@ local function step(dt)
     end
 end
 
+-- exporta o passo para o SilkGuard: ele estava fora de escopo lá embaixo e o
+-- vigia acabava guardando nil. Era esse nil que matava a linha de mira no
+-- primeiro travamento do frame.
+VOL_STEP = step
+
 local COLORS = {
     {n = "vermelho", c = Color3.fromRGB(255, 60, 60)},
     {n = "ciano",    c = Color3.fromRGB(0, 240, 255)},
@@ -6833,6 +6920,15 @@ Toggle("Marcar onde a bola cai", false, function(v)
         end)
     end
 end, "Volley predict")
+
+-- Persist devolve o desenho do switch, mas nunca chama o callback: depois de
+-- re-executar, a linha ficava com "ON" na tela e VB.On em false — nada desenhado.
+-- Aqui o estado real é relido do disco uma vez, com as mesmas chaves.
+VB.On        = Persist.Get("volley:Volley aim line", false) == true
+VB.OnlyEnemy = Persist.Get("volley:Volley enemy only", true) ~= false
+VB.Ball      = Persist.Get("volley:Volley ball trajec", true) ~= false
+VB.ShowDot   = Persist.Get("volley:Volley dot on", true) ~= false
+VB.Predict   = Persist.Get("volley:Volley predict", false) == true
 
 Slider("Alcance da previsao", 1, 10, 8, "%d s", function(v)
     VBX.Span = v
@@ -9881,7 +9977,7 @@ end
 if SilkGuard then
     pcall(SilkGuard.track, Gui)
     if FovGui then pcall(SilkGuard.track, FovGui) end
-    if Drawing then pcall(SilkGuard.hold, VOL_BIND, Enum.RenderPriority.Camera.Value + 4, step) end
+    if Drawing and VOL_STEP then pcall(SilkGuard.hold, VOL_BIND, Enum.RenderPriority.Camera.Value + 4, VOL_STEP) end
 end
 
 ShowTab("Clonar")
