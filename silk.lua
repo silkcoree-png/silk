@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.4 · fix09  (Roblox / executor, Luau)
+    SILK CORE v2.5 · fix10  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -1714,6 +1714,9 @@ local THEMES = {
     {id = "jade",     name = "Jade",     a = Color3.fromRGB(46, 214, 150),  b = Color3.fromRGB(196, 255, 124)},
     {id = "gelo",     name = "Gelo",     a = Color3.fromRGB(86, 190, 255),  b = Color3.fromRGB(196, 242, 255)},
     {id = "orquidea", name = "Orquídea", a = Color3.fromRGB(190, 112, 255), b = Color3.fromRGB(255, 120, 200)},
+    {id = "preto",    name = "Preto OLED", a = Color3.fromRGB(238, 238, 242), b = Color3.fromRGB(132, 132, 146),
+     pal = {Bg = {0, 0, 0}, Panel = {6, 6, 9}, Card = {11, 11, 15}, Card2 = {18, 18, 24},
+            Card3 = {27, 27, 35}, Stroke = {36, 36, 44}, Stroke2 = {68, 68, 84}}},
     {id = "custom",   name = "Personalizado", a = Color3.fromRGB(236, 236, 240), b = Color3.fromRGB(160, 160, 172)},
 }
 
@@ -1831,9 +1834,53 @@ local function SetCustomAccent(c)
     th.a = c
     th.b = Color3.fromHSV((h + 0.08) % 1, math.clamp(s * 0.8, 0, 1), math.clamp(v + 0.1, 0, 1))
 end
+-- paleta base do menu: e pra onde os temas voltam quando nao trazem a sua
+SILK_PAL_BASE = {Bg = {13, 11, 18}, Panel = {21, 18, 28}, Card = {30, 26, 38}, Card2 = {41, 35, 52},
+                Card3 = {54, 46, 68}, Stroke = {66, 58, 84}, Stroke2 = {104, 94, 126}}
 local function SetTheme(id, instant)
     for _, th in ipairs(THEMES) do
         if th.id == id then
+            -- Paleta de FUNDO: "Preto OLED" traz a sua, qualquer outro tema volta
+            -- pra base. Sem isso sair do preto deixaria o menu preto pra sempre.
+            do
+                local pal = th.pal or SILK_PAL_BASE
+                local function mesmo(c, rgb)
+                    if not (c and c.R) then return false end
+                    return math.abs(c.R - rgb[1] / 255) < 0.002
+                        and math.abs(c.G - rgb[2] / 255) < 0.002
+                        and math.abs(c.B - rgb[3] / 255) < 0.002
+                end
+                local troca = false
+                for k, rgb in pairs(pal) do
+                    if not mesmo(T[k], rgb) then troca = true end
+                end
+                if troca then
+                    local antes = {}
+                    for k, rgb in pairs(pal) do
+                        antes[k] = T[k]
+                        T[k] = Color3.fromRGB(rgb[1], rgb[2], rgb[3])
+                    end
+                    if SilkGuiList then
+                        local map = {}
+                        for k, velho in pairs(antes) do
+                            if velho and velho.R then
+                                map[string.format("%.3f/%.3f/%.3f", velho.R, velho.G, velho.B)] = T[k]
+                            end
+                        end
+                        for _, root in ipairs(SilkGuiList) do
+                            if root then
+                                for _, d in ipairs(root:GetDescendants()) do
+                                    local ok, bg = pcall(function() return d.BackgroundColor3 end)
+                                    if ok and bg and bg.R then
+                                        local novoC = map[string.format("%.3f/%.3f/%.3f", bg.R, bg.G, bg.B)]
+                                        if novoC then d.BackgroundColor3 = novoC end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
             T.Accent, T.Accent2 = th.a, th.b
             for inst, m in pairs(accBinds) do
                 if inst.Parent then
@@ -2638,6 +2685,60 @@ New("UIGradient", {
         NumberSequenceKeypoint.new(1, 0.28),
     }),
 }, Main)
+
+-- ==========================================================================
+-- TELA DE ABERTURA (primeira coisa que existe)
+-- Antes ela era criada no fim do arquivo, entao o menu montava primeiro e ela
+-- aparecia depois. Agora ela nasce aqui, o menu nasce DESLIGADO, e o loader
+-- detalhado do fim do arquivo assume por cima e devolve o menu no final.
+-- ==========================================================================
+Gui.Enabled = false
+SilkGuiList = {Gui}
+do
+    local S = New("ScreenGui", {
+        Name = "SilkcoreBoot", ResetOnSpawn = false, IgnoreGuiInset = true, DisplayOrder = 5,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+    }, guiParent)
+    local bg = New("Frame", {Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(4, 3, 7), BorderSizePixel = 0}, S)
+    local halo = New("Frame", {
+        AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.46), Size = UDim2.fromOffset(520, 520),
+        BackgroundColor3 = T.Accent, BackgroundTransparency = 0.95, BorderSizePixel = 0,
+    }, bg)
+    Round(halo, 9999)
+    local halo2 = New("Frame", {
+        AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.46), Size = UDim2.fromOffset(300, 300),
+        BackgroundColor3 = T.Accent, BackgroundTransparency = 0.97, BorderSizePixel = 0,
+    }, bg)
+    Round(halo2, 9999)
+    local card = New("Frame", {
+        AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(430, 214),
+        BackgroundColor3 = Color3.fromRGB(15, 13, 22), BackgroundTransparency = 0.08, BorderSizePixel = 0,
+    }, bg)
+    Glass(card, 18, 28)
+    Stroke(card, T.Stroke, 1)
+    Label(card, "SILK CORE", 26, T.Text, F.Display, Enum.TextXAlignment.Center,
+        UDim2.fromOffset(0, 32), UDim2.new(1, 0, 0, 34))
+    Label(card, "carregando módulos", 10, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+        UDim2.fromOffset(0, 74), UDim2.new(1, 0, 0, 14))
+    local bar = New("Frame", {
+        Size = UDim2.new(1, -104, 0, 3), Position = UDim2.fromOffset(52, 108),
+        BackgroundColor3 = T.Card3, BorderSizePixel = 0,
+    }, card)
+    Round(bar, 3)
+    local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
+    Round(fill, 3)
+    New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
+    Label(card, "v2.5 · fix10", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+        UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
+    local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+        UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
+    SilkBoot = {gui = S, exec = exLbl}
+    TweenEx(halo, 2.0, Enum.EasingStyle.Sine, {Size = UDim2.fromOffset(700, 700)})
+    TweenEx(halo2, 2.4, Enum.EasingStyle.Sine, {Size = UDim2.fromOffset(380, 380)})
+    TweenEx(fill, 2.6, Enum.EasingStyle.Quint, {Size = UDim2.fromScale(0.74, 1)})
+    task.wait(0.1)  -- deixa o primeiro frame pintar antes de travar montando o resto
+end
+
 do
     local sp = Persist.Get("cfg:pos", nil)
     if type(sp) == "table" and type(sp[1]) == "number" and type(sp[2]) == "number" then
@@ -2806,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.4 · fix09"
+SILK_VER = "v2.5 · fix10"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -3035,8 +3136,27 @@ local NAV = {
 do
     local navY = 10
     for _, grp in ipairs(NAV) do
-        Label(NavArea, grp.group, 9, T.Faint, F.Mono, nil, UDim2.fromOffset(18, navY), UDim2.new(1, -36, 0, 16))
-        navY = navY + 16
+        -- cabecalho de categoria: barra de accent + nome + linha que dissolve
+        local gh = New("Frame", {
+            Size = UDim2.new(1, -16, 0, 18), Position = UDim2.fromOffset(8, navY),
+            BackgroundTransparency = 1, BorderSizePixel = 0,
+        }, NavArea)
+        local gb = New("Frame", {
+            Size = UDim2.fromOffset(2, 10), Position = UDim2.fromOffset(4, 4),
+            BackgroundColor3 = T.Accent, BorderSizePixel = 0,
+        }, gh)
+        Round(gb, 1)
+        bindAcc(gb, "BackgroundColor3")
+        Label(gh, grp.group, 9, T.Faint, F.Bold, nil, UDim2.fromOffset(12, 2), UDim2.new(1, -16, 0, 14))
+        local gl = New("Frame", {
+            Size = UDim2.new(1, -16, 0, 1), Position = UDim2.fromOffset(12, 15),
+            BackgroundColor3 = T.Stroke, BorderSizePixel = 0,
+        }, gh)
+        New("UIGradient", {Rotation = 0, Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.35),
+            NumberSequenceKeypoint.new(1, 1),
+        })}, gl)
+        navY = navY + 20
         for _, it in ipairs(grp.items) do
             local btn = New("TextButton", {
                 Text = "", AutoButtonColor = false, BackgroundColor3 = T.Card2, BackgroundTransparency = 1,
@@ -3322,6 +3442,7 @@ do
     end)
     if okEx and nm then execName = tostring(nm) end
 end
+if SilkBoot and SilkBoot.exec then SilkBoot.exec.Text = "executor: " .. execName end
 
 --------------------------------------------------------------------------------
 -- ABRIR / FECHAR (so Frame + tween: sem CanvasGroup e sem UIScale)
@@ -3387,6 +3508,7 @@ ToastGui = New("ScreenGui", {
     Name = "SilkcoreToasts", ResetOnSpawn = false, IgnoreGuiInset = true, DisplayOrder = 30,
     ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 }, guiParent)
+if SilkGuiList then SilkGuiList[#SilkGuiList + 1] = ToastGui end
 local liveToasts = {}
 local TOAST_W, TOAST_H, TOAST_GAP = 320, 44, 8
 local function toastY(i)
@@ -3864,10 +3986,10 @@ function revealTab(tab)
         local t = it.t
         if not baseOf[t] then baseOf[t] = t.Position end
         local base = baseOf[t]
-        t.Position = base + UDim2.fromOffset(0, 14)
-        t.Rotation = (i % 2 == 0) and 1.1 or -1.1
-        task.delay(0.022 * math.min(i, 14), function()
-            if t.Parent then TweenEx(t, 0.42, Enum.EasingStyle.Quint, {Position = base, Rotation = 0}) end
+        t.Position = base + UDim2.fromOffset(0, 22)
+        t.Rotation = (i % 2 == 0) and 2.2 or -2.2
+        task.delay(0.026 * math.min(i, 16), function()
+            if t.Parent then TweenEx(t, 0.5, Enum.EasingStyle.Quint, {Position = base, Rotation = 0}) end
         end)
     end
 end
@@ -6685,7 +6807,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE09"
+local BUILD = "BE10"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -7969,7 +8091,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.4 · fix09  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.5 · fix10  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -8098,6 +8220,9 @@ local function runStep(fn, timeout)
 end
 
 function runLoader(onDone)
+    -- a tela de abertura cumpriu o papel: sai de cena e esta assume
+    if SilkBoot and SilkBoot.gui then SilkBoot.gui:Destroy() end
+    SilkBoot = nil
     local LG = New("ScreenGui", {
         Name = "SilkcoreLoader", ResetOnSpawn = false, IgnoreGuiInset = true, DisplayOrder = 50,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
@@ -8133,14 +8258,34 @@ function runLoader(onDone)
     word.Intro(1.1)
     local tag = Label(col, "inicializando módulos", 10, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 230), UDim2.new(1, 0, 0, 14))
-    local bar = New("Frame", {
-        Size = UDim2.fromOffset(440, 4), Position = UDim2.fromOffset(10, 258), BackgroundColor3 = T.Card3, BorderSizePixel = 0,
+    local barWrap = New("Frame", {
+        Size = UDim2.fromOffset(440, 12), Position = UDim2.fromOffset(10, 254), BackgroundTransparency = 1, BorderSizePixel = 0,
     }, col)
-    Round(bar, 2)
+    local glowFrame = New("Frame", {
+        Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = T.Accent, BackgroundTransparency = 0.86, BorderSizePixel = 0,
+    }, barWrap)
+    Round(glowFrame, 6)
+    local bar = New("Frame", {
+        Size = UDim2.new(1, 0, 0, 4), Position = UDim2.fromOffset(0, 4), BackgroundColor3 = T.Card3, BorderSizePixel = 0,
+    }, barWrap)
+    Round(bar, 3)
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
-    Round(fill, 2)
-    New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    local pct = Label(col, "0%", 11, T.Text, F.Mono, Enum.TextXAlignment.Right, UDim2.fromOffset(10, 266), UDim2.fromOffset(440, 16))
+    Round(fill, 3)
+    local barGrad = New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
+    local shine = New("Frame", {
+        Size = UDim2.fromOffset(46, 4), Position = UDim2.fromOffset(-46, 0), BackgroundColor3 = Color3.new(1, 1, 1),
+        BackgroundTransparency = 0.5, BorderSizePixel = 0, ZIndex = 2,
+    }, bar)
+    local pct = Label(col, "0%", 11, T.Text, F.Mono, Enum.TextXAlignment.Right, UDim2.fromOffset(10, 268), UDim2.fromOffset(440, 16))
+
+    -- painel de vidro com os passos: antes os rotulos ficavam soltos e vazavam
+    -- do card (12 passos x 17px = 204 numa coluna de 500)
+    local list = New("Frame", {
+        Size = UDim2.fromOffset(420, 196), Position = UDim2.fromOffset(20, 294),
+        BackgroundColor3 = T.Card, BackgroundTransparency = 0.6, BorderSizePixel = 0,
+    }, col)
+    Round(list, 12)
+    Stroke(list, T.Stroke, 1)
 
     local function addId(ids, seen, v)
         local n = tonumber(v)
@@ -8215,13 +8360,13 @@ function runLoader(onDone)
             BorderSizePixel = 0, ZIndex = 4,
         }, bar)
         rows[i] = {
-            l = Label(col, "○  " .. st.name, 11, T.Faint, F.Mono, nil, UDim2.fromOffset(20, 330 + (i - 1) * 17), UDim2.fromOffset(360, 17)),
-            r = Label(col, "", 10, T.Faint, F.Mono, Enum.TextXAlignment.Right, UDim2.fromOffset(380, 330 + (i - 1) * 17), UDim2.fromOffset(100, 17)),
+            l = Label(list, "○  " .. st.name, 10, T.Faint, F.Mono, nil, UDim2.fromOffset(14, 8 + (i - 1) * 15), UDim2.fromOffset(300, 15)),
+            r = Label(list, "", 9, T.Faint, F.Mono, Enum.TextXAlignment.Right, UDim2.fromOffset(316, 8 + (i - 1) * 15), UDim2.fromOffset(90, 15)),
         }
     end
     local corners = {
         {"SILK CORE // BOOT", UDim2.fromOffset(20, 16), Enum.TextXAlignment.Left},
-        {"v2.4", UDim2.new(1, -220, 0, 16), Enum.TextXAlignment.Right},
+        {"v2.5", UDim2.new(1, -220, 0, 16), Enum.TextXAlignment.Right},
         {"executor: " .. execName, UDim2.new(0, 20, 1, -30), Enum.TextXAlignment.Left},
         {"place " .. tostring(game.PlaceId), UDim2.new(1, -220, 1, -30), Enum.TextXAlignment.Right},
     }
@@ -11313,7 +11458,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.4 fix09", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.5 fix10", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11569,7 +11714,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.4 fix09 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.5 fix10 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11753,7 +11898,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.4 · fix09", 48)
+Note("SILK CORE v2.5 · fix10", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
