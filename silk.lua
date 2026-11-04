@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.3 · fix08  (Roblox / executor, Luau)
+    SILK CORE v2.4 · fix09  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -1692,18 +1692,18 @@ end))
 -- THEME + UI HELPERS
 --------------------------------------------------------------------------------
 local T = {
-    Bg      = Color3.fromRGB(10, 8, 11),
-    Panel   = Color3.fromRGB(16, 13, 17),
-    Card    = Color3.fromRGB(25, 21, 27),
-    Card2   = Color3.fromRGB(34, 29, 37),
-    Card3   = Color3.fromRGB(46, 40, 50),
-    Stroke  = Color3.fromRGB(44, 38, 47),
-    Stroke2 = Color3.fromRGB(72, 63, 76),
+    Bg      = Color3.fromRGB(13, 11, 18),
+    Panel   = Color3.fromRGB(21, 18, 28),
+    Card    = Color3.fromRGB(30, 26, 38),
+    Card2   = Color3.fromRGB(41, 35, 52),
+    Card3   = Color3.fromRGB(54, 46, 68),
+    Stroke  = Color3.fromRGB(66, 58, 84),
+    Stroke2 = Color3.fromRGB(104, 94, 126),
     Accent  = Color3.fromRGB(255, 58, 96),     -- carmim (Silk Core)
     Accent2 = Color3.fromRGB(255, 176, 84),
-    Text    = Color3.fromRGB(240, 233, 230),
-    Sub     = Color3.fromRGB(150, 140, 148),
-    Faint   = Color3.fromRGB(96, 88, 98),
+    Text    = Color3.fromRGB(243, 237, 244),
+    Sub     = Color3.fromRGB(166, 156, 176),
+    Faint   = Color3.fromRGB(108, 99, 122),
     Good    = Color3.fromRGB(82, 214, 140),
     Bad     = Color3.fromRGB(255, 92, 92),
 }
@@ -1754,6 +1754,32 @@ local function Round(o, r)
 end
 local function Stroke(o, c, t)
     return New("UIStroke", {Color = c or T.Stroke, Thickness = t or 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, o)
+end
+-- ==========================================================================
+-- LIQUID GLASS
+-- O Roblox nao tem desfoque de fundo: "vidro" aqui e feito de camadas —
+-- gradiente vertical (opaco em cima, fundo vazando embaixo), brilho de topo
+-- de 1px (a "quebra" de luz na borda) e borda clara. Sem textura externa,
+-- entao nao quebra em executor nenhum.
+-- ==========================================================================
+local function Glass(o, radius, sheenInset)
+    Round(o, radius or 12)
+    local w = sheenInset or 8
+    local sh = New("Frame", {
+        Name = "Sheen", Size = UDim2.new(1, -w * 2, 0, 1), Position = UDim2.fromOffset(w, 0),
+        BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.86,
+        BorderSizePixel = 0, ZIndex = 5,
+    }, o)
+    Round(sh, 1)
+    New("UIGradient", {
+        Rotation = 90,
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.04),
+            NumberSequenceKeypoint.new(0.58, 0.15),
+            NumberSequenceKeypoint.new(1, 0.40),
+        }),
+    }, o)
+    return sh
 end
 local ANIM = {speed = 1, reduce = false}
 local function Tween(o, t, props)
@@ -2597,8 +2623,21 @@ local Main = New("Frame", {
     Name = "Main", Size = UDim2.fromScale(1, 1), BackgroundColor3 = T.Bg, BackgroundTransparency = 0.03,
     BorderSizePixel = 0, ClipsDescendants = true,
 }, Shell)
-Round(Main, 10)
+Round(Main, 16)
 Stroke(Main, T.Stroke2, 1)
+-- brilho de topo da janela: a quebra de luz do vidro
+New("Frame", {
+    Name = "Sheen", Size = UDim2.new(1, -64, 0, 1), Position = UDim2.fromOffset(32, 0),
+    BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.88, BorderSizePixel = 0, ZIndex = 60,
+}, Main)
+New("UIGradient", {
+    Rotation = 90,
+    Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.0),
+        NumberSequenceKeypoint.new(0.5, 0.06),
+        NumberSequenceKeypoint.new(1, 0.28),
+    }),
+}, Main)
 do
     local sp = Persist.Get("cfg:pos", nil)
     if type(sp) == "table" and type(sp[1]) == "number" and type(sp[2]) == "number" then
@@ -2767,7 +2806,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.3 · fix08"
+SILK_VER = "v2.4 · fix09"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -2859,8 +2898,12 @@ local Rail = New("Frame", {
     BackgroundColor3 = T.Panel, BackgroundTransparency = 0.2, BorderSizePixel = 0, ClipsDescendants = true,
 }, Main)
 LAY.Rail = Rail
-Round(Rail, 8)
+Round(Rail, 12)
 Stroke(Rail, T.Stroke, 1)
+New("Frame", {
+    Name = "Sheen", Size = UDim2.new(1, -24, 0, 1), Position = UDim2.fromOffset(12, 0),
+    BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.88, BorderSizePixel = 0, ZIndex = 20,
+}, Rail)
 NavArea = New("ScrollingFrame", {
     Name = "NavArea",
     Size = UDim2.new(1, 0, 1, -92), Position = UDim2.fromOffset(0, 26),
@@ -2873,7 +2916,7 @@ NavPill = New("Frame", {
     Size = UDim2.new(1, -16, 0, 28), Position = UDim2.fromOffset(8, 26), BackgroundColor3 = T.Card2,
     BorderSizePixel = 0, ZIndex = 1,
 }, NavArea)
-Round(NavPill, 6)
+Round(NavPill, 9)
 do
     local bar = New("Frame", {
         AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 0, 0.5, 0), Size = UDim2.fromOffset(3, 16),
@@ -3233,7 +3276,7 @@ local Panel = New("Frame", {
     BackgroundColor3 = T.Panel, BackgroundTransparency = 0.2, BorderSizePixel = 0, ClipsDescendants = true,
 }, Main)
 LAY.Panel = Panel
-Round(Panel, 8)
+Glass(Panel, 14, 18)
 Stroke(Panel, T.Stroke, 1)
 HeaderTitle = Label(Panel, "", 17, T.Text, F.Bold, nil, UDim2.fromOffset(18, 9), UDim2.new(1, -230, 0, 22))
 HeaderSub = Label(Panel, "", 11, T.Sub, F.Body, nil, UDim2.fromOffset(18, 31), UDim2.new(1, -230, 0, 16))
@@ -3410,7 +3453,7 @@ local function MakeCard(parent, size, order)
     local card = New("Frame", {
         Name = "Glass", Size = UDim2.fromScale(1, 1), BackgroundColor3 = T.Card, BorderSizePixel = 0, Active = true,
     }, outer)
-    Round(card, 8)
+    Glass(card, 12, 14)
     local edge = Stroke(card, T.Stroke, 1)
     local tick = New("Frame", {
         AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 0, 0.5, 0), Size = UDim2.fromOffset(3, 0),
@@ -3444,19 +3487,28 @@ local function Row(h)
 end
 
 local function Section(text)
-    local f = New("Frame", {Size = UDim2.new(1, 0, 0, 28), BackgroundTransparency = 1, LayoutOrder = nextOrder()}, CurTab)
+    local f = New("Frame", {Size = UDim2.new(1, 0, 0, 32), BackgroundTransparency = 1, LayoutOrder = nextOrder()}, CurTab)
     local n = (CurTab:GetAttribute("sec") or 0) + 1
     CurTab:SetAttribute("sec", n)
-    local num = Label(f, string.format("%02d", n), 10, T.Accent, F.Mono, nil, UDim2.fromOffset(2, 2), UDim2.fromOffset(20, 16))
-    bindAcc(num, "TextColor3")
-    Label(f, upperPT(text), 10, T.Sub, F.Mono, nil, UDim2.fromOffset(24, 2), UDim2.new(1, -28, 0, 16))
-    New("Frame", {
-        Size = UDim2.new(1, 0, 0, 1), Position = UDim2.fromOffset(0, 22), BackgroundColor3 = T.Stroke, BorderSizePixel = 0,
+    -- chip do numero da secao (vidro colorido)
+    local chip = New("Frame", {
+        Size = UDim2.fromOffset(22, 16), Position = UDim2.fromOffset(0, 4),
+        BackgroundColor3 = T.Accent, BackgroundTransparency = 0.15, BorderSizePixel = 0,
     }, f)
-    local tickBar = New("Frame", {
-        Size = UDim2.fromOffset(18, 2), Position = UDim2.fromOffset(0, 21), BackgroundColor3 = T.Accent, BorderSizePixel = 0,
+    Round(chip, 5)
+    bindAcc(chip, "BackgroundColor3")
+    Label(chip, string.format("%02d", n), 10, Color3.new(1, 1, 1), F.Bold, Enum.TextXAlignment.Center,
+        UDim2.fromOffset(0, 1), UDim2.fromScale(1, 1))
+    Label(f, upperPT(text), 11, T.Text, F.Bold, nil, UDim2.fromOffset(30, 2), UDim2.new(1, -34, 0, 18))
+    -- linha que dissolve pra direita em vez de risco duro
+    local line = New("Frame", {
+        Size = UDim2.new(1, 0, 0, 1), Position = UDim2.fromOffset(0, 26),
+        BackgroundColor3 = T.Stroke2, BorderSizePixel = 0,
     }, f)
-    bindAcc(tickBar, "BackgroundColor3")
+    New("UIGradient", {Rotation = 0, Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.1),
+        NumberSequenceKeypoint.new(1, 1),
+    })}, line)
     return f
 end
 
@@ -3473,7 +3525,7 @@ local function Button(parent, text, pos, size, color, cb)
         Text = text, Font = F.Bold, TextSize = 12, AutoButtonColor = false, BorderSizePixel = 0,
         Position = pos, Size = size, ZIndex = 3, ClipsDescendants = true,
     }, parent)
-    Round(b, 6)
+    local sheen = Glass(b, 10, 10)
     local st = Stroke(b, T.Stroke2, 1)
     local flash = New("Frame", {
         Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1,
@@ -3492,9 +3544,11 @@ local function Button(parent, text, pos, size, color, cb)
         if animate then
             Tween(b, 0.14, {BackgroundColor3 = bg, TextColor3 = tx})
             Tween(st, 0.14, {Color = sc, Transparency = stT})
+            Tween(sheen, 0.14, {BackgroundTransparency = (hover or down) and 0.52 or 0.86})
         else
             b.BackgroundColor3, b.TextColor3 = bg, tx
             st.Color, st.Transparency = sc, stT
+            sheen.BackgroundTransparency = 0.86
         end
     end
     paint(false, false, false)
@@ -3571,15 +3625,17 @@ function Toggle(text, default, cb, id)
     local state = Label(row, on and "ON" or "OFF", 10, on and T.Accent or T.Faint, F.Mono, Enum.TextXAlignment.Right,
         UDim2.new(1, -116, 0, 0), UDim2.fromOffset(48, 44))
     local sw = New("TextButton", {
-        Text = "", AutoButtonColor = false, Size = UDim2.fromOffset(44, 20), Position = UDim2.new(1, -60, 0.5, -10),
+        Text = "", AutoButtonColor = false, Size = UDim2.fromOffset(48, 22), Position = UDim2.new(1, -60, 0.5, -11),
         BackgroundColor3 = OFF_TRACK, BorderSizePixel = 0,
     }, row)
-    Round(sw, 4)
-    Stroke(sw, T.Stroke2, 1)
+    Round(sw, 11)
+    local swSt = Stroke(sw, T.Stroke2, 1)
     local knob = New("Frame", {
-        Size = UDim2.fromOffset(14, 14), Position = UDim2.fromOffset(3, 3), BackgroundColor3 = OFF_KNOB, BorderSizePixel = 0,
+        Size = UDim2.fromOffset(16, 16), Position = UDim2.fromOffset(3, 3), BackgroundColor3 = OFF_KNOB, BorderSizePixel = 0,
     }, sw)
-    Round(knob, 3)
+    Round(knob, 8)
+    local knobSt = Stroke(knob, Color3.new(1, 1, 1), 1)
+    knobSt.Transparency = 0.55
     local function paint(animate)
         if on then
             bindAcc(sw, "BackgroundColor3", "Accent", true)
@@ -3590,15 +3646,19 @@ function Toggle(text, default, cb, id)
         end
         local tc = on and T.Accent or OFF_TRACK
         local kc = on and Color3.new(1, 1, 1) or OFF_KNOB
-        local kp = on and UDim2.fromOffset(27, 3) or UDim2.fromOffset(3, 3)
+        local kp = on and UDim2.fromOffset(29, 3) or UDim2.fromOffset(3, 3)
         state.Text = on and "ON" or "OFF"
         if animate then
             Tween(sw, 0.2, {BackgroundColor3 = tc})
             Tween(knob, 0.2, {BackgroundColor3 = kc})
+            Tween(swSt, 0.2, {Transparency = on and 0.45 or 0})
+            Tween(knobSt, 0.2, {Transparency = on and 0.2 or 0.55})
             Tween(state, 0.2, {TextColor3 = on and T.Accent or T.Faint})
             TweenEx(knob, 0.42, Enum.EasingStyle.Back, {Position = kp})
         else
             sw.BackgroundColor3, knob.BackgroundColor3, knob.Position = tc, kc, kp
+            swSt.Transparency = on and 0.45 or 0
+            knobSt.Transparency = on and 0.2 or 0.55
             state.TextColor3 = on and T.Accent or T.Faint
         end
     end
@@ -3633,24 +3693,30 @@ local function Slider(text, min, max, default, fmt, cb, id)
     local valLbl = Label(row, "", 12, T.Accent, F.Mono, Enum.TextXAlignment.Right, UDim2.new(0.65, 0, 0, 9), UDim2.new(0.35, -16, 0, 18))
     bindAcc(valLbl, "TextColor3")
     local bar = New("Frame", {
-        Size = UDim2.new(1, -36, 0, 4), Position = UDim2.new(0, 18, 0, 40), BackgroundColor3 = Color3.fromRGB(52, 46, 56),
+        Size = UDim2.new(1, -36, 0, 6), Position = UDim2.new(0, 18, 0, 39), BackgroundColor3 = Color3.fromRGB(46, 40, 58),
         BorderSizePixel = 0,
     }, row)
-    Round(bar, 2)
+    Round(bar, 3)
+    Stroke(bar, T.Stroke, 1)
     for i = 0, 10 do
         New("Frame", {
-            Size = UDim2.fromOffset(1, (i % 5 == 0) and 5 or 3), Position = UDim2.new(i / 10, 0, 0, 8),
-            BackgroundColor3 = T.Stroke2, BorderSizePixel = 0,
+            Size = UDim2.fromOffset(1, (i % 5 == 0) and 5 or 3), Position = UDim2.new(i / 10, 0, 0, (i % 5 == 0) and 0 or 1),
+            BackgroundColor3 = T.Stroke2, BackgroundTransparency = 0.4, BorderSizePixel = 0,
         }, bar)
     end
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     bindAcc(fill, "BackgroundColor3")
-    Round(fill, 2)
+    Round(fill, 3)
+    -- brilho por cima do preenchimento: o "liquido" do vidro
+    New("Frame", {
+        Size = UDim2.new(1, 0, 0, 1), Position = UDim2.fromOffset(0, 1), BackgroundColor3 = Color3.new(1, 1, 1),
+        BackgroundTransparency = 0.55, BorderSizePixel = 0, ZIndex = 2,
+    }, fill)
     local knob = New("Frame", {
-        Size = UDim2.fromOffset(12, 12), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0, 0.5),
-        Rotation = 45, BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0, ZIndex = 2,
+        Size = UDim2.fromOffset(14, 14), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0, 0.5),
+        BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0, ZIndex = 3,
     }, bar)
-    Round(knob, 2)
+    Round(knob, 7)
     local ks = Stroke(knob, T.Accent, 2)
     bindAcc(ks, "Color")
 
@@ -3684,7 +3750,7 @@ local function Slider(text, min, max, default, fmt, cb, id)
     hit.InputBegan:Connect(Safe(function(i)
         if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
             dragging = true
-            TweenEx(knob, 0.2, Enum.EasingStyle.Back, {Size = UDim2.fromOffset(17, 17)})
+            TweenEx(knob, 0.2, Enum.EasingStyle.Back, {Size = UDim2.fromOffset(19, 19)})
             fromX(i.Position.X)
         end
     end, "slider " .. text))
@@ -3697,7 +3763,7 @@ local function Slider(text, min, max, default, fmt, cb, id)
         if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
             if dragging then
                 dragging = false
-                TweenEx(knob, 0.2, Enum.EasingStyle.Back, {Size = UDim2.fromOffset(12, 12)})
+                TweenEx(knob, 0.2, Enum.EasingStyle.Back, {Size = UDim2.fromOffset(14, 14)})
             end
         end
     end))
@@ -3723,7 +3789,7 @@ local function Segmented(row, opts, current, onPick, x0, y0, w, h, gap)
             BackgroundColor3 = T.Card3, TextColor3 = T.Sub, Size = UDim2.fromOffset(w, h),
             Position = UDim2.fromOffset(x0 + (i - 1) * (w + gap), y0),
         }, row)
-        Round(b, 6)
+        Glass(b, 9, 8)
         btns[o.id] = b
         b.MouseButton1Click:Connect(Safe(function()
             cur = o.id
@@ -3743,7 +3809,7 @@ local function Field(parent, pos, size, placeholder, text)
     local box = New("Frame", {
         Position = pos, Size = size, BackgroundColor3 = T.Bg, BorderSizePixel = 0, ClipsDescendants = true,
     }, parent)
-    Round(box, 6)
+    Round(box, 10)
     local st = Stroke(box, T.Stroke2, 1)
     local tb = New("TextBox", {
         Size = UDim2.new(1, -24, 1, 0), Position = UDim2.fromOffset(12, 0), BackgroundTransparency = 1,
@@ -6619,7 +6685,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE08"
+local BUILD = "BE09"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -7903,7 +7969,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.3 · fix08  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.4 · fix09  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -8155,7 +8221,7 @@ function runLoader(onDone)
     end
     local corners = {
         {"SILK CORE // BOOT", UDim2.fromOffset(20, 16), Enum.TextXAlignment.Left},
-        {"v2.3", UDim2.new(1, -220, 0, 16), Enum.TextXAlignment.Right},
+        {"v2.4", UDim2.new(1, -220, 0, 16), Enum.TextXAlignment.Right},
         {"executor: " .. execName, UDim2.new(0, 20, 1, -30), Enum.TextXAlignment.Left},
         {"place " .. tostring(game.PlaceId), UDim2.new(1, -220, 1, -30), Enum.TextXAlignment.Right},
     }
@@ -11247,7 +11313,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.3 fix08", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.4 fix09", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11503,7 +11569,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.3 fix08 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.4 fix09 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11687,7 +11753,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.3 · fix08", 48)
+Note("SILK CORE v2.4 · fix09", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -13752,8 +13818,8 @@ local ND = {
     depth = 0,         -- engrossa a forma no eixo da camera
     bob = 0,           -- sobe/desce o conjunto
     fps = 30,          -- gravacoes de CFrame por segundo
-    maxParts = 120,
-    reach = 300,       -- alcance da busca (studs); antes era 80 e nao pegava nada do mapa
+    maxParts = 24,     -- antes era 120: puxava meio mapa de uma vez
+    reach = 80,        -- studs; antes 300 e trazia o mapa todo pra forma
     anchored = false,  -- incluir pecas presas no mapa
     follow = true,     -- forma virada pra camera
     closed = true,     -- fechar o desenho
@@ -13770,7 +13836,7 @@ HackState.ndOrbital = ND
 
 -- tudo que e chamado antes de existir precisa estar declarado aqui
 local ndShape, ndPoly, ndResample, ndNormalize, ndCustomOutline
-local ndRoot, ndBlocked, ndQuery, ndCollect, ndRelease, ndRebuild, ndVolumetric
+local ndRoot, ndBlocked, ndSolto, ndQuery, ndCollect, ndRelease, ndRebuild, ndVolumetric
 local ndClearGhosts, ndMakeGhosts, ndOnlyOwn
 local ndStep, ndStart, ndCount
 
@@ -13851,15 +13917,25 @@ ndMakeGhosts = function(n)
     return list
 end
 
+-- peca SOLTA de verdade: nao ancorada e nao presa (via assembly) numa estrutura
+-- ancorada. Peca soldada na parede do mapa tem Anchored=false e mesmo assim nao
+-- soltou nada — era isso que o orbital estava puxando.
+ndSolto = function(part)
+    if part.Anchored then return false end
+    local ok, raiz = pcall(function() return part.AssemblyRootPart end)
+    if ok and raiz and raiz.Anchored then return false end
+    return true
+end
+
 ndCollect = function()
     local root = ndRoot()
     local center = root and root.Position or Vector3.zero
-    local reach = math.max(60, ND.reach or 300)
+    local reach = math.max(20, ND.reach or 80)
     local found = ndQuery(center, Vector3.new(reach, reach, reach))
 
     local pick = {}
     for _, part in ipairs(found) do
-        if not ndBlocked(part) and (ND.anchored or not part.Anchored) then
+        if not ndBlocked(part) and (ND.anchored or ndSolto(part)) then
             pick[#pick + 1] = part
         end
     end
@@ -14243,11 +14319,11 @@ Slider("Profundidade da forma", 0, 14, 0, "%.0f", function(v)
     ND.depth = v
 end, "nd_depth")
 
-Slider("Maximo de pecas", 20, 400, 120, "%.0f", function(v)
+Slider("Maximo de pecas", 8, 120, 24, "%.0f", function(v)
     ND.maxParts = math.floor(v)
 end, "nd_max")
 
-Slider("Alcance do puxão", 60, 800, 300, "%.0f studs", function(v)
+Slider("Alcance do puxão", 20, 400, 80, "%.0f studs", function(v)
     ND.reach = math.floor(v)
     Toast("alcance: " .. math.floor(v) .. " studs", true)
 end, "nd_reach")
@@ -14256,10 +14332,19 @@ Slider("Gravações por segundo", 10, 60, 30, "%.0f/s", function(v)
     ND.fps = math.floor(v)
 end, "nd_fps")
 
-Toggle("Incluir peças presas do mapa (mexe só na sua tela)", false, function(v)
-    ND.anchored = v
-    Toast(v and "peças presas: só você vê mexer (o Roblox não deixa replicar)" or "peças presas ignoradas", v)
-end, "nd_anchored")
+do
+    local tAnc = Toggle("Incluir peças presas do mapa (mexe só na sua tela)", false, function(v)
+        ND.anchored = v
+        Toast(v and "peças presas: só você vê mexer (o Roblox não deixa replicar)" or "peças presas ignoradas", v)
+    end, "nd_anchored")
+    -- o padrao e peca SOLTA. se o arquivo salvo trouxe esse toggle ligado, ele
+    -- volta desligado: era o que fazia o orbital arrastar parede e mapa inteiro.
+    if ND.anchored then
+        ND.anchored = false
+        tAnc:Set(false, false)
+        Toast("orbital: peça presa ignorada (era o que puxava o mapa inteiro)", true)
+    end
+end
 
 Toggle("Forma virada pra câmera", true, function(v)
     ND.follow = v
@@ -15086,7 +15171,7 @@ CurTab = Tab("Fling", 0, false)
 Persist.Scope = "fling"
 
 Section("Voadora Universal R15")
-Note("Motor novo: empurra por fisica no corpo inteiro. Nao destroi as juntas do rig, entao nada quebra quando voce para.", 60)
+Note("Voce anda ate a pessoa, chega perto e aperta. Ele roda em torno de si, encosta em quem estiver colado e o corpo da pessoa resolve o empurrao — por isso QUEM VOA E O OUTRO. Voce gira no lugar, nao sai voando.", 76)
 
 -- ==========================================================================
 -- FLING: motor proprio + botoes na tela + teclas escolhidas por voce
@@ -15094,9 +15179,14 @@ Note("Motor novo: empurra por fisica no corpo inteiro. Nao destroi as juntas do 
 -- registradores do Luau, e local dentro de funcao nao gasta registro do chunk.
 -- ==========================================================================
 local function flnBuild()
+local RunService = game:GetService("RunService")
 local FLN = {
     modo = "soco",
     poder = 500,
+    giro = 90,       -- rad/s do redemoinho (escala com o poder)
+    alcance = 8,     -- studs: tem que estar colado nessa distancia
+    busca = 14,      -- studs: raio de procura do alvo
+    tempo = 0.55,    -- duracao do giro
     ocupado = false,
     hud = nil,
     hudOn = true,
@@ -15119,6 +15209,9 @@ local function flPara()
             hrp.AssemblyLinearVelocity = Vector3.zero
             hrp.AssemblyAngularVelocity = Vector3.zero
             hrp.CustomPhysicalProperties = nil
+            -- sobe 2 studs e endireita: sem isso ele fica deitado/torto depois do giro
+            local _, yaw = hrp.CFrame:ToEulerAnglesYXZ()
+            hrp.CFrame = CFrame.new(hrp.Position + Vector3.new(0, 2, 0)) * CFrame.Angles(0, yaw, 0)
         end)
     end
     if hum then
@@ -15144,58 +15237,74 @@ local function flPerto(alcance)
     return melhor, melhorD
 end
 
+-- ==========================================================================
+-- O EMPURRAO NAO E NO SEU CORPO. Seu personagem e seu no servidor: se voce
+-- escrever velocidade nele, VOCE voa (era o bug). Quem manda no corpo do outro
+-- e o cliente DELE. Entao a unica coisa que funciona e entregar o seu corpo
+-- girando na cara dele — o cliente do alvo resolve a colisao e arremessa ele.
+-- Resultado: voce gira parado no lugar, o outro sai voando.
+-- ==========================================================================
 local function flBate(alvo, modo, poder)
+    if FLN.ocupado then Toast("ja ta rodando", false) return end
     local c, hum, hrp = flCorpo()
     if not hrp then Toast("sem personagem", false) return end
-    alvo = alvo or flPerto(220)
-    if not alvo or not alvo.Character then Toast("nenhum alvo por perto", false) return end
+
+    alvo = alvo or flPerto(FLN.busca)
+    if not alvo or not alvo.Character then
+        Toast("ninguem em " .. tostring(FLN.busca) .. " studs — chega perto da pessoa", false)
+        return
+    end
     local tr = alvo.Character:FindFirstChild("HumanoidRootPart")
     local th = alvo.Character:FindFirstChildOfClass("Humanoid")
-    if not tr or not th then Toast("alvo sem corpo", false) return end
+    if not tr or not th or th.Health <= 0 then Toast("alvo sem corpo", false) return end
 
     modo = modo or FLN.modo
     poder = poder or FLN.poder
 
+    local dist = (tr.Position - hrp.Position).Magnitude
+    if dist > FLN.alcance then
+        Toast(string.format("longe demais: %.0f studs (max %d). anda ate ele.", dist, FLN.alcance), false)
+        return
+    end
+
+    -- encaixe: fecha o resto do caminho andando, no maximo 1.8 studs.
+    -- nao e teleporte e nao e voo: e o ultimo passo pra colar no alvo.
     local dif = tr.Position - hrp.Position
     local plano = Vector3.new(dif.X, 0, dif.Z)
-    local dir = (plano.Magnitude > 0.1) and plano.Unit or Vector3.new(0, 0, -1)
+    local dir = (plano.Magnitude > 0.05) and plano.Unit or Vector3.new(0, 0, -1)
+    local encaixe = math.clamp(plano.Magnitude - 2.2, 0, 1.8)
+    local base = hrp.Position + dir * encaixe
+    local baseY = math.max(base.Y, tr.Position.Y)
 
-    local vel, gir
-    if modo == "chute" then
-        vel = (dir + Vector3.new(0, 0.35, 0)) * poder * 0.7
-        gir = Vector3.new(poder * 5, 0, 0)
-    elseif modo == "voadora" then
-        vel = (dir + Vector3.new(0, 0.5, 0)) * poder * 0.9
-        gir = Vector3.new(poder * 4, poder * 4, poder * 4)
-    else
-        vel = dir * poder * 0.7
-        gir = Vector3.new(0, poder * 6, 0)
-    end
-
-    if HackState.flingAim ~= false then
-        pcall(function()
-            hrp.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(tr.Position.X, hrp.Position.Y, tr.Position.Z))
-        end)
-    end
-    -- solta o humanoid pra fisica: sem isso ele freia a velocidade no primeiro frame
-    pcall(function() hum:ChangeState(Enum.HumanoidStateType.Physics) end)
-    pcall(function() hrp.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0, 0, 1, 1) end)
+    local giro = FLN.giro * (poder / 500)
+    if modo == "chute" then giro = giro * 1.4 end
+    if modo == "voadora" then giro = giro * 1.7 end
+    local subida = (modo == "soco") and 0.35 or 0.9
 
     FLN.ocupado = true
-    Toast("fling " .. modo .. " em " .. alvo.Name, true)
+    pcall(function() hum:ChangeState(Enum.HumanoidStateType.Physics) end)
+    pcall(function() hrp.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0, 0, 1, 1) end)
+    Toast("redemoinho em " .. alvo.Name, true)
 
-    task.spawn(function()
-        local t0 = tick()
-        while (tick() - t0) < 0.5 do
-            local cc, hh, rr = flCorpo()
-            if not rr then break end
-            pcall(function()
-                rr.AssemblyLinearVelocity = vel
-                rr.AssemblyAngularVelocity = gir
-            end)
-            task.wait()
-        end
+    local ang = 0
+    local t0 = tick()
+    local conn
+    conn = RunService.Heartbeat:Connect(Safe(function(dt)
+        if tick() - t0 >= FLN.tempo then return end
+        local cc, hh, rr = flCorpo()
+        if not rr then return end
+        ang = ang + dt * giro
+        local sobe = math.min((tick() - t0) / 0.18, 1) * subida
+        -- posicao fixa no lugar + giro no eixo Y: ele nao avanca, so roda
+        rr.CFrame = CFrame.new(base.X, baseY + sobe, base.Z) * CFrame.Angles(0, ang, 0)
+        rr.AssemblyLinearVelocity = Vector3.zero
+        rr.AssemblyAngularVelocity = Vector3.new(0, giro, 0)
+    end, "fling giro"))
+
+    task.delay(FLN.tempo, function()
+        pcall(function() conn:Disconnect() end)
         flPara()
+        Toast("arremessado: " .. (alvo and alvo.Name or "alvo"), true)
     end)
 end
 
