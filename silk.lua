@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.6 · fix25  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix26  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.6 · fix25", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix26", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.6 · fix25"
+SILK_VER = "v2.6 · fix26"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -6840,7 +6840,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE25"
+local BUILD = "BE26"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8124,7 +8124,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.6 · fix25  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix26  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -11491,7 +11491,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.6 fix25", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix26", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11747,7 +11747,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.6 fix25 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix26 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11931,7 +11931,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.6 · fix25", 48)
+Note("SILK CORE v2.6 · fix26", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -12712,6 +12712,11 @@ SP.packsComunidade = SP.packsComunidade or {
     { nome = "creepy puppet", bundle = 219400179430613, idle = 111666756320618, walk = 112257478917132, run = 75408005321882, jump = 84855297944640, climb = 72359738717746, fall = 107442925613386, swimidle = 117001179257918, swim = 117001179257918 },
     { nome = "flying bird wings", bundle = 30793322550438, idle = 123907806042465, walk = 90712205599553, run = 107808419398049, jump = 109272815583305, climb = 86567323089978, fall = 102046420683754, swimidle = 105848026058327, swim = 105848026058327 },
     { nome = "Michael Jackson", bundle = 75302788622640, idle = 81395753063043, walk = 86838831120745, run = 125128518297904, jump = 131050916669810, climb = 121292387936273, fall = 107019637494876, swimidle = 139237948605067, swim = 139237948605067 },
+    { nome = "Yippe!", bundle = 2391157395507, idle = 126543638956675, walk = 88688334181064, run = 128494229601011, jump = 73033178452643, climb = 100741297304543, fall = 80176955689432, swimidle = 115686727315236, swim = 115686727315236 },
+    { nome = "Floating Aura", bundle = 77338000782732, idle = 77508418361086, walk = 71169977946229, run = 97417069168118, jump = 100074744468537, climb = 88717930985048, fall = 70685790898331, swimidle = 120575014050992, swim = 120575014050992 },
+    { nome = "Cute Dog Walk", bundle = 106306787645034, idle = 120907471634146, walk = 77964781270950, run = 113903331266842, jump = 128727117958358, climb = 102971018731719, fall = 89704233386179, swimidle = 91081832242740, swim = 91081832242740 },
+    { nome = "R6 Gear Hold (corpo R6)", bundle = 202894308479265, idle = 103766334307435, walk = 122068681350601, run = 101475660523078, jump = 90924872939548, climb = 103902117192422, fall = 126408720389134, swimidle = 103415879046292, swim = 103415879046292 },
+    { nome = "R6 Animation (corpo R6)", bundle = 63244228017921, idle = 107510976901968, walk = 81418689285592, run = 136312347048580, jump = 78528539300829, climb = 92902598283305, fall = 75362328318455, swimidle = 74692454929935, swim = 74692454929935 },
 }
 
 -- Pacotes que a CONTA ja tem: lista os bundles do usuario no catalogo publico
