@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.6 · fix18  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix19  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.6 · fix18", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix19", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.6 · fix18"
+SILK_VER = "v2.6 · fix19"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -6840,7 +6840,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE18"
+local BUILD = "BE19"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8124,7 +8124,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.6 · fix18  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix19  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -11491,7 +11491,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.6 fix18", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix19", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11747,7 +11747,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.6 fix18 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix19 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11931,7 +11931,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.6 · fix18", 48)
+Note("SILK CORE v2.6 · fix19", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -12768,7 +12768,7 @@ function SP.Controlador(char, hum, animator, mapa)
             t = false
             if mapa[est] then
                 local a = Instance.new("Animation")
-                a.AnimationId = mapa[est]
+                a.AnimationId = SP.AssetUrl(mapa[est])
                 local ok, tr = pcall(function() return animator:LoadAnimation(a) end)
                 if ok and tr then
                     pcall(function() tr.Priority = Enum.AnimationPriority.Action end)
@@ -12984,6 +12984,15 @@ function SP.DescricaoOriginal(hum)
     SP.L("descricao original de volta")
 end
 
+-- Forma do id: a unica animacao que TOCA nesse executor aparece como
+-- http://www.roblox.com/asset/?id=N (Length 10.00, pos andando, peso 1). Na forma
+-- rbxassetid:// nada carrega. Entao o pack entra na forma antiga.
+function SP.AssetUrl(asset)
+    local n = tonumber(tostring(asset or ""):match("(%d+)"))
+    if not n then return tostring(asset or "") end
+    return "http://www.roblox.com/asset/?id=" .. tostring(n)
+end
+
 -- Caminho 2: edita o Animate DO JOGO no lugar e manda ele rodar de novo. Clonar e
 -- destruir o original era o que deixava o boneco duro — clone de LocalScript nao
 -- executa. Aqui nada e destruido: no pior caso os ids voltam.
@@ -12997,15 +13006,12 @@ function SP.MudaAnimate(char, mapa)
             local ok, antigo = pcall(function() return obj.AnimationId end)
             if ok then
                 salvo[#salvo + 1] = { obj = obj, id = antigo }
-                if pcall(function() obj.AnimationId = asset end) then n = n + 1 end
+                if pcall(function() obj.AnimationId = SP.AssetUrl(asset) end) then n = n + 1 end
             end
         end
     end
-    if n > 0 then
-        pcall(function() an.Disabled = true end)
-        task.wait(0.2)
-        pcall(function() an.Disabled = false end)
-    end
+    -- Nada de Disabled: desabilitar o Animate do jogo parava a animacao e deixava
+    -- o personagem reto. Ele pega os ids novos na proxima troca de estado.
     return salvo, n
 end
 
@@ -13020,15 +13026,14 @@ function SP.VoltaAnimate(salvo)
     local char = LocalPlayer.Character
     local an = char and char:FindFirstChild("Animate")
     if an then
-        pcall(function() an.Disabled = true end)
-        task.wait(0.2)
-        pcall(function() an.Disabled = false end)
+        SP.L("Animate de volta ao comando do jogo (sem desabilitar)")
     end
     SP.L("ids do Animate devolvidos: " .. n)
 end
 
--- Aplica SP.cur. Cada caminho so fica se der sinal de vida; se nenhum der, o
--- personagem volta INTEIRO — nunca mais fica duro.
+-- Aplica SP.cur. Cada caminho so fica se der sinal de vida (pos andando ou peso
+-- acima de zero); se nenhum der, o personagem volta INTEIRO. Nada e desabilitado e
+-- nada e destruido, entao nao existe mais risco de ficar reto.
 function SP.NoChar(char, avisar)
     local cur = SP.cur
     if not cur then return false end
@@ -13056,50 +13061,54 @@ function SP.NoChar(char, avisar)
     local nome = tostring(cur.nome or "?")
 
     task.spawn(function()
-        local function vivo(tentativas)
-            for _ = 1, tentativas do
-                task.wait(0.25)
-                if SP.cur ~= eu or not char.Parent then return false end
-                if SP.Viva(animator, ids) then return true end
+        local okR, errR = pcall(function()
+            local function vivo(tentativas)
+                for _ = 1, tentativas do
+                    task.wait(0.25)
+                    if SP.cur ~= eu or not char.Parent then return false end
+                    if SP.Viva(animator, ids) then return true end
+                end
+                return false
             end
-            return false
-        end
-        local function deu(caminho)
-            SP.L("pack tocando por " .. caminho .. ": " .. nome)
-            if avisar then Toast("pack aplicado: " .. nome .. rig, true) end
-        end
+            local function deu(caminho)
+                SP.L("pack tocando por " .. caminho .. ": " .. nome)
+                if avisar then Toast("pack aplicado: " .. nome .. rig, true) end
+            end
 
-        -- 1) descricao do humanoid
-        if SP.PorDescricao(hum, mapa) then
-            if vivo(10) then deu("descricao do humanoid") return end
-            SP.L("descricao aceita mas nada ficou vivo — voltando a original")
-            SP.DescricaoOriginal(hum)
-        end
-        if SP.cur ~= eu or not char.Parent then return end
+            -- 1) descricao do humanoid (nao encosta no Animate: risco zero)
+            local descOk = false
+            pcall(function() descOk = SP.PorDescricao(hum, mapa) end)
+            if descOk then
+                if vivo(8) then deu("descricao do humanoid") return end
+                SP.L("descricao aceita mas nada ficou vivo — voltando a original")
+                SP.DescricaoOriginal(hum)
+            end
+            if SP.cur ~= eu or not char.Parent then return end
 
-        -- 2) Animate do jogo no lugar
-        local salvo, n = SP.MudaAnimate(char, mapa)
-        SP.animSalvo = salvo
-        SP.L("Animate no lugar: ids trocados=" .. tostring(n))
-        if n > 0 then
-            if vivo(12) then deu("Animate do jogo") return end
-            SP.L("Animate trocado nao tocou — devolvendo os ids do jogo")
-            SP.VoltaAnimate(salvo)
+            -- 2) ids do pack no Animate do jogo (forma antiga do id) + 3) controlador
+            --    proprio junto: o Animate so pega os ids novos na troca de estado,
+            --    o controlador da o efeito na hora.
+            local salvo, n = SP.MudaAnimate(char, mapa)
+            SP.animSalvo = salvo
+            SP.L("Animate no lugar: ids trocados=" .. tostring(n))
+            SP.Controlador(char, hum, animator, mapa)
+            if vivo(20) then deu("Animate/controlador") return end
+
+            -- nada deu sinal de vida: desfaz tudo, personagem intacto
+            SP.gen = SP.gen + 1
+            if n > 0 then SP.VoltaAnimate(salvo) end
             SP.animSalvo = nil
+            SP.Snap(animator, "sem confirmacao")
+            SP.L("nenhum caminho tocou esse pack — personagem intacto")
+            if SP.cur == eu then SP.cur = nil end
+            if avisar then SP.Copia("esse pack nao toca nesse jogo — personagem intacto") end
+        end)
+        if not okR then
+            SP.L("erro no apply: " .. tostring(errR))
+            if SP.animSalvo then SP.VoltaAnimate(SP.animSalvo) SP.animSalvo = nil end
+            if SP.cur == eu then SP.cur = nil end
+            if avisar then SP.Copia("erro no apply: " .. tostring(errR)) end
         end
-        if SP.cur ~= eu or not char.Parent then return end
-
-        -- 3) controlador proprio
-        SP.Controlador(char, hum, animator, mapa)
-        if vivo(12) then
-            SP.L("controlador proprio tocando o pack")
-            if avisar then Toast("pack aplicado (controlador próprio): " .. nome .. rig, true) end
-            return
-        end
-        SP.Snap(animator, "sem confirmacao")
-        SP.L("nenhum caminho tocou esse pack — personagem intacto")
-        if SP.cur == eu then SP.cur = nil end
-        if avisar then SP.Copia("esse pack nao toca nesse jogo — personagem intacto") end
     end)
     return true
 end
@@ -13168,27 +13177,45 @@ function SP.Diag()
             end
             local clip = mapa and (mapa.idle or mapa.walk)
             if clip and animator then
-                SP.L("TESTE VISÍVEL: tocando " .. tostring(clip) .. " por ~3s com prioridade alta — olha se o boneco muda")
-                local a = Instance.new("Animation")
-                a.AnimationId = clip
-                local okT, t = pcall(function() return animator:LoadAnimation(a) end)
-                if okT and t then
+                -- discriminante: um id que JA esta tocando, carregado pelo mesmo
+                -- caminho (Instance.new + LoadAnimation). Se esse nao viver, o
+                -- problema e nosso; se viver, o problema e o asset do pack.
+                local controle = nil
+                pcall(function()
+                    for _, t in ipairs(animator:GetPlayingAnimationTracks()) do
+                        local a = t.Animation
+                        if a and a.AnimationId ~= "" and (t.WeightCurrent or 0) > 0 then
+                            controle = a.AnimationId
+                            break
+                        end
+                    end
+                end)
+                SP.L("controle (animacao viva do jogo): " .. tostring(controle))
+                local function testa(rotulo, idStr)
+                    local a = Instance.new("Animation")
+                    a.AnimationId = idStr
+                    local okT, t = pcall(function() return animator:LoadAnimation(a) end)
+                    if not (okT and t) then
+                        SP.L("  " .. rotulo .. " -> LoadAnimation falhou: " .. tostring(t))
+                        return
+                    end
                     pcall(function() t.Priority = Enum.AnimationPriority.Action4 end)
                     pcall(function() t.Looped = true end)
                     pcall(function() t:Play(0.1, 1, 1) end)
-                    for i = 1, 6 do
-                        task.wait(0.5)
-                        local okR2, txt = pcall(function()
-                            return string.format("t=%.1fs play=%s len=%.2f pos=%.2f peso=%.2f", i * 0.5,
-                                tostring(t.IsPlaying), t.Length, t.TimePosition, t.WeightCurrent)
-                        end)
-                        SP.L("  teste: " .. (okR2 and txt or ("erro lendo faixa: " .. tostring(txt))))
-                    end
-                    SP.Snap(animator, "teste visivel")
+                    task.wait(1.6)
+                    local okR2, txt = pcall(function()
+                        return string.format("len=%.2f pos=%.2f peso=%.2f play=%s",
+                            t.Length, t.TimePosition, t.WeightCurrent, tostring(t.IsPlaying))
+                    end)
+                    SP.L("  " .. rotulo .. " -> " .. (okR2 and txt or ("erro: " .. tostring(txt))))
                     pcall(function() t:Stop(0.2) end)
-                else
-                    SP.L("  teste: LoadAnimation falhou: " .. tostring(t))
+                    pcall(function() t:Destroy() end)
                 end
+                local num = tostring(clip):match("(%d+)")
+                if controle then testa("CONTROLE id que ja toca", controle) end
+                testa("PACK forma rbxassetid", "rbxassetid://" .. tostring(num))
+                testa("PACK forma http", "http://www.roblox.com/asset/?id=" .. tostring(num))
+                SP.Snap(animator, "teste de forma")
             end
         end
         local okR, res = pcall(function()
