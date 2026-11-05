@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.6 · fix17  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix18  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.6 · fix17", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix18", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.6 · fix17"
+SILK_VER = "v2.6 · fix18"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -6840,7 +6840,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE17"
+local BUILD = "BE18"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8124,7 +8124,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.6 · fix17  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix18  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -11491,7 +11491,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.6 fix17", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix18", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11747,7 +11747,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.6 fix17 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix18 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11931,7 +11931,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.6 · fix17", 48)
+Note("SILK CORE v2.6 · fix18", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -12923,40 +12923,112 @@ function SP.TocaNovo(animator, antes, ids)
     return ok and r
 end
 
--- Se o Animate novo nao assumiu, liga o controlador proprio. NAO restaura: o
--- Animate trocado e o do proprio jogo, entao o pior caso e ficar como estava —
--- restaurar so tirava o pack de quem pediu por ele.
-function SP.Vigia(char, hum, animator, antes, cur, mapa, ids)
-    task.spawn(function()
-        for i = 1, 8 do
-            task.wait(0.4)
-            if SP.cur ~= cur or not char.Parent then return end
-            if i == 1 or i == 8 then SP.Snap(animator, "vigia " .. i) end
-            if SP.TocaNovo(animator, antes, ids) then
-                SP.L("Vigia: clipe do pack tocando — ok")
-                return
+-- ── confirmacao e aplicacao ──────────────────────────────────────────────────
+-- Faixa VIVA = o clipe esta com peso no osso ou o tempo andando. O log mostrou a
+-- animacao do proprio jogo com pos=6.38/peso=1.00 e as faixas do pack com
+-- pos=0.00/peso=0.00 — essas eram mortas, mesmo com IsPlaying=true. Length nao
+-- mede nada aqui, entao nao entra na conta.
+function SP.Viva(animator, ids)
+    local ok, r = pcall(function()
+        for _, t in ipairs(animator:GetPlayingAnimationTracks()) do
+            if t.IsPlaying then
+                local a = t.Animation
+                local aid = a and tonumber(tostring(a.AnimationId):match("(%d+)"))
+                if aid and ids[aid] and (t.TimePosition > 0.05 or t.WeightCurrent > 0.01) then
+                    return true
+                end
             end
         end
-        SP.L("Vigia: nada do pack em 2s com o Animate trocado — ligando o controlador proprio")
-        SP.Controlador(char, hum, animator, mapa)
-        for _ = 1, 6 do
-            task.wait(0.4)
-            if SP.cur ~= cur or not char.Parent then return end
-            if SP.TocaNovo(animator, antes, ids) then
-                SP.L("controlador proprio tocando o pack")
-                Toast("o Animate do jogo nao assumiu — usei o controlador proprio", true)
-                return
-            end
-        end
-        SP.Snap(animator, "depois do controlador")
-        SP.L("Vigia: nao confirmei clipe tocando — pack MANTIDO (nada de restaurar)")
-        Toast("pack no personagem, mas nao confirmei o clipe tocando (veja o output)", false)
+        return false
     end)
+    return ok and r
 end
 
--- Aplica SP.cur no personagem. Troca os ids dentro de uma COPIA do Animate e
--- coloca no lugar do original; o Animate do jogo cuida de cada estado e o que o
--- pack nao tem fica como estava (nada de encher idle/walk/run com o mesmo clipe).
+-- Caminho 1: pack de avatar vai pela DESCRICAO do humanoid, que e como o proprio
+-- Roblox aplica pack comprado. Nao passa por LoadAnimation de animacao de
+-- terceiro, entao nao bate na regra de dono do lugar.
+SP.camposDesc = SP.camposDesc or {
+    idle = "IdleAnimation", walk = "WalkAnimation", run = "RunAnimation",
+    jump = "JumpAnimation", fall = "FallAnimation", climb = "ClimbAnimation",
+    swim = "SwimAnimation", swimidle = "SwimIdleAnimation",
+}
+
+function SP.PorDescricao(hum, mapa)
+    local ok, atual = pcall(function() return hum:GetAppliedDescription() end)
+    if not ok or not atual then
+        SP.L("GetAppliedDescription falhou: " .. tostring(atual))
+        return false
+    end
+    if not SP.descOrig then SP.descOrig = atual:Clone() end
+    local d = atual:Clone()
+    local n = 0
+    for est, campo in pairs(SP.camposDesc) do
+        local asset = mapa[est]
+        if not asset and est == "swimidle" then asset = mapa.swim end
+        if not asset and est == "swim" then asset = mapa.swimidle end
+        if asset then
+            local num = tonumber(tostring(asset):match("(%d+)"))
+            if num and pcall(function() d[campo] = num end) then n = n + 1 end
+        end
+    end
+    if n == 0 then return false end
+    local okA, err = pcall(function() hum:ApplyDescription(d) end)
+    SP.L("ApplyDescription com " .. n .. " animacoes ok=" .. tostring(okA)
+        .. (okA and "" or (" (" .. tostring(err) .. ")")))
+    return okA
+end
+
+function SP.DescricaoOriginal(hum)
+    if not (hum and SP.descOrig) then return end
+    pcall(function() hum:ApplyDescription(SP.descOrig) end)
+    SP.L("descricao original de volta")
+end
+
+-- Caminho 2: edita o Animate DO JOGO no lugar e manda ele rodar de novo. Clonar e
+-- destruir o original era o que deixava o boneco duro — clone de LocalScript nao
+-- executa. Aqui nada e destruido: no pior caso os ids voltam.
+function SP.MudaAnimate(char, mapa)
+    local an = char:FindFirstChild("Animate") or char:WaitForChild("Animate", 3)
+    if not an then return nil, 0 end
+    local estados = SP.Mapa(an)
+    local salvo, n = {}, 0
+    for est, asset in pairs(mapa) do
+        for _, obj in ipairs(estados[est] or {}) do
+            local ok, antigo = pcall(function() return obj.AnimationId end)
+            if ok then
+                salvo[#salvo + 1] = { obj = obj, id = antigo }
+                if pcall(function() obj.AnimationId = asset end) then n = n + 1 end
+            end
+        end
+    end
+    if n > 0 then
+        pcall(function() an.Disabled = true end)
+        task.wait(0.2)
+        pcall(function() an.Disabled = false end)
+    end
+    return salvo, n
+end
+
+function SP.VoltaAnimate(salvo)
+    if not salvo then return end
+    local n = 0
+    for _, par in ipairs(salvo) do
+        if par.obj and par.obj.Parent then
+            if pcall(function() par.obj.AnimationId = par.id end) then n = n + 1 end
+        end
+    end
+    local char = LocalPlayer.Character
+    local an = char and char:FindFirstChild("Animate")
+    if an then
+        pcall(function() an.Disabled = true end)
+        task.wait(0.2)
+        pcall(function() an.Disabled = false end)
+    end
+    SP.L("ids do Animate devolvidos: " .. n)
+end
+
+-- Aplica SP.cur. Cada caminho so fica se der sinal de vida; se nenhum der, o
+-- personagem volta INTEIRO — nunca mais fica duro.
 function SP.NoChar(char, avisar)
     local cur = SP.cur
     if not cur then return false end
@@ -12968,96 +13040,66 @@ function SP.NoChar(char, avisar)
         return false
     end
 
-    SP.L("NoChar: rig=" .. hum.RigType.Name .. " Animate=" .. tostring(char:FindFirstChild("Animate") ~= nil) .. " pack=" .. tostring(cur.nome))
-    -- 1) so entra o que carrega de verdade
-    local mapa, ruins = SP.Verifica(animator, cur.mapa)
-    if next(mapa) == nil then
-        SP.L("nenhum clipe do pack '" .. tostring(cur.nome) .. "' carregou: " .. table.concat(ruins, ", "))
-        SP.cur = nil
-        if avisar then SP.Copia("nenhum clipe do pack carregou (personagem intacto)") end
-        return false
-    end
-    if #ruins > 0 then
-        print("[silk] clipes que NAO carregaram em '" .. tostring(cur.nome) .. "': " .. table.concat(ruins, ", "))
-    end
-
-    SP.gen = SP.gen + 1
-    -- ids do pack: e por eles que a Vigia sabe se o clipe do pack entrou mesmo
+    local mapa = cur.mapa
     local ids = {}
     for _, asset in pairs(mapa) do
         local n = tonumber(tostring(asset):match("(%d+)"))
         if n then ids[n] = true end
     end
-    local velho = char:FindFirstChild("Animate") or char:WaitForChild("Animate", 3)
-
-    local nomes = {}
-    for est in pairs(mapa) do nomes[#nomes + 1] = est end
-    table.sort(nomes)
     local rig = (hum.RigType == Enum.HumanoidRigType.R6) and " (corpo R6: pack R15 fica deformado)" or ""
-    local extra = (#ruins > 0) and (" — sem carregar: " .. #ruins) or ""
+    SP.L("NoChar: rig=" .. tostring(hum.RigType and hum.RigType.Name or "?")
+        .. " Animate=" .. tostring(char:FindFirstChild("Animate") ~= nil)
+        .. " pack=" .. tostring(cur.nome))
 
-    SP.Snap(animator, "antes da troca")
-    -- faixas que estao tocando agora: param DEPOIS que a nova assume (sem frame reto)
-    local antes = {}
-    pcall(function()
-        for _, t in ipairs(animator:GetPlayingAnimationTracks()) do antes[t] = true end
-    end)
+    SP.gen = SP.gen + 1
+    local eu = cur
+    local nome = tostring(cur.nome or "?")
 
-    if velho then
-        if SP.origChar ~= char then
-            local okC, copia = pcall(function() return velho:Clone() end)
-            if okC and copia then SP.orig, SP.origChar = copia, char end
-        end
-        local novo = velho:Clone()
-        local estados = SP.Mapa(novo)
-        local aplicados = 0
-        for est, asset in pairs(mapa) do
-            local lista = estados[est]
-            if lista then
-                for _, obj in ipairs(lista) do
-                    if pcall(function() obj.AnimationId = asset end) then aplicados = aplicados + 1 end
-                end
-            end
-        end
-        local chaves = {}
-        for k in pairs(estados) do chaves[#chaves + 1] = k end
-        table.sort(chaves)
-        SP.L("Animate do jogo tem os estados: " .. table.concat(chaves, ",") .. " | ids trocados: " .. aplicados)
-        if aplicados > 0 then
-            pcall(function() velho.Disabled = true end)
-            pcall(function() velho:Destroy() end)
-            pcall(function() novo.Disabled = false end)
-            novo.Parent = char
-            task.delay(0.35, function()
-                for t in pairs(antes) do pcall(function() t:Stop(0.2) end) end
-            end)
-            SP.Vigia(char, hum, animator, antes, cur, mapa, ids)
-            if avisar then
-                Toast("pack aplicado: " .. tostring(cur.nome or "?") .. " [" .. table.concat(nomes, " + ") .. "]" .. extra .. rig, true)
-            end
-            return true
-        end
-    end
-
-    SP.Controlador(char, hum, animator, mapa)
-    local meu = cur
     task.spawn(function()
-        for _ = 1, 6 do
-            task.wait(0.4)
-            if SP.cur ~= meu or not char.Parent then return end
-            if SP.TocaNovo(animator, {}, ids) then
-                SP.L("controlador proprio tocando o pack")
-                if avisar then
-                    Toast("pack aplicado (controlador próprio, esse jogo não usa o Animate padrão): " .. tostring(meu.nome or "?") .. rig, true)
-                end
-                return
+        local function vivo(tentativas)
+            for _ = 1, tentativas do
+                task.wait(0.25)
+                if SP.cur ~= eu or not char.Parent then return false end
+                if SP.Viva(animator, ids) then return true end
             end
+            return false
         end
-        SP.Snap(animator, "controlador sem confirmacao")
-        SP.L("controlador proprio: nao confirmei clipe tocando — pack MANTIDO")
-        if avisar then
-            Toast("pack no personagem, mas nao confirmei o clipe tocando (veja o output)", false)
+        local function deu(caminho)
+            SP.L("pack tocando por " .. caminho .. ": " .. nome)
+            if avisar then Toast("pack aplicado: " .. nome .. rig, true) end
         end
+
+        -- 1) descricao do humanoid
+        if SP.PorDescricao(hum, mapa) then
+            if vivo(10) then deu("descricao do humanoid") return end
+            SP.L("descricao aceita mas nada ficou vivo — voltando a original")
+            SP.DescricaoOriginal(hum)
+        end
+        if SP.cur ~= eu or not char.Parent then return end
+
+        -- 2) Animate do jogo no lugar
+        local salvo, n = SP.MudaAnimate(char, mapa)
+        SP.animSalvo = salvo
+        SP.L("Animate no lugar: ids trocados=" .. tostring(n))
+        if n > 0 then
+            if vivo(12) then deu("Animate do jogo") return end
+            SP.L("Animate trocado nao tocou — devolvendo os ids do jogo")
+            SP.VoltaAnimate(salvo)
+            SP.animSalvo = nil
+        end
+        if SP.cur ~= eu or not char.Parent then return end
+
+        -- 3) controlador proprio
+        SP.Controlador(char, hum, animator, mapa)
+        if vivo(12) then
+            SP.L("controlador proprio tocando o pack")
+            if avisar then Toast("pack aplicado (controlador próprio): " .. nome .. rig, true) end
+            return
+        end
+        SP.Snap(animator, "sem confirmacao")
+        SP.L("nenhum caminho tocou esse pack — personagem intacto")
+        if SP.cur == eu then SP.cur = nil end
+        if avisar then SP.Copia("esse pack nao toca nesse jogo — personagem intacto") end
     end)
     return true
 end
@@ -13068,23 +13110,13 @@ function SP.Restaurar(silencioso)
     local char = LocalPlayer.Character
     if not char then return end
     local hum = char:FindFirstChildOfClass("Humanoid")
-    local animator = hum and hum:FindFirstChildOfClass("Animator")
-    if SP.orig and SP.origChar == char then
-        local ok, copia = pcall(function() return SP.orig:Clone() end)
-        if ok and copia then
-            local atual = char:FindFirstChild("Animate")
-            if atual then
-                pcall(function() atual.Disabled = true end)
-                pcall(function() atual:Destroy() end)
-            end
-            SP.PararTudo(animator)
-            copia.Parent = char
-            if not silencioso then Toast("animações originais de volta", true) end
-            return
-        end
+    if hum then SP.DescricaoOriginal(hum) end
+    if SP.animSalvo then
+        SP.VoltaAnimate(SP.animSalvo)
+        SP.animSalvo = nil
     end
-    SP.PararTudo(animator)
-    if not silencioso then Toast("animações originais (nenhum pack tinha trocado o Animate)", true) end
+    SP.descOrig = nil
+    if not silencioso then Toast("animações originais de volta", true) end
 end
 
 -- Persistencia: personagem novo (morreu / resetou) = pack aplicado de novo.
