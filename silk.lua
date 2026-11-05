@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.6 · fix26  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix27  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.6 · fix26", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix27", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.6 · fix26"
+SILK_VER = "v2.6 · fix27"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -6840,7 +6840,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE26"
+local BUILD = "BE27"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8124,7 +8124,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.6 · fix26  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix27  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -11491,7 +11491,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.6 fix26", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix27", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11747,7 +11747,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.6 fix26 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix27 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11931,7 +11931,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.6 · fix26", 48)
+Note("SILK CORE v2.6 · fix27", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -13394,6 +13394,59 @@ function SP.Hook()
     end)
 end
 
+-- Prova de verdade, estado por estado: carrega o clipe do pack aplicado, toca por
+-- 1,2s e mede pos/peso. Foi assim que o diagnostico separou faixa viva de faixa
+-- morta (IsPlaying sozinho mente neste executor). O log inteiro vai pro clipboard.
+function SP.Provar()
+    local char = LocalPlayer.Character
+    if not char then Toast("sem personagem", false) return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local animator = hum and hum:FindFirstChildOfClass("Animator")
+    if not animator then Toast("sem Animator no personagem", false) return end
+    if not (SP.cur and SP.cur.mapa) then Toast("aplica um pack antes de provar", false) return end
+    local mapa, nome = SP.cur.mapa, tostring(SP.cur.nome or "?")
+    task.spawn(function()
+        SP.L("prova do pack " .. nome .. " (personagem vivo, um estado por vez)")
+        local ordem = { "idle", "walk", "run", "jump", "climb", "fall", "swim", "swimidle" }
+        local bons, tentados = 0, 0
+        for _, est in ipairs(ordem) do
+            local asset = mapa[est]
+            if asset then
+                tentados = tentados + 1
+                local a = Instance.new("Animation")
+                a.AnimationId = SP.AssetUrl(asset)
+                local ok, tr = pcall(function() return animator:LoadAnimation(a) end)
+                if ok and tr then
+                    pcall(function() tr.Priority = Enum.AnimationPriority.Action end)
+                    pcall(function() tr.Looped = true end)
+                    pcall(function() tr:Play(0.1) end)
+                    task.wait(1.2)
+                    local pos, peso, play, comp = 0, 0, false, 0
+                    pcall(function()
+                        pos = tr.TimePosition
+                        peso = tr.WeightCurrent
+                        play = tr.IsPlaying
+                        comp = tr.Length
+                    end)
+                    local vivo = (pos > 0.05 or peso > 0.01)
+                    if vivo then bons = bons + 1 end
+                    SP.L(string.format("  prova %-8s id=%s len=%.2f pos=%.2f peso=%.2f play=%s %s",
+                        est, tostring(asset), comp, pos, peso, tostring(play),
+                        vivo and "VIVA" or "morta"))
+                    pcall(function() tr:Stop(0) end)
+                    pcall(function() tr:Destroy() end)
+                else
+                    SP.L("  prova " .. est .. " id=" .. tostring(asset) .. ": nao carregou a faixa")
+                end
+                task.wait(0.15)
+            end
+        end
+        SP.L("prova: " .. bons .. " de " .. tentados .. " estados tocaram")
+        SP.Copia("prova do pack " .. nome .. ": " .. bons .. " de " .. tentados
+            .. " estados tocaram", bons > 0)
+    end)
+end
+
 function SP.Diag()
     task.spawn(function()
         SP.logs = {}
@@ -13782,6 +13835,20 @@ end
     end)
     Button(row, "DIAGNÓSTICO", UDim2.fromOffset(332, 3), UDim2.fromOffset(110, 30), T.Card, function()
         SP.Diag()
+    end)
+end)()
+
+;(function()
+    local row = Row(36)
+    Button(row, "PROVAR ANIMACOES", UDim2.fromOffset(8, 3), UDim2.fromOffset(180, 30), T.Card, function()
+        SP.Provar()
+    end)
+    Button(row, "REAPLICAR", UDim2.fromOffset(196, 3), UDim2.fromOffset(100, 30), T.Card, function()
+        if not (SP.cur and SP.cur.mapa) then Toast("nenhum pack aplicado", false) return end
+        if SP.aplicando then Toast("espera o anterior terminar", false) return end
+        SP.aplicando = true
+        pcall(SP.Aplicar, SP.cur.mapa, SP.cur.nome)
+        SP.aplicando = false
     end)
 end)()
 
