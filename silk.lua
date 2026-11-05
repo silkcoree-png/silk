@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.6 · fix23  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix24  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.6 · fix23", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix24", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.6 · fix23"
+SILK_VER = "v2.6 · fix24"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -6840,7 +6840,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE23"
+local BUILD = "BE24"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8124,7 +8124,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.6 · fix23  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix24  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -11491,7 +11491,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.6 fix23", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix24", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11747,7 +11747,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.6 fix23 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix24 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11931,7 +11931,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.6 · fix23", 48)
+Note("SILK CORE v2.6 · fix24", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -12714,6 +12714,52 @@ SP.packsComunidade = SP.packsComunidade or {
     { nome = "Michael Jackson", bundle = 75302788622640, idle = 81395753063043, walk = 86838831120745, run = 125128518297904, jump = 131050916669810, climb = 121292387936273, fall = 107019637494876, swimidle = 139237948605067, swim = 139237948605067 },
 }
 
+-- Pacotes que a CONTA ja tem: lista os bundles do usuario no catalogo publico
+-- (catalog/users/<id>/bundles), pagina por pagina, e guarda so os de animacao.
+-- Nao pede permissao de inventario e esses pacotes sempre carregam.
+function SP.BuscaMeus()
+    if SP.meus then return SP.meus end
+    SP.meus = {}
+    local uid = LocalPlayer and LocalPlayer.UserId
+    if not uid then return SP.meus end
+    local vistos = 0
+    local url = "https://catalog.roblox.com/v1/users/" .. tostring(uid) .. "/bundles?limit=100"
+    for pagina = 1, 8 do
+        local body = SilkHttpGet(url)
+        if not body then break end
+        local okJ, j = pcall(function() return game:GetService("HttpService"):JSONDecode(body) end)
+        if not okJ or type(j) ~= "table" or type(j.data) ~= "table" then break end
+        for _, b in ipairs(j.data) do
+            vistos = vistos + 1
+            if tostring(b.bundleType) == "AvatarAnimations" and tonumber(b.id) then
+                SP.meus[#SP.meus + 1] = { id = tonumber(b.id), name = tostring(b.name or "?") }
+            end
+        end
+        local prox = j.nextPageCursor
+        if not prox or prox == "" then break end
+        url = "https://catalog.roblox.com/v1/users/" .. tostring(uid) .. "/bundles?limit=100&cursor=" .. tostring(prox)
+        task.wait(0.15)
+    end
+    SP.L("meus pacotes: " .. #SP.meus .. " de animacao em " .. vistos .. " bundles da conta")
+    return SP.meus
+end
+
+-- Pinta o botao do card: APLICADO / BLOQUEADO. O card nao e reconstruido, so o
+-- texto e a cor do botao mudam.
+function SP.Marcar(card, txt, cor)
+    if not card or not card.Parent then return end
+    for _, ch in ipairs(card:GetChildren()) do
+        if ch:IsA("TextButton") then
+            pcall(function()
+                ch.Text = txt
+                ch.BackgroundColor3 = cor or T.Bad
+                ch.TextColor3 = textOn(cor or T.Bad)
+            end)
+            return
+        end
+    end
+end
+
 function SP.MapaOficial(p)
     local mapa = {}
     for est in pairs(SP.camposDesc) do
@@ -13258,6 +13304,20 @@ function SP.NoChar(char, avisar)
                 SP.L("sonda reprovou: " .. tostring(motivo) .. " — nada foi tocado")
                 SP.Snap(animator, "depois da sonda")
                 if SP.cur == eu then SP.cur = nil end
+                if SP.cardAtual and SP.cardAtual.Parent then
+                    pcall(SP.Marcar, SP.cardAtual, "BLOQUEADO", T.Bad)
+                end
+                do
+                    local alvo = mapa.idle or mapa.walk or mapa.run
+                    local num = alvo and tonumber(tostring(alvo):match("(%d+)"))
+                    if num then
+                        local corpo = SilkHttpGet("https://assetdelivery.roblox.com/v1/assetId/" .. tostring(num))
+                        local pub = corpo and corpo:find('"location"', 1, true) ~= nil
+                        SP.L("entrega do asset " .. tostring(num) .. ": "
+                            .. (pub and "o cliente consegue baixar (o problema e outro)"
+                                or ("negada " .. tostring(corpo and corpo:sub(1, 80) or "sem resposta"))))
+                    end
+                end
                 if avisar then
                     SP.Copia("esse pack nao toca nesse jogo: " .. tostring(motivo)
                         .. " — personagem intacto, nada foi tocado")
@@ -13566,6 +13626,7 @@ function SP.Card(item)
         BackgroundTransparency = 1, Position = UDim2.fromOffset(11, 109), Size = UDim2.fromOffset(126, 34),
     }, card)
     Button(card, "APLICAR", UDim2.fromOffset(11, 148), UDim2.fromOffset(126, 30), T.Accent, function()
+        SP.cardAtual = card
         if SP.aplicando then
             Toast("espera o pack anterior terminar de carregar", false)
             return
@@ -13633,6 +13694,15 @@ function SP.Carregar(avancar)
         SP.carregando = false
         if st.Parent then st:Destroy() end
         -- Oficiais primeiro: sempre na grade, mesmo sem catalogo carregado.
+        local nMeu = 0
+        for i, it in ipairs(SP.BuscaMeus()) do
+            if g ~= SP.g2 then return end
+            local okc, c = pcall(SP.Card, it)
+            if okc and c then
+                SP.cards[#SP.cards + 1] = c
+                nMeu = nMeu + 1
+            end
+        end
         local nOfic = 0
         for i, p in ipairs(SP.packsOficiais) do
             if g ~= SP.g2 then return end
@@ -13667,7 +13737,7 @@ function SP.Carregar(avancar)
                 if i % 6 == 0 then task.wait() end
             end
         end
-        if SP.info then SP.info.Text = #SP.cards .. " packs (" .. nOfic .. " oficiais + " .. nCom .. " de criador)" end
+        if SP.info then SP.info.Text = #SP.cards .. " packs (" .. nMeu .. " seus + " .. nOfic .. " oficiais + " .. nCom .. " de criador)" end
         if SP.prox then SP.prox.Visible = (mais and lista and #lista > 0) and true or false end
     end)
 end
