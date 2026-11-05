@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.6 · fix21  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix22  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.6 · fix21", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix22", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.6 · fix21"
+SILK_VER = "v2.6 · fix22"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -6840,7 +6840,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE21"
+local BUILD = "BE22"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8124,7 +8124,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.6 · fix21  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix22  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -11491,7 +11491,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.6 fix21", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix22", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11747,7 +11747,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.6 fix21 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix22 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11931,7 +11931,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.6 · fix21", 48)
+Note("SILK CORE v2.6 · fix22", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -12675,6 +12675,73 @@ SP.packsFixos = SP.packsFixos or {
     [79] = { idle = 619542203, walk = 619544080, run = 619543231, jump = 619542888,
              fall = 619541867, climb = 619541458, swim = 619543721 },
 }
+
+-- Pacotes de animacao OFICIAIS do catalogo do Roblox (os classicos R15), com os
+-- clipes gravados no script. Ficam sempre na aba Animacoes: sem busca, sem
+-- bundle, sem HTTP. Sao os mesmos ids que o pacote oficial equipa.
+SP.packsOficiais = SP.packsOficiais or {
+    { nome = "Stylish", idle = 616136790, walk = 616146177, run = 616140816, jump = 616139451, climb = 616133594, fall = 616134815, swimidle = 616144772, swim = 616143378 },
+    { nome = "Zombie", idle = 616158929, walk = 616168032, run = 616163682, jump = 616161997, climb = 616156119, fall = 616157476, swimidle = 616166655, swim = 616165109 },
+    { nome = "Robot", idle = 616088211, walk = 616095330, run = 616091570, jump = 616090535, climb = 616086039, fall = 616087089, swimidle = 616094091, swim = 616092998 },
+    { nome = "Toy", idle = 782841498, walk = 782843345, run = 782842708, jump = 782847020, climb = 782843869, fall = 782846423, swimidle = 782845186, swim = 782844582 },
+    { nome = "Cartoony", idle = 742637544, walk = 742640026, run = 742638842, jump = 742637942, climb = 742636889, fall = 742637151, swimidle = 742639812, swim = 742639220 },
+    { nome = "Superhero", idle = 616111295, walk = 616122287, run = 616117076, jump = 616115533, climb = 616104706, fall = 616108001, swimidle = 616120861, swim = 616119360 },
+    { nome = "Ninja", idle = 656117400, walk = 656121766, run = 656118852, jump = 656117878, climb = 656114359, fall = 656115606, swimidle = 656121397, swim = 656119721 },
+    { nome = "Mage", idle = 707742142, walk = 707897309, run = 707861613, jump = 707853694, climb = 707826056, fall = 707829716, swimidle = 707894699, swim = 707876443 },
+    { nome = "Levitation", idle = 616006778, walk = 616013216, run = 616010382, jump = 616008936, climb = 616003713, fall = 616005863, swimidle = 616012453, swim = 616011509 },
+    { nome = "Vampire", idle = 1083445855, walk = 1083473930, run = 1083462077, jump = 1083455352, climb = 1083439238, fall = 1083443587, swimidle = 1083467779, swim = 1083464683 },
+    { nome = "Elder", idle = 845397899, walk = 845403856, run = 845386501, jump = 845398858, climb = 845392038, fall = 845396048, swimidle = 845403127, swim = 845401742 },
+    { nome = "Werewolf", idle = 1083195517, walk = 1083178339, run = 1083216690, jump = 1083218792, climb = 1083182000, fall = 1083189019, swimidle = 1083225406, swim = 1083222527 },
+    { nome = "Pirate", idle = 750781874, walk = 750785693, run = 750783738, jump = 750782230, climb = 750779899, fall = 750780242, swimidle = 750785176, swim = 750784579 },
+    { nome = "Knight", idle = 657595757, walk = 657552124, run = 657564596, jump = 658409194, climb = 658360781, fall = 657600338, swimidle = 657557095, swim = 657560551 },
+    { nome = "Astronaut", idle = 891621366, walk = 891667138, run = 891636393, jump = 891627522, climb = 891609353, fall = 891617961, swimidle = 891663592, swim = 891639666 },
+    { nome = "Bubbly", idle = 910004836, walk = 910034870, run = 910025107, jump = 910016857, climb = 909997997, fall = 910001910, swimidle = 910030921, swim = 910028158 },
+}
+
+function SP.MapaOficial(p)
+    local mapa = {}
+    for est in pairs(SP.camposDesc) do
+        local id = p[est]
+        if id then mapa[est] = "rbxassetid://" .. tostring(id) end
+    end
+    return mapa
+end
+
+-- Card dos pacotes oficiais: mesma celula da grade (148x186), nome, selo e
+-- APLICAR. O pack inteiro entra pelo mesmo motor do resto (sonda primeiro).
+function SP.CardOficial(p)
+    local card = New("Frame", {
+        Size = UDim2.fromOffset(148, 186), BackgroundColor3 = T.Card, BorderSizePixel = 0,
+    }, SP.grid)
+    Round(card, 8)
+    Stroke(card, T.Stroke, 1)
+    New("TextLabel", {
+        Text = p.nome, Font = F.Bold, TextSize = 14, TextColor3 = T.Text,
+        TextXAlignment = Enum.TextXAlignment.Center, TextWrapped = true,
+        BackgroundTransparency = 1, Position = UDim2.fromOffset(8, 14), Size = UDim2.fromOffset(132, 40),
+    }, card)
+    local selo = New("TextLabel", {
+        Text = "OFICIAL", Font = F.Mono, TextSize = 9, TextColor3 = textOn(T.Accent),
+        BackgroundColor3 = T.Accent, BorderSizePixel = 0,
+        TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.fromOffset(11, 58),
+        Size = UDim2.fromOffset(126, 18),
+    }, card)
+    Round(selo, 4)
+    New("TextLabel", {
+        Text = "8 clipes", Font = F.Mono, TextSize = 10, TextColor3 = T.Faint,
+        BackgroundTransparency = 1, Position = UDim2.fromOffset(11, 82), Size = UDim2.fromOffset(126, 18),
+        TextXAlignment = Enum.TextXAlignment.Left,
+    }, card)
+    Button(card, "APLICAR", UDim2.fromOffset(11, 148), UDim2.fromOffset(126, 30), T.Accent, function()
+        if SP.aplicando then Toast("espera o pack anterior terminar de carregar", false) return end
+        SP.aplicando = true
+        pcall(SP.Aplicar, SP.MapaOficial(p), p.nome)
+        SP.aplicando = false
+    end)
+    card.MouseEnter:Connect(function() Tween(card, 0.15, {BackgroundColor3 = T.Card2}) end)
+    card.MouseLeave:Connect(function() Tween(card, 0.2, {BackgroundColor3 = T.Card}) end)
+    return card
+end
 
 -- Itens de um pack: AssetService primeiro (nao precisa de HTTP do executor),
 -- request() do executor so se o primeiro falhar.
@@ -13543,6 +13610,16 @@ function SP.Carregar(avancar)
         if g ~= SP.g2 then return end
         SP.carregando = false
         if st.Parent then st:Destroy() end
+        -- Oficiais primeiro: sempre na grade, mesmo sem catalogo carregado.
+        local nOfic = 0
+        for i, p in ipairs(SP.packsOficiais) do
+            if g ~= SP.g2 then return end
+            local okc, c = pcall(SP.CardOficial, p)
+            if okc and c then
+                SP.cards[#SP.cards + 1] = c
+                nOfic = nOfic + 1
+            end
+        end
         if not lista or #lista == 0 then
             SP.Copia("catálogo de packs não carregou")
             New("TextLabel", {
@@ -13559,8 +13636,8 @@ function SP.Carregar(avancar)
                 if i % 6 == 0 then task.wait() end
             end
         end
-        if SP.info then SP.info.Text = #SP.cards .. " packs" end
-        if SP.prox then SP.prox.Visible = (mais and #SP.cards > 0) and true or false end
+        if SP.info then SP.info.Text = #SP.cards .. " packs (" .. nOfic .. " oficiais)" end
+        if SP.prox then SP.prox.Visible = (mais and lista and #lista > 0) and true or false end
     end)
 end
 
