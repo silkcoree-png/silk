@@ -1,5 +1,5 @@
 --[[
-    SILK CORE v2.6 · fix19  (Roblox / executor, Luau)
+    SILK CORE v2.6 · fix20  (Roblox / executor, Luau)
 
     - Menu: RightControl / RightShift abre e fecha (tecla extra em Config).
     - Roupa: troca cabeca, tronco, bracos e pernas por ID. O ApplyDescription e bloqueado no
@@ -2728,7 +2728,7 @@ do
     local fill = New("Frame", {Size = UDim2.fromScale(0, 1), BackgroundColor3 = T.Accent, BorderSizePixel = 0}, bar)
     Round(fill, 3)
     New("UIGradient", {Color = ColorSequence.new(T.Accent, T.Accent2)}, fill)
-    Label(card, "v2.6 · fix19", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
+    Label(card, "v2.6 · fix20", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 132), UDim2.new(1, 0, 0, 14))
     local exLbl = Label(card, "executor: ?", 9, T.Faint, F.Mono, Enum.TextXAlignment.Center,
         UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 14))
@@ -2907,7 +2907,7 @@ do
     end, "logo"))
 end
 -- carimbo de build: sobe a cada versao. o contador mostra quantas abas o script conseguiu montar.
-SILK_VER = "v2.6 · fix19"
+SILK_VER = "v2.6 · fix20"
 TAB_FEITAS = 0
 local VerTag = Label(Top, SILK_VER .. "  ·  0/35", 10, T.Faint, F.Mono, nil, UDim2.fromOffset(58, 30), UDim2.fromOffset(240, 14))
 local Crumb = Label(Top, "", 11, T.Sub, F.Mono, nil, UDim2.fromOffset(300, 0), UDim2.fromOffset(240, LAY.TOP))
@@ -6840,7 +6840,7 @@ local Drawing = Drawing or (getgenv and getgenv().Drawing)
 
 -- carimbo de build: aparece na tela quando a linha está ligada. Se você carregar
 -- um arquivo velho, esse número não muda — é o jeito de saber o que está rodando.
-local BUILD = "BE19"
+local BUILD = "BE20"
 local VB = {
     On = false, Len = 14, Ball = true, OnlyEnemy = true, Predict = false,
     Thick = 6, Outline = 3, Alpha = 1, Dot = 6, ShowDot = true,
@@ -8124,7 +8124,7 @@ end, 40)
 Section("Sobre")
 do
     local row = Row(72)
-    local about = Label(row, "Silk Core v2.6 · fix19  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
+    local about = Label(row, "Silk Core v2.6 · fix20  ·  avatar, partes do corpo, catálogo e efeitos\nexecutor: " .. execName .. "   ·   place " .. tostring(game.PlaceId),
         11, T.Sub, F.Mono, nil, UDim2.fromOffset(16, 0), UDim2.new(1, -32, 1, 0))
     about.TextWrapped = true
 end
@@ -11491,7 +11491,7 @@ do
     Label(selo, "S", 18, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(marca, "SILK CORE", 15, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 6), UDim2.new(1, -70, 0, 20))
-    Label(marca, "script hub · silkcoree-png · v2.6 fix19", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
+    Label(marca, "script hub · silkcoree-png · v2.6 fix20", 10, T.Faint, F.Mono, Enum.TextXAlignment.Left,
         UDim2.fromOffset(56, 25), UDim2.new(1, -70, 0, 14))
     Label(marca, "tudo aqui carrega com a marca Silk Core", 9, T.Faint, F.Body, Enum.TextXAlignment.Left,
         UDim2.fromOffset(12, 51), UDim2.new(1, -24, 0, 8))
@@ -11747,7 +11747,7 @@ do
     Label(selo, "S", 14, T.Bg, F.Bold, Enum.TextXAlignment.Center, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
     Label(fim, "SILK CORE · silkcoree-png", 11, T.Text, F.Bold, Enum.TextXAlignment.Left,
         UDim2.fromOffset(48, 10), UDim2.new(1, -60, 0, 14))
-    Label(fim, "menu, scripts e hacks · v2.6 fix19 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
+    Label(fim, "menu, scripts e hacks · v2.6 fix20 · github.com/silkcoree-png/silk", 9, T.Faint, F.Mono,
         Enum.TextXAlignment.Left, UDim2.fromOffset(48, 26), UDim2.new(1, -60, 0, 12))
 end
 
@@ -11931,7 +11931,7 @@ end)
 
 Section("Sobre")
 
-Note("SILK CORE v2.6 · fix19", 48)
+Note("SILK CORE v2.6 · fix20", 48)
 Note("executor: " .. tostring(execName), 40)
 Note("place " .. tostring(game.PlaceId) .. "   job " .. tostring(game.JobId), 40)
 
@@ -12990,7 +12990,86 @@ end
 function SP.AssetUrl(asset)
     local n = tonumber(tostring(asset or ""):match("(%d+)"))
     if not n then return tostring(asset or "") end
+    if SP.formaUsada == "rbxassetid" then return "rbxassetid://" .. tostring(n) end
     return "http://www.roblox.com/asset/?id=" .. tostring(n)
+end
+
+-- Animacao padrao do Roblox (idle R15): referencia de "isto carrega em qualquer
+-- lugar". Serve de segunda prova do caminho de carga na sonda.
+SP.PADRAO = "rbxassetid://507766666"
+
+-- Uma faixa descartavel: carrega, toca em prioridade alta, mede e joga fora.
+-- Viva = TimePosition andando ou WeightCurrent acima de zero (Length e IsPlaying
+-- mentem neste executor). Nunca encosta no Animate nem na descricao.
+function SP.UmaFaixa(animator, idStr, rotulo, segundos, manter)
+    local a = Instance.new("Animation")
+    a.AnimationId = idStr
+    local ok, t = pcall(function() return animator:LoadAnimation(a) end)
+    if not (ok and t) then
+        SP.L("  " .. rotulo .. " " .. tostring(idStr) .. " -> LoadAnimation falhou: " .. tostring(t))
+        return false
+    end
+    pcall(function() t.Priority = Enum.AnimationPriority.Action4 end)
+    pcall(function() t.Looped = true end)
+    pcall(function() t:Play(0.05, 1, 1) end)
+    local vivo, len, pos, peso, play = false, 0, 0, 0, false
+    local passos = math.max(3, math.floor((segundos or 1.2) / 0.25))
+    for _ = 1, passos do
+        task.wait(0.25)
+        local okM, l, pp, w, pl = pcall(function()
+            return t.Length, t.TimePosition, t.WeightCurrent, t.IsPlaying
+        end)
+        if okM then
+            len, pos, peso, play = l or 0, pp or 0, w or 0, pl == true
+            if (pos > 0.05 or peso > 0.01) then
+                vivo = true
+                if not manter then break end
+            end
+        end
+    end
+    SP.L(string.format("  %s %s -> len=%.2f pos=%.2f peso=%.2f play=%s %s",
+        rotulo, tostring(idStr), len, pos, peso, tostring(play), vivo and "VIVA" or "morta"))
+    pcall(function() t:Stop(0) end)
+    pcall(function() t:Destroy() end)
+    return vivo
+end
+
+-- SONDA. Devolve a forma do id que carregou ("http" / "rbxassetid") ou nil + motivo.
+-- Testa o caminho com um id que JA esta tocando e com o padrao do Roblox antes de
+-- julgar o pack — assim o log separa "nosso caminho de carga esta quebrado" de
+-- "o asset do pack esta bloqueado neste place".
+function SP.Sonda(animator, mapa)
+    if not animator then return nil, "sem Animator" end
+    SP.L("sonda: testando o caminho de carregamento")
+    local controle = nil
+    pcall(function()
+        for _, t in ipairs(animator:GetPlayingAnimationTracks()) do
+            local aid = t.Animation and t.Animation.AnimationId or ""
+            if t.IsPlaying and (t.WeightCurrent or 0) > 0.01 and aid ~= "" then
+                controle = aid
+                break
+            end
+        end
+    end)
+    if controle then SP.UmaFaixa(animator, controle, "CONTROLE id que ja toca", 1.0) end
+    SP.UmaFaixa(animator, SP.PADRAO, "PADRAO do roblox", 1.0)
+
+    local alvo = mapa.idle or mapa.walk or mapa.run
+    if not alvo then
+        for _, v in pairs(mapa) do alvo = v break end
+    end
+    if not alvo then return nil, "o pack nao trouxe clipe de estado" end
+    local num = tonumber(tostring(alvo):match("(%d+)"))
+    if not num then return nil, "id invalido no pack" end
+    SP.L("sonda: clipe de teste " .. tostring(num))
+
+    if SP.UmaFaixa(animator, "http://www.roblox.com/asset/?id=" .. num, "PACK forma http", 1.5) then
+        return "http"
+    end
+    if SP.UmaFaixa(animator, "rbxassetid://" .. num, "PACK forma rbxassetid", 1.5) then
+        return "rbxassetid"
+    end
+    return nil, "o clipe do pack nao carrega em forma nenhuma"
 end
 
 -- Caminho 2: edita o Animate DO JOGO no lugar e manda ele rodar de novo. Clonar e
@@ -13075,33 +13154,46 @@ function SP.NoChar(char, avisar)
                 if avisar then Toast("pack aplicado: " .. nome .. rig, true) end
             end
 
-            -- 1) descricao do humanoid (nao encosta no Animate: risco zero)
-            local descOk = false
-            pcall(function() descOk = SP.PorDescricao(hum, mapa) end)
-            if descOk then
-                if vivo(8) then deu("descricao do humanoid") return end
-                SP.L("descricao aceita mas nada ficou vivo — voltando a original")
-                SP.DescricaoOriginal(hum)
+            -- guarda a descricao ATUAL antes de qualquer coisa: e o que o RESTAURAR
+            -- devolve se algum dia o conjunto de animacao do avatar for perdido.
+            if not SP.descOrig then
+                pcall(function() SP.descOrig = hum:GetAppliedDescription():Clone() end)
             end
-            if SP.cur ~= eu or not char.Parent then return end
 
-            -- 2) ids do pack no Animate do jogo (forma antiga do id) + 3) controlador
-            --    proprio junto: o Animate so pega os ids novos na troca de estado,
-            --    o controlador da o efeito na hora.
+            -- 0) SONDA. Nada no personagem e tocado antes de o clipe carregar: nem
+            --    Animate, nem descricao (era a descricao aplicada as cegas que deixava
+            --    o boneco reto quando o asset nao vinha).
+            local forma, motivo = SP.Sonda(animator, mapa)
+            if SP.cur ~= eu or not char.Parent then return end
+            if not forma then
+                SP.L("sonda reprovou: " .. tostring(motivo) .. " — nada foi tocado")
+                SP.Snap(animator, "depois da sonda")
+                if SP.cur == eu then SP.cur = nil end
+                if avisar then
+                    SP.Copia("esse pack nao toca nesse jogo: " .. tostring(motivo)
+                        .. " — personagem intacto, nada foi tocado")
+                end
+                return
+            end
+            SP.formaUsada = forma
+            SP.L("sonda aprovou na forma " .. forma .. " — aplicando")
+
+            -- 1) ids do pack no Animate DO JOGO, no lugar (sem Disabled) + 2) o
+            --    controlador proprio junto: o Animate so pega id novo na troca de
+            --    estado; o controlador da o efeito na hora e replica igual.
             local salvo, n = SP.MudaAnimate(char, mapa)
             SP.animSalvo = salvo
             SP.L("Animate no lugar: ids trocados=" .. tostring(n))
             SP.Controlador(char, hum, animator, mapa)
-            if vivo(20) then deu("Animate/controlador") return end
 
-            -- nada deu sinal de vida: desfaz tudo, personagem intacto
-            SP.gen = SP.gen + 1
-            if n > 0 then SP.VoltaAnimate(salvo) end
-            SP.animSalvo = nil
-            SP.Snap(animator, "sem confirmacao")
-            SP.L("nenhum caminho tocou esse pack — personagem intacto")
-            if SP.cur == eu then SP.cur = nil end
-            if avisar then SP.Copia("esse pack nao toca nesse jogo — personagem intacto") end
+            -- a sonda ja provou que o clipe carrega; a confirmacao viva aqui e so
+            -- para o log (neste executor a faixa que a gente cria pode nao reportar).
+            if vivo(20) then deu("Animate/controlador")
+            else
+                SP.L("sem confirmacao viva em 5s, mas a sonda aprovou: pack fica")
+                SP.Snap(animator, "sem confirmacao")
+                deu("sonda (sem confirmacao viva)")
+            end
         end)
         if not okR then
             SP.L("erro no apply: " .. tostring(errR))
